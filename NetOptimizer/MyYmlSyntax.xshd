@@ -1,0 +1,56 @@
+<?xml version="1.0"?>
+<SyntaxDefinition name="YAML_NetOpt" xmlns="http://icsharpcode.net/sharpdevelop/syntaxdefinition/2008">
+
+	<Color name="Comment" foreground="#6A9955" />
+	<Color name="String" foreground="#CE9178" />
+	<Color name="HeaderKeywords" foreground="#00FFD5" fontWeight="bold"/>
+	<Color name="SectionKeywords" foreground="#79C0FF" fontWeight="bold"/>
+	<Color name="InnerSectionKeywords" foreground="#FFA657" fontWeight="bold"/>
+	<Color name="Numbers" foreground="#B5CEA8" />
+	<Color name="Punctuation" foreground="#DCDCDC" />
+
+	<RuleSet>
+		<Span color="Comment">
+			<Begin>\#</Begin>
+		</Span>
+
+		<Span color="String">
+			<Begin>"</Begin>
+			<End>"</End>
+		</Span>
+
+
+		<Keywords color="HeaderKeywords">
+			<Word>netoptimizer</Word>
+		</Keywords>
+		
+		<Keywords color="SectionKeywords">
+			<Word>network</Word>
+			<Word>nodes</Word>
+			<Word>links</Word>
+		</Keywords>
+		
+		<Keywords color="InnerSectionKeywords">
+			<Word>id</Word>
+			<Word>type</Word>
+			<Word>model</Word>
+			<Word>ip</Word>
+			<Word>ports</Word>
+			<Word>source</Word>
+			<Word>target</Word>
+			<Word>port_count</Word>
+			<Word>name</Word>
+			<Word>port_type</Word>
+			<Word>src</Word>
+			<Word>src_port</Word>
+			<Word>dst</Word>
+			<Word>dst_port</Word>
+		</Keywords>
+		
+		<Rule color="Numbers">
+			\b\d+\b
+		</Rule>
+
+		<Rule color="Punctuation">:</Rule>
+	</RuleSet>
+</SyntaxDefinition>
