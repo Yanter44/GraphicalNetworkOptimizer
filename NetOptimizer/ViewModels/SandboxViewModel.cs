@@ -23,7 +23,6 @@ namespace NetOptimizer.ViewModels
             _windowNavigator = windowNavigator;
             OpenCreateDeviceWindowCommand = new RelayCommand(p => OpenCreateDeviceWindow((DeviceToAddDto)p));
         }
-
         public void OpenCreateDeviceWindow(DeviceToAddDto device) 
         {
             _windowNavigator.ShowModalView<CreateDeviceWindow, CreateDeviceWindowViewModel>(device);  

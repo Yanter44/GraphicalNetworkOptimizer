@@ -213,7 +213,12 @@
                                 <ColumnDefinition Width="Auto" SharedSizeGroup="Icon"/>
                                 <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
-
+                            <ContentPresenter x:Name="IconPresenter"
+                      Grid.Column="0"
+                      ContentSource="Icon"
+                      Width="20" Height="20"
+                
+                      VerticalAlignment="Center"/>
                             <ContentPresenter Grid.Column="1"
                                        ContentSource="Header"
                                        Margin="{TemplateBinding Padding}"
@@ -252,7 +257,7 @@
             </Setter.Value>
         </Setter>
     </Style>
-    
+
     <Style x:Key="ActionBtn" TargetType="Button">
         <Setter Property="Background" Value="#EFEFEF"/>
         <Setter Property="BorderThickness" Value="0"/>
@@ -265,5 +270,5 @@
             </Style>
         </Style.Resources>
     </Style>
-    
+ 
 </ResourceDictionary>

@@ -3,51 +3,82 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:NetOptimizer.Views"
+        xmlns:local="clr-namespace:NetOptimizer"
+        xmlns:behaviors="clr-namespace:NetOptimizer.Behaviors"
         xmlns:settingsModels="clr-namespace:NetOptimizer.Models.AddDeviceSettingsModels"
         xmlns:myenums="clr-namespace:NetOptimizer.Enums"
         xmlns:helpers="clr-namespace:NetOptimizer.Helpers"
         xmlns:shell="clr-namespace:System.Windows.Shell;assembly=PresentationFramework"
-        mc:Ignorable="d"
+        Title="NetOptimizer.DeviceWindow"
         WindowStartupLocation="CenterScreen"
-        Height="400" Width="300" ResizeMode="NoResize">
-    <Window.Resources>
+        Height="450" Width="300" ResizeMode="NoResize">
+<Window.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="/Views/ResourcesDictionary/CreateDeviceWindowResources.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+
 
         <!-- ПК -->
         <DataTemplate DataType="{x:Type settingsModels:PcSettingModel}">
             <StackPanel Grid.Row="1" Margin="14,10,10,0">
                 <TextBlock Text="Имя устройства" Foreground="#6B7280" FontSize="12" Margin="0,0,0,4"/>
                 <Border CornerRadius="8" Background="#F3F6FA" Padding="5">
-                    <TextBox Text="{Binding Name}" BorderThickness="0" Background="Transparent" FontSize="14" Foreground="#111827"/>
+                    <TextBox TextAlignment="Center" Text="{Binding Name}" BorderThickness="0" Background="Transparent" FontSize="14" Foreground="#111827"/>
                 </Border>
             </StackPanel>
         </DataTemplate>
-        
+ 
         <!-- Коммутатор -->
         <DataTemplate DataType="{x:Type settingsModels:SwitchSettingModel}">
             <StackPanel Grid.Row="1" Margin="14,10,10,0">
                 <TextBlock Text="Имя устройства" Foreground="#6B7280" FontSize="12" Margin="0,0,0,4"/>
-                <Border CornerRadius="8" Background="#F3F6FA" Padding="5">
-                    <TextBox Text="{Binding Name}" BorderThickness="0" 
-                             Background="Transparent" TextAlignment="Center"
-                             FontSize="14" Foreground="#111827"/>
+                <Border CornerRadius="8" Background="#F3F6FA" Padding="5" Margin="0,0,0,10">
+                    <TextBox Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}" 
+                     BorderThickness="0" Background="Transparent" FontSize="14"/>
                 </Border>
 
-                <TextBlock Text="Уровень устройства:" Foreground="#6B7280" FontSize="12" Margin="0,0,0,4"/>
-                <ComboBox SelectedItem="{Binding DeviceLayer, Mode=TwoWay}" FontSize="14" Foreground="#111827" 
-                          ItemsSource="{Binding Source={x:Static helpers:DeviceLayerValues.All}}"/>
+                <TextBlock Text="Производитель (Vendor)" Foreground="#6B7280" FontSize="12" Margin="0,8,0,4"/>
+                <ComboBox Style="{StaticResource ModernComboBox}"  ItemsSource="{Binding AvailableVendors}" 
+                  SelectedItem="{Binding SelectedVendor, Mode=TwoWay}" />
+                <TextBlock Text="Модель устройства" Foreground="#6B7280" FontSize="12" Margin="0,8,0,4"/>
+                    <ComboBox Style="{StaticResource ModernComboBox}" ItemsSource="{Binding FilteredModels}"  
+                              SelectedItem="{Binding SelectedModelFromCatalog, Mode=TwoWay}">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding Model}" />
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
+                    <Border Margin="0,15,0,0" Padding="10" Background="#F9FAFB" 
+                BorderBrush="#E5E7EB" BorderThickness="1" CornerRadius="8">
+                    <StackPanel>
+                        <TextBlock Text="Технические данные:" FontWeight="Bold" Foreground="#374151" Margin="0,0,0,8"/>
 
-                <TextBlock Text="Количество портов:" Foreground="#6B7280" FontSize="12" Margin="0,0,0,4" />
-                <Border CornerRadius="8" Background="#F3F6FA" Padding="5">
-                    <TextBox Text="{Binding TotalPorts, Mode=TwoWay}" 
-                             BorderThickness="0" Background="Transparent" 
-                             FontSize="14" Foreground="#111827"
-                             TextAlignment="Center" />
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+
+                            <StackPanel Grid.Column="0">
+                                <TextBlock Text="{Binding TotalPorts, StringFormat='Порты RJ45: {0}'}" Foreground="#4B5563"/>
+                                <TextBlock Text="{Binding SfpPortsCount, StringFormat='Порты SFP: {0}'}" Foreground="#4B5563"/>
+                                <TextBlock Text="{Binding SupportsPoe, StringFormat='Поддержка PoE: {0}'}" Foreground="#4B5563"/>
+                            </StackPanel>
+                        
+                          
+                        </Grid>
+                        <TextBlock Text="Средняя цена:" Foreground="#6B7280" FontSize="12" Margin="0,8,0,4"/>
+                        <TextBlock Grid.Column="1" VerticalAlignment="Bottom"
+                                   Text="{Binding AveragePrice, StringFormat='{}{0:N0} ₽'}"
+                                   FontSize="16" Foreground="#059669" FontWeight="Bold"/>
+                    </StackPanel>
                 </Border>
             </StackPanel>
         </DataTemplate>
-
-    </Window.Resources>
+        </ResourceDictionary>
+</Window.Resources>
     
     <shell:WindowChrome.WindowChrome>
         <shell:WindowChrome  CaptionHeight="0"
@@ -77,16 +108,17 @@
                     <ColumnDefinition Width="30"></ColumnDefinition>
                 </Grid.ColumnDefinitions>
                 <Border Background="#6DB0FA" CornerRadius="10" Height="22" Width="25">
-                    <TextBlock Text="+" FontSize="20" Foreground="White" Margin="0,0,0,5"  HorizontalAlignment="Center" VerticalAlignment="Center"/>
-
+                        <TextBlock Text="+" FontSize="20" Foreground="White" Margin="0,0,0,5"  HorizontalAlignment="Center" VerticalAlignment="Center"/>
                 </Border>
+                
                 <TextBlock Grid.Column="1" FontSize="14"
                            FontWeight="SemiBold" VerticalAlignment="Center"  
                            Text="{Binding CreatableDevice.DeviceName, StringFormat='Добавить: {0}'}"/>
-                    <Button Command="{Binding CloseCommand}" CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Window}}" Grid.Column="2" Content="✕" Width="28" Height="28"
+                    <Button  Command="{Binding CloseCommand}" CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Window}}"
+                             Grid.Column="2" Content="✕" Width="28" Height="28"
                              HorizontalAlignment="Right" Background="Transparent"
                              BorderThickness="0" FontSize="14"
-                             Foreground="#888" Cursor="Hand">
+                           Cursor="Hand">
                         <Button.Template>
                             <ControlTemplate TargetType="Button">
                                 <Border x:Name="border" Background="#F0F3FC" CornerRadius="10">
@@ -94,8 +126,8 @@
                                 </Border>
                                 <ControlTemplate.Triggers>
                                     <Trigger Property="IsMouseOver" Value="True">
-                                        <Setter TargetName="border" Property="Background" Value="#FF7070"/>
-                                        <Setter Property="Foreground" Value="White"/>
+                                        <Setter TargetName="border" Property="Background" Value="#FF6079"/>
+                                        <Setter  Property="Foreground" Value="White"/>
                                     </Trigger>
                                     <Trigger Property="IsPressed" Value="True">
                                         <Setter TargetName="border" Property="Background" Value="#BB1E1E"/>

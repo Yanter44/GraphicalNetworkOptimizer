@@ -6,8 +6,10 @@ using NetOptimizer.Services;
 using NetOptimizer.ViewModels;
 using NetOptimizer.Views;
 using NetOptimizer.Views.DopViews;
+using NetOptimizer.Views.MainWindow;
 using System.Configuration;
 using System.Data;
+using System.Diagnostics;
 using System.Windows;
 namespace NetOptimizer
 {
@@ -23,16 +25,19 @@ namespace NetOptimizer
                  {
                      c.BaseAddress = new Uri("https://localhost:7244/");
                  });
+                 services.AddSingleton<INetOptimizerApiService, NetOptimizerApiService>();
+                 services.AddSingleton<DeviceCatalogService>();
                  services.AddSingleton<IWindowNavigator, WindowNavigator>();
                  services.AddTransient<IYamlManager, YamlNetworkManager>();
                  services.AddTransient<IFileService, FileService>();
+
                  services.AddTransient<MainWindow>();
                  services.AddTransient<CreateDeviceWindow>();
                  services.AddTransient<ErrorWindow>();
                  services.AddTransient<InfoWindow>();
 
-                 services.AddTransient<MainWindowViewModel>();
 
+                 services.AddTransient<MainWindowViewModel>();
                  services.AddTransient<ErrorWindowViewModel>();
                  services.AddTransient<InfoWindowViewModel>();
 
@@ -42,9 +47,20 @@ namespace NetOptimizer
         {
             base.OnStartup(e);
             
-            var main = _host.Services.GetRequiredService<MainWindow>();
+            try
+            {
+                var catalogStore = _host.Services.GetRequiredService<DeviceCatalogService>();
+                await catalogStore.LoadCatalogAsync();
+                var main = _host.Services.GetRequiredService<MainWindow>();
+                main.Show();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("API Offline: " + ex.Message);
+                Shutdown();
+            }
 
-            main.Show();
+       
         }
     }
 

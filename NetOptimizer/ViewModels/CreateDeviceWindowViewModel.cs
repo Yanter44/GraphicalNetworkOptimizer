@@ -2,6 +2,7 @@
 using NetOptimizer.Enums;
 using NetOptimizer.Models.AddDeviceSettingsModels;
 using NetOptimizer.Models.Dtos;
+using NetOptimizer.Services;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Windows;
@@ -11,6 +12,8 @@ namespace NetOptimizer.ViewModels
 {
     public class CreateDeviceWindowViewModel : INotifyPropertyChanged
     {
+
+        public event Action RequestClose;
         private DeviceToAddDto _creatableDevice;
         public DeviceToAddDto CreatableDevice { get => _creatableDevice; set { _creatableDevice = value; OnPropertyChanged(); } }
 
@@ -20,10 +23,12 @@ namespace NetOptimizer.ViewModels
             get => _deviceSettings;
             set { _deviceSettings = value; OnPropertyChanged(); }
         }
+        private readonly DeviceCatalogService _catalogService;
         public ICommand CloseCommand { get; }
         public ICommand ValidateDeviceAndAddToCanvasCommand { get; }
-        public CreateDeviceWindowViewModel(DeviceToAddDto device)
+        public CreateDeviceWindowViewModel(DeviceToAddDto device, DeviceCatalogService catalogService)
         {
+            _catalogService = catalogService;
             CreatableDevice = device;
             CloseCommand = new RelayCommand(obj => { if (obj is Window window) { window.Close(); } });
             ValidateDeviceAndAddToCanvasCommand = new RelayCommand(ValidateDeviceAndAddToCanvas);
@@ -33,27 +38,21 @@ namespace NetOptimizer.ViewModels
         {
             if (CreatableDevice == null) return;
 
-            switch (CreatableDevice.Type)
+            DeviceSettings = CreatableDevice.Type switch
             {
-                case DeviceType.PC:
-                    DeviceSettings = new PcSettingModel();
-                    break;
-
-                case DeviceType.Printer:
-                    DeviceSettings = new PrinterSettingModel();
-                    break;
-                case DeviceType.Switch:
-                    DeviceSettings = new SwitchSettingModel();
-                    break;
-
-                default:
-                    DeviceSettings = null;
-                    break;
-            }
+                DeviceType.PC => new PcSettingModel(),
+                DeviceType.Printer => new PrinterSettingModel(),
+                DeviceType.Switch => new SwitchSettingModel(_catalogService.AvailableSwitches),
+                _ => null
+            };
         }
         private void ValidateDeviceAndAddToCanvas()
         {
-            var currentSettings = DeviceSettings;
+            if (CreatableDevice == null || DeviceSettings == null) return;
+           
+            EventAggregator.Instance.PublishDeviceCreated(CreatableDevice, DeviceSettings);
+            RequestClose?.Invoke();
+     
         }
 
         public event PropertyChangedEventHandler PropertyChanged;

@@ -11,6 +11,7 @@ namespace NetOptimizer.Models
         public Device Owner { get; set; }
         public EthernetPort ConnectedTo { get; set; }
         public bool IsLinked => ConnectedTo != null;
+        public bool IsInitiator { get; set; }
         public void LinkTo(EthernetPort remotePort)
         {
             if (this.IsLinked || remotePort.IsLinked)
@@ -18,6 +19,9 @@ namespace NetOptimizer.Models
 
             this.ConnectedTo = remotePort;
             remotePort.ConnectedTo = this;
+
+            this.IsInitiator = true;      
+            remotePort.IsInitiator = false; 
         }
 
         public void Unlink()

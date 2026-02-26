@@ -1,10 +1,11 @@
-﻿using ICSharpCode.AvalonEdit.Highlighting;
-using ICSharpCode.AvalonEdit.Highlighting.Xshd;
-using NetOptimizer.Models;
+﻿using NetOptimizer.Models;
 using NetOptimizer.ViewModels;
-using System.Xml;
-using System.IO;
-using System.Reflection;
+using NetOptimizer.Views.DopViews;
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Linq;
+using System.Text;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
@@ -13,75 +14,19 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 
-
-namespace NetOptimizer
+namespace NetOptimizer.Views.MainWindow
 {
-    public partial class MainWindow : Window
+    public partial class MainWindow
     {
-        private Point _selectionStartPoint;
-        private Point _lastMousePosition;
         private Point _deviceClickPosition;
-
-        private bool _isPanning = false;
-
         private bool _isDraggingDevice = false;
         private FrameworkElement _activeElement = null;
 
         private List<(Line Line, DeviceOnCanvas Source, DeviceOnCanvas Target)> _visualLinks = new();
-        public MainWindow(MainWindowViewModel viewmodel)
-        {
-            InitializeComponent();
-            this.DataContext = viewmodel;
+        private Line _connectionLine;
 
-            viewmodel.DeviceAdded += OnDeviceAddedToCanvas;
-            viewmodel.ConnectionRequested += CreateVisualConnection;
-            LoadCustomYamlHighlighting();
-
-            this.Loaded += (s, e) =>
-            {
-                if (DataContext is MainWindowViewModel vm)
-                {
-                    YamlEditor.Text = vm.CurrentYamlText;
-                    YamlEditor.TextChanged += (sender, args) =>
-                    {
-                        vm.CurrentYamlText = YamlEditor.Text;
-                    };
-                    vm.PropertyChanged += (sender, args) =>
-                    {
-                        if (args.PropertyName == nameof(vm.CurrentYamlText))
-                        {
-                            if (YamlEditor.Text != vm.CurrentYamlText)
-                                YamlEditor.Text = vm.CurrentYamlText;
-                        }
-                    };
-                }
-            };
-        }
-        private void LoadCustomYamlHighlighting()
-        {
-            var assembly = Assembly.GetExecutingAssembly();
-
-            string resourceName = assembly.GetManifestResourceNames()
-                .FirstOrDefault(r => r.EndsWith("MyYmlSyntax.xshd"));
-
-            if (string.IsNullOrEmpty(resourceName))
-            {
-                MessageBox.Show("ОШИБКА: Файл .xshd не найден в ресурсах сборки!");
-                foreach (var name in assembly.GetManifestResourceNames())
-                    MessageBox.Show($"Доступный ресурс: {name}");
-                return;
-            }
-
-            using (Stream s = assembly.GetManifestResourceStream(resourceName))
-            {
-                if (s == null) return;
-                using (XmlTextReader reader = new XmlTextReader(s))
-                {
-                    YamlEditor.SyntaxHighlighting = HighlightingLoader.Load(reader, HighlightingManager.Instance);
-                }
-            }
-        }
-
+        private DeviceOnCanvas _sourceDeviceConnection;
+        private object _sourcePortNumber;
         private void OnDeviceAddedToCanvas(object sender, DeviceOnCanvas data)
         {
             StackPanel deviceContainer = new StackPanel
@@ -89,7 +34,7 @@ namespace NetOptimizer
                 Width = 64,
                 Cursor = Cursors.Hand,
                 Background = Brushes.Transparent,
-                Tag = data 
+                Tag = data
             };
             deviceContainer.MouseEnter += ShowMyToolTip;
             deviceContainer.MouseDown += Device_MouseDown;
@@ -105,10 +50,12 @@ namespace NetOptimizer
             deviceContainer.Children.Add(deviceImg);
             deviceContainer.Children.Add(deviceText);
 
+            deviceContainer.ContextMenu = CreateDeviceContextMenu(deviceContainer);
             Canvas.SetLeft(deviceContainer, data.X);
             Canvas.SetTop(deviceContainer, data.Y);
 
             MainCanvas.Children.Add(deviceContainer);
+    
         }
         private void ShowMyToolTip(object sender, MouseEventArgs e)
         {
@@ -142,15 +89,22 @@ namespace NetOptimizer
                 for (int i = 0; i < data.LogicDevice.Ports.Count; i++)
                 {
                     var p = data.LogicDevice.Ports[i];
-                    string portName = $"{i / 4}/{i % 4}";
+                    string portName = p.PortNumber;
 
-                    var portRow = new TextBlock { FontSize = 11 };
+                    var portRow = new TextBlock { FontSize = 11, Margin = new Thickness(0, 1, 0, 1) };
                     portRow.Inlines.Add(new Run($"{portName}: ") { Foreground = Brushes.LightGray });
 
                     if (p.IsLinked)
                     {
-                        portRow.Inlines.Add(new Run("✔ LINK UP") { Foreground = Brushes.LimeGreen, FontWeight = FontWeights.SemiBold });
-                        portRow.Inlines.Add(new Run($" (to {p.ConnectedTo.Owner.Name})") { Foreground = Brushes.Gray, FontSize = 10 });
+                        string directionArrow = p.IsInitiator ? " → " : " ← ";
+
+                        portRow.Inlines.Add(new Run("✔ LINK") { Foreground = Brushes.LimeGreen, FontWeight = FontWeights.SemiBold });
+                        portRow.Inlines.Add(new Run(directionArrow) { Foreground = Brushes.Orange, FontWeight = FontWeights.Bold });
+                        portRow.Inlines.Add(new Run($"{p.ConnectedTo.Owner.Name} [{p.ConnectedTo.PortNumber}]")
+                        {
+                            Foreground = Brushes.Gray,
+                            FontSize = 10
+                        });
                     }
                     else
                     {
@@ -185,7 +139,7 @@ namespace NetOptimizer
             {
                 var sourcePanelX = Canvas.GetLeft(sourcePanel);
                 var sourcePanelY = Canvas.GetTop(sourcePanel);
-                
+
                 var targetPanelX = Canvas.GetLeft(targetPanel);
                 var targetPanelY = Canvas.GetTop(targetPanel);
 
@@ -196,7 +150,7 @@ namespace NetOptimizer
                     StrokeDashArray = new DoubleCollection() { 6, 5 },
                     SnapsToDevicePixels = true
                 };
-          
+
                 MainCanvas.Children.Add(connectionLine);
                 var newLink = (connectionLine, source, target);
                 _visualLinks.Add(newLink);
@@ -245,16 +199,16 @@ namespace NetOptimizer
         {
             if (sender is StackPanel panel && panel.Tag is DeviceOnCanvas hoverData)
             {
-                panel.Background = new SolidColorBrush(Color.FromArgb(50, 0, 120, 215));  
+                panel.Background = new SolidColorBrush(Color.FromArgb(50, 0, 120, 215));
             }
         }
-        private void Device_MouseLeave(object sender, MouseEventArgs e) 
+        private void Device_MouseLeave(object sender, MouseEventArgs e)
         {
             if (sender is StackPanel panel && panel.Tag is DeviceOnCanvas hoverData)
             {
-                if(hoverData.IsSelected != true)
+                if (hoverData.IsSelected != true)
                 {
-                   panel.Background = Brushes.Transparent;
+                    panel.Background = Brushes.Transparent;
                 }
             }
         }
@@ -311,20 +265,217 @@ namespace NetOptimizer
                 }
             }
         }
+
         private void Device_MouseDown(object sender, MouseButtonEventArgs e)
         {
+            var currentElement = sender as FrameworkElement;
+            var targetDevice = currentElement?.Tag as DeviceOnCanvas;
+            if (_connectionLine != null && e.LeftButton == MouseButtonState.Pressed)
+            {
+                if (targetDevice != null && targetDevice != _sourceDeviceConnection)
+                {
+                    if (currentElement.ContextMenu != null)
+                    {
+                        currentElement.ContextMenu.PlacementTarget = currentElement;
+                        currentElement.ContextMenu.IsOpen = true;
+                    }
+                }
+                e.Handled = true;
+                return;
+            }
             if (e.LeftButton == MouseButtonState.Pressed)
             {
                 _isDraggingDevice = true;
                 _activeElement = sender as FrameworkElement;
-                _deviceClickPosition = e.GetPosition(_activeElement); 
+                _deviceClickPosition = e.GetPosition(_activeElement);
                 _activeElement.CaptureMouse();
-                
-                e.Handled = true; 
+
+                e.Handled = true;
+            }
+            if (e.RightButton == MouseButtonState.Pressed)
+            {
+                var element = sender as FrameworkElement;
+                if (element?.ContextMenu != null)
+                {
+                    element.ContextMenu.PlacementTarget = element;
+                    element.ContextMenu.IsOpen = true;
+                }
+                e.Handled = true;
             }
         }
+        private ContextMenu CreateDeviceContextMenu(StackPanel container)
+        {
+            ContextMenu menu = new ContextMenu();
+            var data = container.Tag as DeviceOnCanvas;
+            MenuItem connectHeader = new MenuItem
+            {
+                Icon = new Image
+                {
+                    Source = new BitmapImage(new Uri("/Assets/Images/connect.png", UriKind.Relative)),
+                    Width = 20,
+                    Height = 20
+                },
+                Header = "Подключить"
+            };
+            if (data?.LogicDevice?.Ports != null)
+            {
+                foreach (var port in data.LogicDevice.Ports)
+                {
+                    string statusIcon = port.IsLinked ? "●" : "○";
+                    string statusText = port.IsLinked ? "UP" : "DOWN";
 
-      
+                    MenuItem portItem = new MenuItem
+                    {
+                        Header = $"{statusIcon} {port.PortName} {port.PortNumber} ({statusText})",
+                        Tag = port.PortNumber,
+                        Foreground = port.IsLinked ? Brushes.LimeGreen : Brushes.Black
+                    };
+
+                    portItem.Click += (s, e) => {
+                        var pNum = (s as MenuItem).Tag;
+                        if (port.IsLinked)
+                        {
+                            _windowNavigator.ShowModalView<ErrorWindow, ErrorWindowViewModel>($"Ошибка: Порт {port.PortName} уже занят!");
+                            return;
+                        }
+
+                        if (_connectionLine != null)
+                        {
+
+                            var sourcePort = _sourceDeviceConnection.LogicDevice.Ports
+                                .FirstOrDefault(p => p.PortNumber.Equals(_sourcePortNumber));
+
+                            if (sourcePort != null)
+                            {
+                                try
+                                {
+                                    sourcePort.LinkTo(port);
+                                    CreateVisualConnection(_sourceDeviceConnection, data);
+                                    RefreshDeviceMenu(_sourceDeviceConnection);
+                                    RefreshDeviceMenu(data);
+                                    if (this.DataContext is MainWindowViewModel vm)
+                                    {
+                                        vm.UpdateYamlFromCanvas();
+                                    }
+                                }
+                                catch (Exception ex)
+                                {
+                                    _windowNavigator.ShowModalView<ErrorWindow, ErrorWindowViewModel>(ex.Message);
+                                }
+                            }
+
+                            MainCanvas.Children.Remove(_connectionLine);
+                            _connectionLine = null;
+                            _sourceDeviceConnection = null;
+                            _sourcePortNumber = null;
+                        }
+                        else
+                        {
+                            StartDrawConnectionLine(data, pNum);
+                        }
+                    };
+                    connectHeader.Items.Add(portItem);
+                }
+            }
+            menu.Items.Add(connectHeader);
+            menu.Items.Add(new Separator());
+
+            MenuItem deleteItem = new MenuItem { 
+                Header = "Удалить",
+                Icon = new Image
+                {
+                    Source = new BitmapImage(new Uri("/Assets/Images/delete.png", UriKind.Relative)),
+                    Width = 20,
+                    Height = 20
+                },
+            };
+            deleteItem.Click += (s, e) => 
+            {
+                RemoveDeviceFromCanvas(container);
+            };
+            menu.Items.Add(deleteItem);
+
+            return menu;
+        }
+        private void RemoveDeviceFromCanvas(StackPanel container)
+        {
+            var deviceData = container.Tag as DeviceOnCanvas;
+            if (deviceData == null) return;
+
+            var relatedLinks = _visualLinks.Where(x => x.Source == deviceData || x.Target == deviceData).ToList();
+
+            var neighborsToRefresh = new HashSet<DeviceOnCanvas>();
+
+            foreach (var link in relatedLinks)
+            {
+                var neighbor = (link.Source == deviceData) ? link.Target : link.Source;
+                neighborsToRefresh.Add(neighbor);
+
+                MainCanvas.Children.Remove(link.Line);
+                _visualLinks.Remove(link);
+            }
+
+            UnlinkAllPorts(deviceData);
+
+            var vm = (MainWindowViewModel)this.DataContext;
+            vm.DevicesOnCanvas.Remove(deviceData);
+            MainCanvas.Children.Remove(container);
+
+            foreach (var neighbor in neighborsToRefresh)
+            {
+                RefreshDeviceMenu(neighbor);
+            }
+            vm.UpdateYamlFromCanvas();
+        }
+        private void UnlinkAllPorts(DeviceOnCanvas device)
+        {
+            foreach (var port in device.LogicDevice.Ports)
+            {
+                if (port.IsLinked)
+                {
+                    port.Unlink();
+                }
+            }
+        }
+        private void RefreshDeviceMenu(DeviceOnCanvas device)
+        {
+            var visual = MainCanvas.Children.OfType<StackPanel>()
+                         .FirstOrDefault(x => x.Tag == device);
+
+            if (visual != null)
+            {
+                visual.ContextMenu = CreateDeviceContextMenu(visual);
+            }
+        }
+        private void StartDrawConnectionLine(DeviceOnCanvas deviceOnCanvas, object pnumb)
+        {
+            _sourceDeviceConnection = deviceOnCanvas; // Сохраняем КТО тянет
+            _sourcePortNumber = pnumb;
+            var visualElement = MainCanvas.Children.OfType<StackPanel>()
+                               .FirstOrDefault(enumerable => enumerable.Tag == deviceOnCanvas);
+            if (visualElement != null)
+            {
+
+                double x = Canvas.GetLeft(visualElement);
+                double y = Canvas.GetTop(visualElement);
+
+                double centerX = x + (visualElement.ActualWidth / 2);
+                double centerY = y + (visualElement.ActualHeight / 2);
+                _connectionLine = new Line
+                {
+                    Stroke = Brushes.SlateGray,
+                    StrokeThickness = 2,
+                    StrokeDashArray = new DoubleCollection() { 6, 5 },
+                    SnapsToDevicePixels = true,
+                    X1 = centerX,
+                    X2 = centerX, 
+                    Y1 = centerY,
+                    Y2 = centerY, 
+                };
+                MainCanvas.Children.Add(_connectionLine);
+           
+            }
+        }
         private void Device_MouseUp(object sender, MouseButtonEventArgs e)
         {
             _isDraggingDevice = false;
@@ -334,119 +485,5 @@ namespace NetOptimizer
                 _activeElement = null;
             }
         }
-        private void MainCanvas_MouseWheel(object sender, MouseWheelEventArgs e)
-        {
-            double zoomSpeed = 0.1;
-            double zoomChange = e.Delta > 0 ? zoomSpeed : -zoomSpeed;
-            double newScale = CanvasScale.ScaleX + zoomChange;
-
-            if (newScale >= 0.3 && newScale <= 3.0)
-            {
-                CanvasScale.ScaleX = newScale;
-                CanvasScale.ScaleY = newScale;
-            }
-        }
-
-        private void MainCanvas_MouseDown(object sender, MouseButtonEventArgs e)
-        {
-            if (e.ChangedButton == MouseButton.Middle || e.ChangedButton == MouseButton.Right)
-            {
-                _isPanning = true;
-                _lastMousePosition = e.GetPosition(this);
-                MainCanvas.CaptureMouse();
-                return;
-            }
-            if (e.ChangedButton == MouseButton.Left)
-            {
-                _selectionStartPoint = e.GetPosition(MainCanvas);
-                var vm = (MainWindowViewModel)this.DataContext;
-
-                if (e.Source == MainCanvas)
-                {
-                    if (Keyboard.Modifiers != ModifierKeys.Control)
-                    {
-                        foreach (var device in vm.DevicesOnCanvas)
-                        {
-                            device.IsSelected = false;
-
-                            var visual = MainCanvas.Children.OfType<FrameworkElement>()
-                                         .FirstOrDefault(x => x.Tag == device);
-
-                            if (visual is Panel panel) panel.Background = Brushes.Transparent;
-                            if (visual is Border border) border.Background = Brushes.Transparent;
-                        }
-                    }
-                }
-                Canvas.SetLeft(SelectionBox, _selectionStartPoint.X);
-                Canvas.SetTop(SelectionBox, _selectionStartPoint.Y);
-                SelectionBox.Width = 0;
-                SelectionBox.Height = 0;
-                SelectionBox.Visibility = Visibility.Visible;
-
-                MainCanvas.CaptureMouse();
-            }
-        }
-
-        private void MainCanvas_MouseMove(object sender, MouseEventArgs e)
-        {
-            if (_isPanning)
-            {
-                Point currentPosition = e.GetPosition(this);
-                Vector delta = currentPosition - _lastMousePosition;
-                CanvasTranslate.X += delta.X;
-                CanvasTranslate.Y += delta.Y;
-                _lastMousePosition = currentPosition;
-            }
-            else if (SelectionBox.Visibility == Visibility.Visible)
-            {
-                Point currentPos = e.GetPosition(MainCanvas);
-                double x = Math.Min(_selectionStartPoint.X, currentPos.X);
-                double y = Math.Min(_selectionStartPoint.Y, currentPos.Y);
-                double width = Math.Abs(currentPos.X - _selectionStartPoint.X);
-                double height = Math.Abs(currentPos.Y - _selectionStartPoint.Y);
-
-                Canvas.SetLeft(SelectionBox, x);
-                Canvas.SetTop(SelectionBox, y);
-                SelectionBox.Width = width;
-                SelectionBox.Height = height;
-
-                Rect selectionRect = new Rect(x, y, width, height);
-                var vm = (MainWindowViewModel)this.DataContext;
-
-                foreach (var device in vm.DevicesOnCanvas)
-                {
-                    Rect deviceRect = new Rect(device.X, device.Y, 64, 64);
-                    bool isIntersecting = selectionRect.IntersectsWith(deviceRect);
-                    var visualElement = MainCanvas.Children.OfType<StackPanel>()
-                        .FirstOrDefault(b => b.Tag == device);
-
-                    if (visualElement != null)
-                    {
-                        if (isIntersecting)
-                        {
-                            visualElement.Background = new SolidColorBrush(Color.FromArgb(50, 0, 120, 215));
-                            device.IsSelected = true; 
-                        }
-                        else
-                        {
-                            visualElement.Background = Brushes.Transparent;
-                            device.IsSelected = false;
-                        }
-                    }
-                }
-            }
-        }
-        private void MainCanvas_MouseUp(object sender, MouseButtonEventArgs e)
-        {
-            _isPanning = false;
-
-            if (SelectionBox.Visibility == Visibility.Visible)
-            {
-                SelectionBox.Visibility = Visibility.Collapsed;
-            }
-
-            MainCanvas.ReleaseMouseCapture();
-        }
-
     }
 }

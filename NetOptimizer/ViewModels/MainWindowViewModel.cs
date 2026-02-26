@@ -3,12 +3,15 @@ using NetOptimizer.Common;
 using NetOptimizer.Enums;
 using NetOptimizer.Interfaces;
 using NetOptimizer.Models;
+using NetOptimizer.Models.AddDeviceSettingsModels;
 using NetOptimizer.Models.Dtos;
+using NetOptimizer.Services;
 using NetOptimizer.Views;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.IO;
 using System.Runtime.CompilerServices;
+using System.Text;
 using System.Windows.Input;
 
 namespace NetOptimizer.ViewModels
@@ -42,6 +45,7 @@ namespace NetOptimizer.ViewModels
             _fileService = fileservice;
             editorViewModel = new EditorViewModel();
             sandboxViewModel = new SandboxViewModel(_windowNavigator);
+            EventAggregator.Instance.DeviceCreated += OnDeviceCreated;
 
             ApplyAndBuildYamlFileCommand = new AsyncRelayCommand(ApplyAndBuildNetwork);
             OpenFinderFileDialogCommand = new RelayCommand(OpenFinderFileFileDialog);
@@ -50,6 +54,55 @@ namespace NetOptimizer.ViewModels
             sandboxViewModel.InitializeAllAvailableDevices();
             editorViewModel.InitializeAvailableTypes();
             editorViewModel.InitializeAllAvailableDevices();           
+        }
+        public void UpdateYamlFromCanvas()
+        {
+            StringBuilder yaml = new StringBuilder();
+            yaml.AppendLine("netoptimizer");
+            yaml.AppendLine("");
+            yaml.AppendLine("network:");
+            yaml.AppendLine($"  name: \"{ProjectName}\"");
+            yaml.AppendLine();
+
+            // Секция Nodes
+            yaml.AppendLine("nodes:");
+            foreach (var device in DevicesOnCanvas)
+            {
+                yaml.AppendLine($"  - id: \"{device.LogicDevice.Name}\"");
+                yaml.AppendLine($"    type: \"{device.LogicDevice.GetType().Name.Replace("Device", "").ToLower()}\"");
+                yaml.AppendLine($"    model: \"{device.LogicDevice.DeviceModel}\"");
+                yaml.AppendLine($"    port_count: {device.LogicDevice.Ports.Count}");
+                yaml.AppendLine($"");
+            }
+            yaml.AppendLine();
+
+            // Секция Links
+            yaml.AppendLine("links:");
+            var processedLinks = new HashSet<string>();
+
+            foreach (var device in DevicesOnCanvas)
+            {
+                foreach (var port in device.LogicDevice.Ports)
+                {
+                    if (port.IsLinked && port.IsInitiator)
+                    {
+                        // Создаем уникальный ключ для пары портов, чтобы не дублировать связь в YAML
+                        var linkKey = string.Join("-", new[] { port.GetHashCode(), port.ConnectedTo.GetHashCode() }.OrderBy(x => x));
+
+                        if (!processedLinks.Contains(linkKey))
+                        {
+                            yaml.AppendLine($"  - src: \"{device.LogicDevice.Name}\"");
+                            yaml.AppendLine($"    src_port: \"{port.PortNumber}\"");
+                            yaml.AppendLine($"    dst: \"{port.ConnectedTo.Owner.Name}\"");
+                            yaml.AppendLine($"    dst_port: \"{port.ConnectedTo.PortNumber}\"");
+                            yaml.AppendLine($"");
+
+                            processedLinks.Add(linkKey);
+                        }
+                    }
+                }
+            }
+            CurrentYamlText = yaml.ToString();
         }
         private async void InitializeNewProject()
         {
@@ -69,7 +122,6 @@ namespace NetOptimizer.ViewModels
                 BuildNetwork(resultWrite);
             }
         }
-      
         private async void OpenFinderFileFileDialog()
         {
             string path = _fileService.OpenFileDialog("YAML files (*.yml)|*.yml");
@@ -88,7 +140,6 @@ namespace NetOptimizer.ViewModels
         }
         public void BuildNetwork(NetworkMap networkmap)
         {
-            DevicesOnCanvas.Clear();
             var visualLookup = new Dictionary<string, DeviceOnCanvas>();
             int startX = 100;
 
@@ -126,7 +177,6 @@ namespace NetOptimizer.ViewModels
                 }
             }
         }
-
         public void DrawAllConnectionsForDevice(DeviceOnCanvas deviceOnCanvas)
         {
             foreach (var port in deviceOnCanvas.LogicDevice.Ports)
@@ -143,7 +193,21 @@ namespace NetOptimizer.ViewModels
                 }
             }
         }
+        private void OnDeviceCreated(DeviceToAddDto dto, DeviceSettingsBase settings)
+        {
+            Device logicDevice = dto.Type switch
+            {
+                DeviceType.PC => new PcDevice(((PcSettingModel)settings).Name, configur => configur.DeviceModel = "SomeModel"),
+                _ => null
+            };
 
+            if (logicDevice == null) return;
+
+            var deviceOnCanvas = new DeviceOnCanvas(logicDevice, x: 500, y: 500);
+            DevicesOnCanvas.Add(deviceOnCanvas);
+            DeviceAdded?.Invoke(this, deviceOnCanvas);
+            UpdateYamlFromCanvas();
+        }
         public event PropertyChangedEventHandler PropertyChanged;
         protected void OnPropertyChanged([CallerMemberName] string propertyName = null)
         {

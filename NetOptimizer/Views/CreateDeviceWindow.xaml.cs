@@ -21,6 +21,14 @@ namespace NetOptimizer.Views
         public CreateDeviceWindow()
         {
             InitializeComponent();
+            this.Loaded += CreateDeviceWindow_Loaded;
+        }
+        private void CreateDeviceWindow_Loaded(object sender, RoutedEventArgs e)
+        {
+            if (DataContext is CreateDeviceWindowViewModel vm)
+            {
+                vm.RequestClose += () => this.Close();
+            }
         }
         private void NavBar_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {

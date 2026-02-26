@@ -6,6 +6,7 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UseWPF>true</UseWPF>
+    <ApplicationIcon>gnologo.ico</ApplicationIcon>
   </PropertyGroup>
 
   <ItemGroup>
@@ -15,8 +16,11 @@
     <None Remove="Assets\Images\commutator.png" />
     <None Remove="Assets\Images\connect.png" />
     <None Remove="Assets\Images\delete.png" />
+    <None Remove="Assets\Images\edit.png" />
     <None Remove="Assets\Images\error.png" />
+    <None Remove="Assets\Images\file.png" />
     <None Remove="Assets\Images\gno_logo.png" />
+    <None Remove="Assets\Images\help.png" />
     <None Remove="Assets\Images\info.png" />
     <None Remove="Assets\Images\minus.png" />
     <None Remove="Assets\Images\new_project.png" />
@@ -35,6 +39,10 @@
     <None Remove="Assets\Images\videocam.png" />
     <None Remove="Assets\Images\wifi.png" />
     <None Remove="MyYmlSyntax.xshd" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="gnologo.ico" />
   </ItemGroup>
 
   <ItemGroup>
@@ -57,6 +65,7 @@
     <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.2" />
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="10.0.2" />
     <PackageReference Include="Microsoft.Extensions.Http" Version="9.0.0" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
   </ItemGroup>
 
   <ItemGroup>
@@ -75,10 +84,19 @@
     <Resource Include="Assets\Images\delete.png">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Resource>
+    <Resource Include="Assets\Images\edit.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
     <Resource Include="Assets\Images\error.png">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Resource>
+    <Resource Include="Assets\Images\file.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
     <Resource Include="Assets\Images\gno_logo.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Assets\Images\help.png">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Resource>
     <Resource Include="Assets\Images\info.png">
@@ -135,6 +153,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="Properties\" />
     <Folder Include="Validators\" />
   </ItemGroup>
 
