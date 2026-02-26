@@ -1,12 +1,8 @@
 ﻿using NetOptimizer.Enums;
 using NetOptimizer.Interfaces;
-using NetOptimizer.Models.AddDeviceSettingsModels;
 using NetOptimizer.Models.Dtos;
 using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
 using System.Net.Http;
-using System.Text;
 
 namespace NetOptimizer.Services
 {
@@ -29,7 +25,7 @@ namespace NetOptimizer.Services
                 return JsonConvert.DeserializeObject<List<CommutatorResponceDto>>(json);
             }
 
-            return new List<CommutatorResponceDto>(); 
+            return new List<CommutatorResponceDto>();
         }
     }
 }

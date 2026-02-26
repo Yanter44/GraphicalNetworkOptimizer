@@ -1,5 +1,4 @@
 ﻿using NetOptimizer.Common;
-using NetOptimizer.Common;
 using NetOptimizer.Interfaces;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;

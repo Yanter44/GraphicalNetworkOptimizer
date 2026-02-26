@@ -49,10 +49,10 @@ namespace NetOptimizer.ViewModels
         private void ValidateDeviceAndAddToCanvas()
         {
             if (CreatableDevice == null || DeviceSettings == null) return;
-           
+
             EventAggregator.Instance.PublishDeviceCreated(CreatableDevice, DeviceSettings);
             RequestClose?.Invoke();
-     
+
         }
 
         public event PropertyChangedEventHandler PropertyChanged;

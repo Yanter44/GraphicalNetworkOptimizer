@@ -1,10 +1,7 @@
 ﻿using NetOptimizer.Enums;
 using NetOptimizer.Models.Dtos;
-using System;
-using System.Collections.Generic;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
-using System.Text;
 
 namespace NetOptimizer.Models.AddDeviceSettingsModels
 {
@@ -32,7 +29,7 @@ namespace NetOptimizer.Models.AddDeviceSettingsModels
 
         public List<string> AvailableVendors { get; }
         private readonly List<CommutatorResponceDto> _catalog;
-        public List<CommutatorResponceDto> FilteredModels =>_catalog.Where(x => x.Vendor == SelectedVendor).ToList();
+        public List<CommutatorResponceDto> FilteredModels => _catalog.Where(x => x.Vendor == SelectedVendor).ToList();
 
         public SwitchSettingModel(List<CommutatorResponceDto> catalog)
         {
@@ -47,7 +44,7 @@ namespace NetOptimizer.Models.AddDeviceSettingsModels
             SupportsPoe = dto.SupportsPoe;
             AveragePrice = dto.AveragePrice;
         }
-  
+
 
         public event PropertyChangedEventHandler PropertyChanged;
         protected void OnPropertyChanged([CallerMemberName] string name = null) =>

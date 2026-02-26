@@ -19,7 +19,7 @@
                 <ResourceDictionary Source="/Views/ResourcesDictionary/MainWindowResources.xaml"/>
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
-        
+
     </Window.Resources>
 
     <DockPanel Background="#F8F8F8">
@@ -159,13 +159,13 @@
                                                             TickFrequency="1" 
                                                             IsSnapToTickEnabled="True"
                                                             VerticalAlignment="Center"/>
-                                                    
+
                                                     <TextBlock Grid.Column="3" 
                                                                Text="{Binding Count}" 
                                                                VerticalAlignment="Center" 
                                                                HorizontalAlignment="Right" 
                                                                FontWeight="Bold" 
-                                                               Foreground="#4A89F3"/>       
+                                                               Foreground="#4A89F3"/>
                                                 </Grid>
                                             </DataTemplate>
                                         </ItemsControl.ItemTemplate>
@@ -191,7 +191,7 @@
                                         </StackPanel>
                                     </Grid>
                                 </StackPanel>
-                                
+
                                 <StackPanel Grid.Row="4" VerticalAlignment="Bottom" >
                                     <Button Content="Создать" Height="30" Width="150" Foreground="White" FontWeight="SemiBold" Cursor="Hand">
                                         <Button.Template>
@@ -290,7 +290,7 @@
                                                FontWeight="Bold"
                                                Foreground="#888"
                                                FontSize="10"/>
-                                    
+
                                     <ListBox ItemsSource="{Binding DevicesOnCanvas}"
                                              SelectedItem="{Binding SelectedDevice}"
                                              Background="Transparent"

@@ -1,15 +1,12 @@
-﻿
-using NetOptimizer.Common;
+﻿using NetOptimizer.Common;
 using NetOptimizer.Enums;
 using NetOptimizer.Interfaces;
 using NetOptimizer.Models;
 using NetOptimizer.Models.AddDeviceSettingsModels;
 using NetOptimizer.Models.Dtos;
 using NetOptimizer.Services;
-using NetOptimizer.Views;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.IO;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Windows.Input;
@@ -21,10 +18,10 @@ namespace NetOptimizer.ViewModels
         private string _projectName;
         private string _currentYamlText;
         private string _currentFilePath;
-        public string ProjectName { get => _projectName; set { _projectName = value;  OnPropertyChanged(); } }
-        public string CurrentYamlText { get => _currentYamlText; set { _currentYamlText = value; OnPropertyChanged() ; _ = AutoSaveAsync(); } }
+        public string ProjectName { get => _projectName; set { _projectName = value; OnPropertyChanged(); } }
+        public string CurrentYamlText { get => _currentYamlText; set { _currentYamlText = value; OnPropertyChanged(); _ = AutoSaveAsync(); } }
         public string CurrentFilePath { get => _currentFilePath; set { _currentFilePath = value; OnPropertyChanged(); } }
-  
+
         public ObservableCollection<DeviceOnCanvas> DevicesOnCanvas { get; } = new ObservableCollection<DeviceOnCanvas>();
 
         public event EventHandler<DeviceOnCanvas> DeviceAdded;
@@ -38,7 +35,7 @@ namespace NetOptimizer.ViewModels
         private readonly IWindowNavigator _windowNavigator;
         private readonly IYamlManager _yamlManager;
         private readonly IFileService _fileService;
-        public MainWindowViewModel(IWindowNavigator windowNavigator,IYamlManager yamlManager, IFileService fileservice)
+        public MainWindowViewModel(IWindowNavigator windowNavigator, IYamlManager yamlManager, IFileService fileservice)
         {
             _windowNavigator = windowNavigator;
             _yamlManager = yamlManager;
@@ -50,10 +47,10 @@ namespace NetOptimizer.ViewModels
             ApplyAndBuildYamlFileCommand = new AsyncRelayCommand(ApplyAndBuildNetwork);
             OpenFinderFileDialogCommand = new RelayCommand(OpenFinderFileFileDialog);
             InitializeNewProject();
-            
+
             sandboxViewModel.InitializeAllAvailableDevices();
             editorViewModel.InitializeAvailableTypes();
-            editorViewModel.InitializeAllAvailableDevices();           
+            editorViewModel.InitializeAllAvailableDevices();
         }
         public void UpdateYamlFromCanvas()
         {
@@ -113,7 +110,7 @@ namespace NetOptimizer.ViewModels
             CurrentYamlText = "network:\n  nodes: []\n  connections: []";
             await _yamlManager.CreateYamlFile(docPath, fileName, CurrentYamlText);
         }
-        private async Task ApplyAndBuildNetwork() 
+        private async Task ApplyAndBuildNetwork()
         {
             var resultRead = await _yamlManager.ReadYamlFileAsync(CurrentFilePath);
             var resultWrite = await _yamlManager.CheckConfigAsync(resultRead);
@@ -149,11 +146,11 @@ namespace NetOptimizer.ViewModels
                 visualLookup[item.Name] = visual;
 
                 DevicesOnCanvas.Add(visual);
-                DeviceAdded?.Invoke(this, visual); 
+                DeviceAdded?.Invoke(this, visual);
 
                 startX += 200;
             }
-            var processedLinks = new HashSet<int>(); 
+            var processedLinks = new HashSet<int>();
             foreach (var visual in DevicesOnCanvas)
             {
                 foreach (var port in visual.LogicDevice.Ports)
@@ -169,7 +166,7 @@ namespace NetOptimizer.ViewModels
 
                         if (targetVisual != null)
                         {
- 
+
                             ConnectionRequested?.Invoke(sourceVisual, targetVisual);
                             processedLinks.Add(linkId);
                         }
@@ -215,4 +212,4 @@ namespace NetOptimizer.ViewModels
         }
     }
 }
-  
+

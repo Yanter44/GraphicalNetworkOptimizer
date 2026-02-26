@@ -1,12 +1,9 @@
 ﻿using ICSharpCode.AvalonEdit.Highlighting;
 using ICSharpCode.AvalonEdit.Highlighting.Xshd;
 using NetOptimizer.ViewModels;
-using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using System.Xml;
-using System.Text;
 using System.Windows;
 
 namespace NetOptimizer.Views.MainWindow

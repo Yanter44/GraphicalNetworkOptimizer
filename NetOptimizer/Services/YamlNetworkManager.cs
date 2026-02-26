@@ -3,11 +3,8 @@ using NetOptimizer.Interfaces;
 using NetOptimizer.Models;
 using NetOptimizer.ViewModels;
 using NetOptimizer.Views.DopViews;
-using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Text;
-using System.Xml;
 
 namespace NetOptimizer.Services
 {
@@ -28,7 +25,7 @@ namespace NetOptimizer.Services
         private void InitializeDictionaryKeywords()
         {
             dictionaryKeywords.Add(KeywordsStructureType.NetworkSection, new List<string>() { "name" });
-            dictionaryKeywords.Add(KeywordsStructureType.NodesSection, new List<string>() {  "id", "type",  "model", "ip", "port_type", "port_count" });
+            dictionaryKeywords.Add(KeywordsStructureType.NodesSection, new List<string>() { "id", "type", "model", "ip", "port_type", "port_count" });
             dictionaryKeywords.Add(KeywordsStructureType.LinksSection, new List<string>() { "src", "src_port", "dst", "dst_port" });
         }
         public async Task<NetworkMap> CheckConfigAsync(string configText)
@@ -107,7 +104,7 @@ namespace NetOptimizer.Services
                     {
                         _windowNavigator.ShowModalView<ErrorWindow, ErrorWindowViewModel>(
                             $"Неизвестное свойство: {key} \n В блоке: {section}");
-                        return false ; 
+                        return false;
                     }
                 }
             }
@@ -182,8 +179,8 @@ namespace NetOptimizer.Services
                 }
             }
         }
-      
-       
+
+
 
         public async Task<string> ReadYamlFileAsync(string pathToFile)
         {
@@ -210,7 +207,7 @@ namespace NetOptimizer.Services
             }
         }
 
-        
+
         public async Task<bool> CreateYamlFile(string path, string fileName, string yamltext)
         {
             try
@@ -241,6 +238,6 @@ namespace NetOptimizer.Services
             _activeStream?.Dispose();
         }
 
-  
+
     }
 }

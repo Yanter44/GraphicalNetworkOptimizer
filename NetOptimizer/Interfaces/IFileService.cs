@@ -1,5 +1,4 @@
 ﻿
-
 namespace NetOptimizer.Interfaces
 {
     public interface IFileService

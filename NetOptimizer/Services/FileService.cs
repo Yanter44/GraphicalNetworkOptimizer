@@ -1,6 +1,4 @@
-﻿
-
-using Microsoft.Win32;
+﻿using Microsoft.Win32;
 using NetOptimizer.Interfaces;
 
 namespace NetOptimizer.Services

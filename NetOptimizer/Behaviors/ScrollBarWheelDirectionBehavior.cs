@@ -1,7 +1,4 @@
 ﻿using NetOptimizer.Enums;
-using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -10,19 +7,17 @@ namespace NetOptimizer.Behaviors
 {
     public static class ScrollBarWheelDirectionBehavior
     {
-        public static readonly DependencyProperty OrientationScrollProperty = DependencyProperty.RegisterAttached(
-      "OrientationScroll", // Имя должно быть таким же, как в методах Get/Set
-      typeof(MouseOrientationScrollType),
-      typeof(ScrollBarWheelDirectionBehavior),
-      new PropertyMetadata(MouseOrientationScrollType.None, OnPriorityChanged));
-
+        public static readonly DependencyProperty OrientationScrollProperty =
+            DependencyProperty.RegisterAttached("OrientationScroll",
+                typeof(MouseOrientationScrollType),
+                typeof(ScrollBarWheelDirectionBehavior),
+                new PropertyMetadata(MouseOrientationScrollType.None, OnPriorityChanged));
 
         public static MouseOrientationScrollType GetOrientationScroll(DependencyObject obj)
         {
             return (MouseOrientationScrollType)obj.GetValue(OrientationScrollProperty);
         }
 
-        // ОБЯЗАТЕЛЬНЫЙ СЕТТЕР
         public static void SetOrientationScroll(DependencyObject obj, MouseOrientationScrollType value)
         {
             obj.SetValue(OrientationScrollProperty, value);
@@ -32,13 +27,11 @@ namespace NetOptimizer.Behaviors
         {
             if (d is ScrollViewer scrollViewer)
             {
-                // Отписываемся от старого события, чтобы не было утечек памяти при смене типа
                 scrollViewer.PreviewMouseWheel -= ScrollViewer_PreviewMouseWheel;
 
                 var mode = (MouseOrientationScrollType)e.NewValue;
                 if (mode != MouseOrientationScrollType.None)
                 {
-                    // Подписываемся на событие
                     scrollViewer.PreviewMouseWheel += ScrollViewer_PreviewMouseWheel;
                 }
             }
@@ -58,9 +51,6 @@ namespace NetOptimizer.Behaviors
                 }
                 else if (mode == MouseOrientationScrollType.Vertical)
                 {
-                    // ПРИНУДИТЕЛЬНАЯ ПРОКРУТКА
-                    // Если мы здесь, значит мы хотим, чтобы ScrollViewer крутился, 
-                    // даже если внутри него ListBox, который "съедает" событие.
                     scrollViewer.ScrollToVerticalOffset(scrollViewer.VerticalOffset - e.Delta);
                     e.Handled = true;
                 }

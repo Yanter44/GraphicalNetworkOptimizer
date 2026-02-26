@@ -3,12 +3,9 @@ using NetOptimizer.Enums;
 using NetOptimizer.Interfaces;
 using NetOptimizer.Models.Dtos;
 using NetOptimizer.Views;
-using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
-using System.Text;
 using System.Windows.Input;
 
 namespace NetOptimizer.ViewModels

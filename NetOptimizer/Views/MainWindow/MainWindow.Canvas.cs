@@ -1,6 +1,4 @@
-﻿using NetOptimizer.Models;
-using NetOptimizer.ViewModels;
-
+﻿using NetOptimizer.ViewModels;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -40,13 +38,13 @@ namespace NetOptimizer.Views.MainWindow
             {
                 if (_connectionLine != null)
                 {
-               
+
                     MainCanvas.Children.Remove(_connectionLine);
                     _connectionLine = null;
                     _sourceDeviceConnection = null;
 
                     MainCanvas.ReleaseMouseCapture();
-                    return; 
+                    return;
                 }
                 _selectionStartPoint = e.GetPosition(MainCanvas);
                 var vm = (MainWindowViewModel)this.DataContext;

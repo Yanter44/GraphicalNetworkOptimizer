@@ -12,36 +12,36 @@
         Title="NetOptimizer.DeviceWindow"
         WindowStartupLocation="CenterScreen"
         Height="450" Width="300" ResizeMode="NoResize">
-<Window.Resources>
+    <Window.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="/Views/ResourcesDictionary/CreateDeviceWindowResources.xaml"/>
             </ResourceDictionary.MergedDictionaries>
 
 
-        <!-- ПК -->
-        <DataTemplate DataType="{x:Type settingsModels:PcSettingModel}">
-            <StackPanel Grid.Row="1" Margin="14,10,10,0">
-                <TextBlock Text="Имя устройства" Foreground="#6B7280" FontSize="12" Margin="0,0,0,4"/>
-                <Border CornerRadius="8" Background="#F3F6FA" Padding="5">
-                    <TextBox TextAlignment="Center" Text="{Binding Name}" BorderThickness="0" Background="Transparent" FontSize="14" Foreground="#111827"/>
-                </Border>
-            </StackPanel>
-        </DataTemplate>
- 
-        <!-- Коммутатор -->
-        <DataTemplate DataType="{x:Type settingsModels:SwitchSettingModel}">
-            <StackPanel Grid.Row="1" Margin="14,10,10,0">
-                <TextBlock Text="Имя устройства" Foreground="#6B7280" FontSize="12" Margin="0,0,0,4"/>
-                <Border CornerRadius="8" Background="#F3F6FA" Padding="5" Margin="0,0,0,10">
-                    <TextBox Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}" 
-                     BorderThickness="0" Background="Transparent" FontSize="14"/>
-                </Border>
+            <!-- ПК -->
+            <DataTemplate DataType="{x:Type settingsModels:PcSettingModel}">
+                <StackPanel Grid.Row="1" Margin="14,10,10,0">
+                    <TextBlock Text="Имя устройства" Foreground="#6B7280" FontSize="12" Margin="0,0,0,4"/>
+                    <Border CornerRadius="8" Background="#F3F6FA" Padding="5">
+                        <TextBox TextAlignment="Center" Text="{Binding Name}" BorderThickness="0" Background="Transparent" FontSize="14" Foreground="#111827"/>
+                    </Border>
+                </StackPanel>
+            </DataTemplate>
 
-                <TextBlock Text="Производитель (Vendor)" Foreground="#6B7280" FontSize="12" Margin="0,8,0,4"/>
-                <ComboBox Style="{StaticResource ModernComboBox}"  ItemsSource="{Binding AvailableVendors}" 
+            <!-- Коммутатор -->
+            <DataTemplate DataType="{x:Type settingsModels:SwitchSettingModel}">
+                <StackPanel Grid.Row="1" Margin="14,10,10,0">
+                    <TextBlock Text="Имя устройства" Foreground="#6B7280" FontSize="12" Margin="0,0,0,4"/>
+                    <Border CornerRadius="8" Background="#F3F6FA" Padding="5" Margin="0,0,0,10">
+                        <TextBox Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}" 
+                     BorderThickness="0" Background="Transparent" FontSize="14"/>
+                    </Border>
+
+                    <TextBlock Text="Производитель (Vendor)" Foreground="#6B7280" FontSize="12" Margin="0,8,0,4"/>
+                    <ComboBox Style="{StaticResource ModernComboBox}"  ItemsSource="{Binding AvailableVendors}" 
                   SelectedItem="{Binding SelectedVendor, Mode=TwoWay}" />
-                <TextBlock Text="Модель устройства" Foreground="#6B7280" FontSize="12" Margin="0,8,0,4"/>
+                    <TextBlock Text="Модель устройства" Foreground="#6B7280" FontSize="12" Margin="0,8,0,4"/>
                     <ComboBox Style="{StaticResource ModernComboBox}" ItemsSource="{Binding FilteredModels}"  
                               SelectedItem="{Binding SelectedModelFromCatalog, Mode=TwoWay}">
                         <ComboBox.ItemTemplate>
@@ -52,66 +52,66 @@
                     </ComboBox>
                     <Border Margin="0,15,0,0" Padding="10" Background="#F9FAFB" 
                 BorderBrush="#E5E7EB" BorderThickness="1" CornerRadius="8">
-                    <StackPanel>
-                        <TextBlock Text="Технические данные:" FontWeight="Bold" Foreground="#374151" Margin="0,0,0,8"/>
+                        <StackPanel>
+                            <TextBlock Text="Технические данные:" FontWeight="Bold" Foreground="#374151" Margin="0,0,0,8"/>
 
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="Auto"/>
-                            </Grid.ColumnDefinitions>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
 
-                            <StackPanel Grid.Column="0">
-                                <TextBlock Text="{Binding TotalPorts, StringFormat='Порты RJ45: {0}'}" Foreground="#4B5563"/>
-                                <TextBlock Text="{Binding SfpPortsCount, StringFormat='Порты SFP: {0}'}" Foreground="#4B5563"/>
-                                <TextBlock Text="{Binding SupportsPoe, StringFormat='Поддержка PoE: {0}'}" Foreground="#4B5563"/>
-                            </StackPanel>
-                        
-                          
-                        </Grid>
-                        <TextBlock Text="Средняя цена:" Foreground="#6B7280" FontSize="12" Margin="0,8,0,4"/>
-                        <TextBlock Grid.Column="1" VerticalAlignment="Bottom"
+                                <StackPanel Grid.Column="0">
+                                    <TextBlock Text="{Binding TotalPorts, StringFormat='Порты RJ45: {0}'}" Foreground="#4B5563"/>
+                                    <TextBlock Text="{Binding SfpPortsCount, StringFormat='Порты SFP: {0}'}" Foreground="#4B5563"/>
+                                    <TextBlock Text="{Binding SupportsPoe, StringFormat='Поддержка PoE: {0}'}" Foreground="#4B5563"/>
+                                </StackPanel>
+
+
+                            </Grid>
+                            <TextBlock Text="Средняя цена:" Foreground="#6B7280" FontSize="12" Margin="0,8,0,4"/>
+                            <TextBlock Grid.Column="1" VerticalAlignment="Bottom"
                                    Text="{Binding AveragePrice, StringFormat='{}{0:N0} ₽'}"
                                    FontSize="16" Foreground="#059669" FontWeight="Bold"/>
-                    </StackPanel>
-                </Border>
-            </StackPanel>
-        </DataTemplate>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+            </DataTemplate>
         </ResourceDictionary>
-</Window.Resources>
-    
+    </Window.Resources>
+
     <shell:WindowChrome.WindowChrome>
         <shell:WindowChrome  CaptionHeight="0"
                              CornerRadius="16"
                              GlassFrameThickness="0"
                              ResizeBorderThickness="0"/>
     </shell:WindowChrome.WindowChrome>
-    
-  <Border Background="#FCFBFE" CornerRadius="16"
-          BorderThickness="1"    BorderBrush="#EDEDED" SnapsToDevicePixels="True">
-        
-     <Grid Background="White">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="30"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
-        </Grid.RowDefinitions>
 
-        <Border Grid.Row="0" Background="#FCFBFE" MouseLeftButtonDown="NavBar_MouseLeftButtonDown" 
+    <Border Background="#FCFBFE" CornerRadius="16"
+          BorderThickness="1"    BorderBrush="#EDEDED" SnapsToDevicePixels="True">
+
+        <Grid Background="White">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="30"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+            <Border Grid.Row="0" Background="#FCFBFE" MouseLeftButtonDown="NavBar_MouseLeftButtonDown" 
                 BorderBrush="#EDEEF4" BorderThickness="0,0,0,1"
                 HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="40"></ColumnDefinition>
-                    <ColumnDefinition Width="220"></ColumnDefinition>
-                    <ColumnDefinition Width="30"></ColumnDefinition>
-                </Grid.ColumnDefinitions>
-                <Border Background="#6DB0FA" CornerRadius="10" Height="22" Width="25">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="40"></ColumnDefinition>
+                        <ColumnDefinition Width="220"></ColumnDefinition>
+                        <ColumnDefinition Width="30"></ColumnDefinition>
+                    </Grid.ColumnDefinitions>
+                    <Border Background="#6DB0FA" CornerRadius="10" Height="22" Width="25">
                         <TextBlock Text="+" FontSize="20" Foreground="White" Margin="0,0,0,5"  HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                </Border>
-                
-                <TextBlock Grid.Column="1" FontSize="14"
+                    </Border>
+
+                    <TextBlock Grid.Column="1" FontSize="14"
                            FontWeight="SemiBold" VerticalAlignment="Center"  
                            Text="{Binding CreatableDevice.DeviceName, StringFormat='Добавить: {0}'}"/>
                     <Button  Command="{Binding CloseCommand}" CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Window}}"
@@ -138,7 +138,7 @@
                         </Button.Template>
                     </Button>
                 </Grid>
-        </Border>
+            </Border>
             <ContentControl Grid.Row="2" Content="{Binding DeviceSettings}" />
 
             <Border Grid.Row="3" Width="200" Margin="10" CornerRadius="10" VerticalAlignment="Bottom" >
@@ -174,5 +174,5 @@
                 </Button>
             </Border>
         </Grid>
-  </Border>
+    </Border>
 </Window>

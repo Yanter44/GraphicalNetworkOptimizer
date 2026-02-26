@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
+﻿
 namespace NetOptimizer.Models
 {
     public class EthernetPort
@@ -20,8 +17,8 @@ namespace NetOptimizer.Models
             this.ConnectedTo = remotePort;
             remotePort.ConnectedTo = this;
 
-            this.IsInitiator = true;      
-            remotePort.IsInitiator = false; 
+            this.IsInitiator = true;
+            remotePort.IsInitiator = false;
         }
 
         public void Unlink()
@@ -30,7 +27,7 @@ namespace NetOptimizer.Models
             {
                 var remote = ConnectedTo;
                 this.ConnectedTo = null;
-                remote.ConnectedTo = null; 
+                remote.ConnectedTo = null;
             }
         }
     }

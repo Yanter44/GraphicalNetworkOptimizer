@@ -1,9 +1,5 @@
-﻿using NetOptimizer.Models;
-using NetOptimizer.Models.AddDeviceSettingsModels;
+﻿using NetOptimizer.Models.AddDeviceSettingsModels;
 using NetOptimizer.Models.Dtos;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace NetOptimizer.Services
 {

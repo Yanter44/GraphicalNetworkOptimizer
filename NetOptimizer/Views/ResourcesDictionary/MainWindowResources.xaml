@@ -7,7 +7,7 @@
         <Setter Property="Padding" Value="5,2"/>
     </Style>
 
-    
+
     <Style x:Key="ModernTabItemStyle" TargetType="TabItem">
         <Setter Property="Template">
             <Setter.Value>
@@ -76,7 +76,7 @@
             </Setter.Value>
         </Setter>
     </Style>
-    
+
     <Style TargetType="Slider">
         <Setter Property="Background" Value="Transparent"/>
         <Setter Property="BorderBrush" Value="Transparent"/>
@@ -270,5 +270,5 @@
             </Style>
         </Style.Resources>
     </Style>
- 
+
 </ResourceDictionary>

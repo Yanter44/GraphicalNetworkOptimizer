@@ -1,11 +1,6 @@
 ﻿using NetOptimizer.Models;
 using NetOptimizer.ViewModels;
 using NetOptimizer.Views.DopViews;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Linq;
-using System.Text;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
@@ -55,7 +50,7 @@ namespace NetOptimizer.Views.MainWindow
             Canvas.SetTop(deviceContainer, data.Y);
 
             MainCanvas.Children.Add(deviceContainer);
-    
+
         }
         private void ShowMyToolTip(object sender, MouseEventArgs e)
         {
@@ -331,7 +326,8 @@ namespace NetOptimizer.Views.MainWindow
                         Foreground = port.IsLinked ? Brushes.LimeGreen : Brushes.Black
                     };
 
-                    portItem.Click += (s, e) => {
+                    portItem.Click += (s, e) =>
+                    {
                         var pNum = (s as MenuItem).Tag;
                         if (port.IsLinked)
                         {
@@ -380,7 +376,8 @@ namespace NetOptimizer.Views.MainWindow
             menu.Items.Add(connectHeader);
             menu.Items.Add(new Separator());
 
-            MenuItem deleteItem = new MenuItem { 
+            MenuItem deleteItem = new MenuItem
+            {
                 Header = "Удалить",
                 Icon = new Image
                 {
@@ -389,7 +386,7 @@ namespace NetOptimizer.Views.MainWindow
                     Height = 20
                 },
             };
-            deleteItem.Click += (s, e) => 
+            deleteItem.Click += (s, e) =>
             {
                 RemoveDeviceFromCanvas(container);
             };
@@ -468,12 +465,12 @@ namespace NetOptimizer.Views.MainWindow
                     StrokeDashArray = new DoubleCollection() { 6, 5 },
                     SnapsToDevicePixels = true,
                     X1 = centerX,
-                    X2 = centerX, 
+                    X2 = centerX,
                     Y1 = centerY,
-                    Y2 = centerY, 
+                    Y2 = centerY,
                 };
                 MainCanvas.Children.Add(_connectionLine);
-           
+
             }
         }
         private void Device_MouseUp(object sender, MouseButtonEventArgs e)
