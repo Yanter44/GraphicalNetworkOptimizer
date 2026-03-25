@@ -1,13 +1,17 @@
 ﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
-
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:deviceSettingsViewModels ="clr-namespace:NetOptimizer.ViewModels.DeviceSettingss"
+                    xmlns:converters="clr-namespace:NetOptimizer.Convertors"
+                    xmlns:selectors="clr-namespace:NetOptimizer.Views.Selectors">
+    <!-- =====================Конверторы==================== -->
+    <converters:DeviceTypeToIconConverter x:Key="DeviceTypeToIconConverter"/>
+    <!-- ===================== Стили ==================== -->
     <Style TargetType="Menu">
         <Setter Property="Background" Value="#EFEFEF"/>
         <Setter Property="Foreground" Value="#333"/>
         <Setter Property="Padding" Value="5,2"/>
     </Style>
-
-
+    
     <Style x:Key="ModernTabItemStyle" TargetType="TabItem">
         <Setter Property="Template">
             <Setter.Value>
@@ -195,50 +199,61 @@
         </Setter>
     </Style>
 
-
     <Style TargetType="{x:Type MenuItem}">
         <Setter Property="Padding" Value="10,5"/>
         <Setter Property="Background" Value="Transparent"/>
         <Setter Property="FontSize" Value="12"/>
+        <Setter Property="Foreground" Value="#333"/>
+
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type MenuItem}">
-                    <Border x:Name="Bg"  Background="{TemplateBinding Background}" BorderThickness="1"
-                     BorderBrush="Transparent"
-                     CornerRadius="5" 
-                     SnapsToDevicePixels="True"
-                     Margin="2,1">
+                    <Border x:Name="Bg" 
+                        Background="{TemplateBinding Background}" 
+                        BorderThickness="1"
+                        BorderBrush="Transparent"
+                        CornerRadius="5" 
+                        SnapsToDevicePixels="True"
+                        Margin="2,1">
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="Auto" SharedSizeGroup="Icon"/>
                                 <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
+
                             <ContentPresenter x:Name="IconPresenter"
-                      Grid.Column="0"
-                      ContentSource="Icon"
-                      Width="20" Height="20"
-                
-                      VerticalAlignment="Center"/>
+                                          Grid.Column="0"
+                                          ContentSource="Icon"
+                                          Width="18" Height="18"
+                                          HorizontalAlignment="Center"
+                                          VerticalAlignment="Center"/>
+
                             <ContentPresenter Grid.Column="1"
-                                       ContentSource="Header"
-                                       Margin="{TemplateBinding Padding}"
-                                       VerticalAlignment="Center"
-                                       RecognizesAccessKey="True"/>
+                                          ContentSource="Header"
+                                          Margin="{TemplateBinding Padding}"
+                                          VerticalAlignment="Center"
+                                          RecognizesAccessKey="True"/>
 
                             <Popup x:Name="PART_Popup" 
-                            AllowsTransparency="True" 
-                            IsOpen="{Binding IsSubmenuOpen, RelativeSource={RelativeSource TemplatedParent}}" 
-                            Placement="Bottom">
+                               AllowsTransparency="True" 
+                               IsOpen="{Binding IsSubmenuOpen, RelativeSource={RelativeSource TemplatedParent}}" 
+                               Placement="Right" 
+                               PopupAnimation="Fade">
                                 <Border Background="White" 
-                                 BorderBrush="#DDD" 
-                                 BorderThickness="1" 
-                                 CornerRadius="5" 
-                                 Padding="2"
-                                 Margin="0,2,5,5">
+                                    BorderBrush="#DDD" 
+                                    BorderThickness="1" 
+                                    CornerRadius="5" 
+                                    Padding="2"
+                                    Margin="0,0,5,5">
                                     <Border.Effect>
-                                        <DropShadowEffect BlurRadius="5" Opacity="0.2" ShadowDepth="1"/>
+                                        <DropShadowEffect BlurRadius="8" Opacity="0.15" ShadowDepth="2" Color="Black"/>
                                     </Border.Effect>
-                                    <ItemsPresenter />
+
+                                    <ScrollViewer MaxHeight="300" 
+                                              VerticalScrollBarVisibility="Auto"
+                                              HorizontalScrollBarVisibility="Disabled">
+                                        <ItemsPresenter SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}"/>
+                                    </ScrollViewer>
                                 </Border>
                             </Popup>
                         </Grid>
@@ -246,11 +261,15 @@
 
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsHighlighted" Value="True">
-                            <Setter TargetName="Bg" Property="Background" Value="#DEDEDE"/>
-                            <Setter TargetName="Bg" Property="BorderBrush" Value="#CCCCCC"/>
+                            <Setter TargetName="Bg" Property="Background" Value="#F0F0F0"/>
+                            <Setter TargetName="Bg" Property="BorderBrush" Value="#DCDCDC"/>
                         </Trigger>
                         <Trigger Property="IsSubmenuOpen" Value="True">
-                            <Setter TargetName="Bg" Property="Background" Value="#DEDEDE"/>
+                            <Setter TargetName="Bg" Property="Background" Value="#E8E8E8"/>
+                            <Setter TargetName="Bg" Property="BorderBrush" Value="#CCCCCC"/>
+                        </Trigger>
+                        <Trigger Property="Icon" Value="{x:Null}">
+                            <Setter TargetName="IconPresenter" Property="Visibility" Value="Collapsed"/>
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
@@ -271,4 +290,190 @@
         </Style.Resources>
     </Style>
 
+    <Style x:Key="RemoveGroupButton" TargetType="Button">
+        <Setter Property="Foreground" Value="Gray"/>
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Border x:Name="btnBorder" Background="{TemplateBinding Background}" CornerRadius="5">
+                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+
+                            <Setter TargetName="btnBorder" Property="Background" Value="#CF2B13"/>
+                            <Setter Property="Foreground" Value="White"/>
+                        </Trigger>
+                        <Trigger Property="IsPressed" Value="True">
+                            <Setter TargetName="btnBorder" Property="Background" Value="#B60000"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- =====================ДАТА ТЕМПЛЕЙТЫ ==================== -->
+    
+    <DataTemplate DataType="{x:Type deviceSettingsViewModels:PcSubMenuViewModel}">
+        <StackPanel>
+            <CheckBox Content="Учитывать в бюджете"
+                  IsChecked="{Binding IncludeInBudget, Mode=TwoWay}" 
+                  Margin="10,10,0,0"/>
+        </StackPanel>
+    </DataTemplate>
+    
+    <!--Шаблон элементов со слайдерами-->
+    <DataTemplate x:Key="DeviceWithCountTemplate">
+        <Border BorderBrush="#CECECE" BorderThickness="1" Padding="10,0,10,0" CornerRadius="5" Margin="0,0,0,5">
+            <StackPanel Margin="0,5">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="25"/>
+                        <ColumnDefinition Width="90"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="25"/>
+                    </Grid.ColumnDefinitions>
+
+                    <Image Source="{Binding Type, Converter={StaticResource DeviceTypeToIconConverter}}" Width="26" Height="26"/>
+                    <TextBlock Grid.Column="1" VerticalAlignment="Center" Text="{Binding DeviceName}" Margin="5,0,0,0"/>
+                </Grid>
+                <Grid Margin="0,10,10,0">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+                    <ScrollViewer VerticalScrollBarVisibility="Auto">
+                        <ItemsControl ItemsSource="{Binding DataContext.editorViewModel.DeviceGroups}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Border BorderBrush="#EDEDED" BorderThickness="1" CornerRadius="10" Padding="15,10" Margin="5,0,5,10">
+                                        <DockPanel LastChildFill="True">
+
+                                            <TextBlock Text="{Binding Name}" 
+                                   VerticalAlignment="Center" 
+                                   FontSize="16" 
+                                   DockPanel.Dock="Left" 
+                                   Margin="0,0,15,0"/>
+
+                                            <TextBlock Text="{Binding Value}" 
+                                   VerticalAlignment="Center" 
+                                   Foreground="Gray" 
+                                   FontSize="16" 
+                                   DockPanel.Dock="Right" 
+                                   Margin="10,0,0,0"/>
+
+                                            <Slider Minimum="0" 
+                                Maximum="100" 
+                                Value="{Binding Value}" 
+                                VerticalAlignment="Center"/>
+                                        </DockPanel>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </ScrollViewer>
+
+                    <DockPanel Grid.Row="1" LastChildFill="True" Margin="0,15,0,0" VerticalAlignment="Top">
+                        <Button DockPanel.Dock="Right" Width="30" Height="25" Cursor="Hand" Margin="10,0,0,0">
+                            <Button.Template>
+                                <ControlTemplate TargetType="Button">
+                                    <Border x:Name="btnBorder" Background="White" CornerRadius="6" 
+                        BorderThickness="1" BorderBrush="#EDEDED" SnapsToDevicePixels="True">
+                                        <Image Source="/Assets/Images/disconnectGroup.png" Width="50" Height="18" 
+                           RenderOptions.BitmapScalingMode="HighQuality"/>
+                                    </Border>
+                                </ControlTemplate>
+                            </Button.Template>
+                        </Button>
+
+                        <Button DockPanel.Dock="Right" 
+                                Command="{Binding DataContext.editorViewModel.OpenConnectGroupWindowCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}" 
+                                CommandParameter="{Binding}"
+                                Width="30" Height="25" Cursor="Hand" Margin="10,0,0,0">
+                            <Button.Template>
+                                <ControlTemplate TargetType="Button">
+                                    <Border x:Name="btnBorder" Background="White" CornerRadius="6" 
+                                            BorderThickness="1" BorderBrush="#EDEDED" SnapsToDevicePixels="True">
+                                        <Image Source="/Assets/Images/connectedGroup.png" Width="50" Height="18" 
+                                                RenderOptions.BitmapScalingMode="HighQuality"/>
+                                    </Border>
+                                </ControlTemplate>
+                            </Button.Template>
+                        </Button>
+
+                        <Rectangle Stroke="Gray" Height="25" 
+                                   StrokeThickness="1" StrokeDashArray="4 1" 
+                                   RadiusX="3" RadiusY="5"
+                                   SnapsToDevicePixels="True"/>
+                    </DockPanel>
+                </Grid>
+
+                <Border x:Name="SettingsArea"  Background="#F9FBFF" 
+                        CornerRadius="5"  Margin="0,5,0,0"
+                        BorderBrush="#E0E7FF" BorderThickness="1" MinHeight="65">
+
+                    <StackPanel>
+                        <TextBlock Text="Дополнительные параметры:" FontSize="10"
+                                   Foreground="#9CA3AF" Margin="10,5,0,0"/>
+                        <ContentControl Content="{Binding DeviceSubMenuViewModel}" />
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+        </Border>
+    </DataTemplate>
+    <!--Шаблон элементов без слайдеров-->
+    <DataTemplate x:Key="DeviceWithoutCountTemplate">
+        <Border BorderBrush="#CECECE" BorderThickness="1" Padding="10,0,10,0" CornerRadius="5" Margin="0,0,0,5">
+            <StackPanel Margin="0,5">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="25"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <Image Source="{Binding Type, Converter={StaticResource DeviceTypeToIconConverter}}" Width="26" Height="26"/>
+
+                    <TextBlock Grid.Column="1" VerticalAlignment="Center"
+                           Text="{Binding DeviceName}"
+                           Margin="5,0,0,0"/>
+                </Grid>
+                <Border x:Name="SettingsArea"  Background="#F9FBFF" 
+                        CornerRadius="1"  Margin="10"
+                        BorderBrush="#E0E7FF" BorderThickness="1">
+                    <StackPanel>
+                        <TextBlock TextAlignment="Center" Text="Дополнительные настройки:" FontSize="10" Foreground="#9CA3AF" Margin="0,0,0,5"/>
+                        <ContentControl Content="{Binding DeviceSubMenuViewModel}" />
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+        </Border>
+    </DataTemplate>
+
+<!--ШАБЛОН СПИСКА ГРУПП-->
+    <DataTemplate x:Key="DeviceGroupItemTemplate">
+        <Border BorderBrush="#EDEDED" BorderThickness="1" CornerRadius="6"
+                Margin="0,0,5,5" Padding="10,2" Height="25" Background="#FAFAFA">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+ 
+                <TextBlock Text="{Binding GroupName}" FontSize="11"  Foreground="Gray"
+                           VerticalAlignment="Center" HorizontalAlignment="Center"/>
+
+                <Button Style="{StaticResource RemoveGroupButton}" Command="{Binding DataContext.editorViewModel.RemoveDeviceGroupCommand, 
+                                                                             RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                        CommandParameter="{Binding}" Content="" FontFamily="Segoe MDL2 Assets"  FontSize="10"
+                        Width="15" Height="15" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="0,0,5,0"
+                        Cursor="Hand">
+                </Button>
+            </Grid>
+        </Border>
+    </DataTemplate>
+    <selectors:DeviceTemplateSelector x:Key="DeviceTemplateSelector"
+                               WithCountTemplate="{StaticResource DeviceWithCountTemplate}"
+                               WithoutCountTemplate="{StaticResource DeviceWithoutCountTemplate}"/>
 </ResourceDictionary>

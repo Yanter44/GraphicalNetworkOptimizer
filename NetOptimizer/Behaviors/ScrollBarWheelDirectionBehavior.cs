@@ -42,7 +42,6 @@ namespace NetOptimizer.Behaviors
             if (sender is ScrollViewer scrollViewer)
             {
                 var mode = (MouseOrientationScrollType)scrollViewer.GetValue(OrientationScrollProperty);
-
                 if (mode == MouseOrientationScrollType.Horizontal)
                 {
                     if (e.Delta > 0) scrollViewer.LineLeft();

@@ -1,18 +1,6 @@
-﻿using ICSharpCode.AvalonEdit.Highlighting;
-using ICSharpCode.AvalonEdit.Highlighting.Xshd;
-using NetOptimizer.Models;
-using NetOptimizer.ViewModels;
-using System.Xml;
-using System.IO;
-using System.Reflection;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
+﻿using System.Windows;
 using NetOptimizer.Interfaces;
+using NetOptimizer.ViewModels.MainWindow;
 
 
 namespace NetOptimizer.Views.MainWindow
@@ -25,9 +13,6 @@ namespace NetOptimizer.Views.MainWindow
             InitializeComponent();
             this.DataContext = viewmodel;
             _windowNavigator = windowNavigator;
-            viewmodel.DeviceAdded += OnDeviceAddedToCanvas;
-            viewmodel.ConnectionRequested += CreateVisualConnection;
-
             InitializeEditor(viewmodel);
         }
        

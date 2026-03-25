@@ -5,78 +5,324 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:NetOptimizer"
         xmlns:behaviors="clr-namespace:NetOptimizer.Behaviors"
-        xmlns:settingsModels="clr-namespace:NetOptimizer.Models.AddDeviceSettingsModels"
+        xmlns:deviceSettingsViewModels="clr-namespace:NetOptimizer.ViewModels.DeviceSettingss"
         xmlns:myenums="clr-namespace:NetOptimizer.Enums"
         xmlns:helpers="clr-namespace:NetOptimizer.Helpers"
         xmlns:shell="clr-namespace:System.Windows.Shell;assembly=PresentationFramework"
         Title="NetOptimizer.DeviceWindow"
         WindowStartupLocation="CenterScreen"
-        Height="450" Width="300" ResizeMode="NoResize">
+        Height="460" Width="300" ResizeMode="NoResize">
     <Window.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="/Views/ResourcesDictionary/CreateDeviceWindowResources.xaml"/>
             </ResourceDictionary.MergedDictionaries>
 
-
             <!-- ПК -->
-            <DataTemplate DataType="{x:Type settingsModels:PcSettingModel}">
-                <StackPanel Grid.Row="1" Margin="14,10,10,0">
-                    <TextBlock Text="Имя устройства" Foreground="#6B7280" FontSize="12" Margin="0,0,0,4"/>
-                    <Border CornerRadius="8" Background="#F3F6FA" Padding="5">
-                        <TextBox TextAlignment="Center" Text="{Binding Name}" BorderThickness="0" Background="Transparent" FontSize="14" Foreground="#111827"/>
-                    </Border>
-                </StackPanel>
+            <DataTemplate DataType="{x:Type deviceSettingsViewModels:PcSettingsViewModel}">
+                <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Height="350">
+                    <StackPanel Grid.Row="1" Margin="14,10,10,0">
+                        <TextBlock Text="Имя устройства" Foreground="#6B7280" FontSize="12" Margin="0,0,0,4"/>
+                        <Border CornerRadius="8" Background="#F3F6FA" Padding="5">
+                            <TextBox TextAlignment="Center" Text="{Binding Name}" BorderThickness="0" Background="Transparent" FontSize="14" Foreground="#111827"/>
+                        </Border>
+
+                        <!-- Производитель -->
+                        <TextBlock Text="Производитель (Vendor)" Foreground="#6B7280" FontSize="12" Margin="0,8,0,4"/>
+                        <ComboBox Style="{StaticResource ModernComboBox}"  
+                                  ItemsSource="{Binding AvailableVendors}" 
+                                  SelectedItem="{Binding SelectedVendor, Mode=TwoWay}" >
+                            <ComboBox.ItemTemplate>
+                                <DataTemplate>
+                                    <TextBlock VerticalAlignment="Center" HorizontalAlignment="Center" Text="{Binding}"/>
+                                </DataTemplate>
+                            </ComboBox.ItemTemplate>
+                        </ComboBox>
+                        
+                        <!--Модель-->
+                        <TextBlock Text="Модель устройства" Foreground="#6B7280" FontSize="12" Margin="0,8,0,4"/>
+                        <ComboBox Style="{StaticResource ModernComboBox}" 
+                              ItemsSource="{Binding FilteredModels}"  
+                              SelectedItem="{Binding SelectedModelFromCatalog, Mode=TwoWay}" >
+                            <ComboBox.ItemTemplate>
+                                <DataTemplate>
+                                    <StackPanel Orientation="Horizontal" >
+                                        <TextBlock  VerticalAlignment="Center" HorizontalAlignment="Center" Text="{Binding Model}"  Margin="0,0,0,0"/>
+
+                                        <TextBlock Foreground="#6B7280" FontSize="12" VerticalAlignment="Center">
+                                            <TextBlock.Text>
+                                                <MultiBinding StringFormat=" ({0}, {1}GB {2})">
+                                                    <Binding Path="HardwareSpecs.CpuModel"/>
+                                                    <Binding Path="HardwareSpecs.RamAmountGb"/>
+                                                    <Binding Path="HardwareSpecs.RamType"/>                         
+                                                </MultiBinding>
+                                            </TextBlock.Text>
+                                        </TextBlock>
+                                    </StackPanel>
+                                </DataTemplate>
+                            </ComboBox.ItemTemplate>
+                        </ComboBox>
+
+                        <Border Margin="0,15,0,0" Padding="10" Background="#F9FAFB" BorderBrush="#E5E7EB" BorderThickness="1" CornerRadius="8">
+                            <StackPanel>
+                                <TextBlock Text="Технические данные:" FontWeight="Bold" Foreground="#374151" Margin="0,0,0,8"/>
+
+                                <StackPanel Orientation="Horizontal" Margin="0,2">
+                                    <TextBlock Text="Процессор: " Foreground="#6B7280"/>
+                                    <TextBlock Text="{Binding HardwareSpecs.CpuModel}" Foreground="#111827" FontWeight="Medium"/>
+                                </StackPanel>
+
+                                <StackPanel Orientation="Horizontal" Margin="0,2">
+                                    <TextBlock Text="Оперативная память: " Foreground="#6B7280"/>
+                                    <TextBlock Text="{Binding HardwareSpecs.RamAmountGb, StringFormat='{}{0} ГБ '}" Foreground="#111827" FontWeight="Medium"/>
+                                    <TextBlock Text="{Binding HardwareSpecs.RamType}" Foreground="#111827" FontWeight="Medium"/>
+                                </StackPanel>
+
+                                <StackPanel Orientation="Horizontal" Margin="0,2">
+                                    <TextBlock Text="Накопитель: " Foreground="#6B7280"/>
+                                    <TextBlock Text="{Binding HardwareSpecs.StorageAmountGb, StringFormat='{}{0} ГБ '}" Foreground="#111827" FontWeight="Medium"/>
+                                    <TextBlock Text="{Binding HardwareSpecs.StorageType}" Foreground="#111827" FontWeight="Medium"/>
+                                </StackPanel>
+
+                                <StackPanel Orientation="Horizontal" Margin="0,2">
+                                    <TextBlock Text="Wi-Fi: " Foreground="#6B7280"/>
+                                    <TextBlock Foreground="#111827" FontWeight="Medium">
+                                        <TextBlock.Style>
+                                            <Style TargetType="TextBlock">
+                                                <Setter Property="Text" Value="Отсутствует"/>
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding WifiOptions.HasWiFi}" Value="True">
+                                                        <Setter Property="Text" Value="Есть"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </TextBlock.Style>
+                                    </TextBlock>
+                                </StackPanel>
+                                
+                                <!-- Список портов -->
+                                <TextBlock Text="Ethernet порты:" FontWeight="Bold" Foreground="#374151" Margin="0,8,0,4"/>
+                                <ItemsControl ItemsSource="{Binding SelectedModelFromCatalog.Ports}">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <TextBlock>
+                                                <TextBlock.Text>
+                                                    <MultiBinding StringFormat="{}{0}: {1} шт. ({2})">
+                                                        <Binding Path="Type"/>
+                                                        <Binding Path="Count"/>
+                                                        <Binding Path="Speed"/>
+                                                    </MultiBinding>
+                                                </TextBlock.Text>
+                                            </TextBlock>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+
+                                <!-- Средняя цена -->
+                                <TextBlock Text="Средняя цена:" Foreground="#6B7280" FontSize="12" Margin="0,8,0,4"/>
+                                <TextBlock Grid.Column="1" VerticalAlignment="Bottom"
+                                       Text="{Binding AveragePrice, StringFormat='{}{0:N0} ₽'}"
+                                       FontSize="16" Foreground="#059669" FontWeight="Bold"/>
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+                </ScrollViewer>
             </DataTemplate>
 
             <!-- Коммутатор -->
-            <DataTemplate DataType="{x:Type settingsModels:SwitchSettingModel}">
-                <StackPanel Grid.Row="1" Margin="14,10,10,0">
-                    <TextBlock Text="Имя устройства" Foreground="#6B7280" FontSize="12" Margin="0,0,0,4"/>
-                    <Border CornerRadius="8" Background="#F3F6FA" Padding="5" Margin="0,0,0,10">
-                        <TextBox Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}" 
-                     BorderThickness="0" Background="Transparent" FontSize="14"/>
-                    </Border>
+            <DataTemplate DataType="{x:Type deviceSettingsViewModels:SwitchSettingViewModel}">
+                <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Height="350">
+                    <StackPanel Margin="14,10,10,0">
+                        <!-- Имя устройства -->
+                        <TextBlock Text="Имя устройства" Foreground="#6B7280" FontSize="12" Margin="0,0,0,4"/>
+                        <Border CornerRadius="8" Background="#F3F6FA" Padding="5" Margin="0,0,0,10">
+                            <TextBox TextAlignment="Center" Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}" 
+                         BorderThickness="0" Background="Transparent" FontSize="14"/>
+                        </Border>
 
-                    <TextBlock Text="Производитель (Vendor)" Foreground="#6B7280" FontSize="12" Margin="0,8,0,4"/>
-                    <ComboBox Style="{StaticResource ModernComboBox}"  ItemsSource="{Binding AvailableVendors}" 
-                  SelectedItem="{Binding SelectedVendor, Mode=TwoWay}" />
-                    <TextBlock Text="Модель устройства" Foreground="#6B7280" FontSize="12" Margin="0,8,0,4"/>
-                    <ComboBox Style="{StaticResource ModernComboBox}" ItemsSource="{Binding FilteredModels}"  
-                              SelectedItem="{Binding SelectedModelFromCatalog, Mode=TwoWay}">
-                        <ComboBox.ItemTemplate>
-                            <DataTemplate>
-                                <TextBlock Text="{Binding Model}" />
-                            </DataTemplate>
-                        </ComboBox.ItemTemplate>
-                    </ComboBox>
-                    <Border Margin="0,15,0,0" Padding="10" Background="#F9FAFB" 
-                BorderBrush="#E5E7EB" BorderThickness="1" CornerRadius="8">
-                        <StackPanel>
-                            <TextBlock Text="Технические данные:" FontWeight="Bold" Foreground="#374151" Margin="0,0,0,8"/>
+                        <!-- Производитель -->
+                        <TextBlock Text="Производитель (Vendor)" Foreground="#6B7280" FontSize="12" Margin="0,8,0,4"/>
+                        <ComboBox Style="{StaticResource ModernComboBox}"  
+                                  ItemsSource="{Binding AvailableVendors}" 
+                                  SelectedItem="{Binding SelectedVendor, Mode=TwoWay}" >
+                            <ComboBox.ItemTemplate>
+                                <DataTemplate>
+                                    <TextBlock VerticalAlignment="Center" HorizontalAlignment="Center" Text="{Binding}"/>
+                                </DataTemplate>
+                            </ComboBox.ItemTemplate>
+                        </ComboBox>
 
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="Auto"/>
-                                </Grid.ColumnDefinitions>
+                        <!-- Модель -->
+                        <TextBlock Text="Модель устройства" Foreground="#6B7280" FontSize="12" Margin="0,8,0,4"/>
+                        <ComboBox Style="{StaticResource ModernComboBox}" 
+                                  ItemsSource="{Binding FilteredModels}"  
+                                  SelectedItem="{Binding SelectedModelFromCatalog, Mode=TwoWay}">
+                            <ComboBox.ItemTemplate>
+                                <DataTemplate>
+                                    <TextBlock VerticalAlignment="Center" HorizontalAlignment="Center" Text="{Binding Model}" />
+                                </DataTemplate>
+                            </ComboBox.ItemTemplate>
+                        </ComboBox>
 
-                                <StackPanel Grid.Column="0">
-                                    <TextBlock Text="{Binding TotalPorts, StringFormat='Порты RJ45: {0}'}" Foreground="#4B5563"/>
-                                    <TextBlock Text="{Binding SfpPortsCount, StringFormat='Порты SFP: {0}'}" Foreground="#4B5563"/>
+                        <!-- Технические данные -->
+                        <Border Margin="0,15,0,0" Padding="10" Background="#F9FAFB" BorderBrush="#E5E7EB" BorderThickness="1" CornerRadius="8">
+                            <StackPanel>
+                                <TextBlock Text="Технические данные:" FontWeight="Bold" Foreground="#374151" Margin="0,0,0,8"/>
+
+                                <StackPanel>
+                                    <TextBlock Text="{Binding TotalPorts, StringFormat='Общее количество портов: {0}'}" Foreground="#4B5563"/>
                                     <TextBlock Text="{Binding SupportsPoe, StringFormat='Поддержка PoE: {0}'}" Foreground="#4B5563"/>
+                                    <TextBlock Text="{Binding PoeBudgetW, StringFormat='Бюджет PoE (Вт): {0}'}" Foreground="#4B5563"/>
+                                    <TextBlock Text="{Binding ThroughputGbps, StringFormat='Пропускная способность (Gbps): {0}'}" Foreground="#4B5563"/>
+                                    <TextBlock Text="{Binding MacTableSize, StringFormat='Размер таблицы MAC: {0}'}" Foreground="#4B5563"/>
+                                    <TextBlock Text="{Binding MaxVlans, StringFormat='Максимальное количество VLAN: {0}'}" Foreground="#4B5563"/>
+                                    <TextBlock Text="{Binding IsManaged, StringFormat='Управляемый: {0}'}" Foreground="#4B5563"/>
                                 </StackPanel>
 
+                                <!-- Список портов -->
+                                <TextBlock Text="Порты:" FontWeight="Bold" Foreground="#374151" Margin="0,8,0,4"/>
+                                <ItemsControl ItemsSource="{Binding SelectedModelFromCatalog.Ports}">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <TextBlock>
+                                                <TextBlock.Text>
+                                                    <MultiBinding StringFormat="{}{0}: {1} шт.">
+                                                        <Binding Path="Type"/>
+                                                        <Binding Path="Count"/>
+                                                    </MultiBinding>
+                                                </TextBlock.Text>
+                                            </TextBlock>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
 
-                            </Grid>
-                            <TextBlock Text="Средняя цена:" Foreground="#6B7280" FontSize="12" Margin="0,8,0,4"/>
-                            <TextBlock Grid.Column="1" VerticalAlignment="Bottom"
-                                   Text="{Binding AveragePrice, StringFormat='{}{0:N0} ₽'}"
-                                   FontSize="16" Foreground="#059669" FontWeight="Bold"/>
-                        </StackPanel>
-                    </Border>
-                </StackPanel>
+                                <!-- Средняя цена -->
+                                <TextBlock Text="Средняя цена:" Foreground="#6B7280" FontSize="12" Margin="0,8,0,4"/>
+                                <TextBlock Grid.Column="1" VerticalAlignment="Bottom"
+                               Text="{Binding AveragePrice, StringFormat='{}{0:N0} ₽'}"
+                               FontSize="16" Foreground="#059669" FontWeight="Bold"/>
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+                </ScrollViewer>
             </DataTemplate>
+
+            <!-- Роутер -->
+            <DataTemplate DataType="{x:Type deviceSettingsViewModels:RouterSettingsViewModel}">
+                <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Height="350">
+                    <StackPanel Margin="14,10,10,0">
+                        <!-- Имя устройства -->
+                        <TextBlock Text="Имя устройства" Foreground="#6B7280" FontSize="12" Margin="0,0,0,4"/>
+                        <Border CornerRadius="8" Background="#F3F6FA" Padding="5" Margin="0,0,0,10">
+                            <TextBox TextAlignment="Center" Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}" 
+                                     BorderThickness="0" Background="Transparent" FontSize="14"/>
+                        </Border>
+
+                        <!-- Производитель -->
+                        <TextBlock Text="Производитель (Vendor)" Foreground="#6B7280" FontSize="12" Margin="0,8,0,4"/>
+                        <ComboBox Style="{StaticResource ModernComboBox}" 
+                                  ItemsSource="{Binding AvailableVendors}" 
+                                  SelectedItem="{Binding SelectedVendor, Mode=TwoWay}" >
+                            <ComboBox.ItemTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding}" VerticalAlignment="Center" HorizontalAlignment="Center"></TextBlock>
+                                </DataTemplate>
+                            </ComboBox.ItemTemplate>
+                        </ComboBox>
+
+                        <!-- Модель -->
+                        <TextBlock Text="Модель устройства" Foreground="#6B7280" FontSize="12" Margin="0,8,0,4"/>
+                        <ComboBox Style="{StaticResource ModernComboBox}" 
+                                  ItemsSource="{Binding FilteredModels}"  
+                                  SelectedItem="{Binding SelectedModelFromCatalog, Mode=TwoWay}">
+                            <ComboBox.ItemTemplate>
+                                <DataTemplate>
+                                    <TextBlock VerticalAlignment="Center" HorizontalAlignment="Center" Text="{Binding Model}" />
+                                </DataTemplate>
+                            </ComboBox.ItemTemplate>
+                        </ComboBox>
+
+                        <!-- Технические данные -->
+                        <Border Margin="0,15,0,0" Padding="10" Background="#F9FAFB" BorderBrush="#E5E7EB" BorderThickness="1" CornerRadius="8">
+                            <StackPanel>
+                                <TextBlock Text="Технические данные:" FontWeight="Bold" Foreground="#374151" Margin="0,0,0,8"/>
+
+                                <StackPanel>
+                                    <TextBlock Text="{Binding TotalPorts, StringFormat='Общее количество портов: {0}'}" Foreground="#4B5563"/>
+                                    <TextBlock Foreground="#4B5563">
+                                        <TextBlock.Style>
+                                            <Style TargetType="TextBlock">
+                                                <!-- По умолчанию пусто -->
+                                                <Setter Property="Text" Value=""/>
+
+                                                <Style.Triggers>
+                                                    <!-- Сначала: если модель не выбрана — пусто -->
+                                                    <DataTrigger Binding="{Binding SelectedModelFromCatalog}" Value="{x:Null}">
+                                                        <Setter Property="Text" Value=""/>
+                                                    </DataTrigger>
+
+                                                    <!-- Если модель выбрана, но Wi-Fi нет -->
+                                                    <DataTrigger Binding="{Binding WifiOptions}" Value="{x:Null}">
+                                                        <Setter Property="Text" Value="Не поддерживает Wi-Fi"/>
+                                                    </DataTrigger>
+
+                                                    <!-- Если модель выбрана и Wi-Fi есть — обычная привязка -->
+                                                    <DataTrigger Binding="{Binding WifiOptions}" Value="{x:Null}">
+                                                        <Setter Property="Text" Value="{Binding WifiOptions.HasWiFi, StringFormat='Поддержка Wi-Fi: {0}'}"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </TextBlock.Style>
+                                    </TextBlock>
+                                    <StackPanel>
+                                        <StackPanel.Style>
+                                            <Style TargetType="StackPanel">
+                                                <Setter Property="Visibility" Value="Visible"/>
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding WifiOptions}" Value="{x:Null}">
+                                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </StackPanel.Style>
+
+                                        <TextBlock Text="{Binding WifiOptions.HasWiFi, StringFormat='Поддержка Wi-Fi: {0}'}" Foreground="#4B5563"/>
+                                        <TextBlock Text="{Binding WifiOptions.WiFiStandard, StringFormat='Стандарт: {0}'}" Foreground="#4B5563"/>
+                                        <TextBlock Text="{Binding WifiOptions.MaxWirelessSpeed, StringFormat='Макс. скорость: {0} Мбит/с'}" Foreground="#4B5563"/>
+                                        <TextBlock Text="{Binding WifiOptions.AntennaCount, StringFormat='Антенн: {0}'}" Foreground="#4B5563"/>
+                                        <TextBlock Text="{Binding WifiOptions.AntennaGain, StringFormat='Усиление антенны: {0} dBi'}" Foreground="#4B5563"/>
+                                        <TextBlock Text="{Binding WifiOptions.FrequencyBands, StringFormat='Диапазоны: {0}'}" Foreground="#4B5563"/>
+                                    </StackPanel>
+                                </StackPanel>
+
+                                <!-- Список портов -->
+                                <TextBlock Text="Порты:" FontWeight="Bold" Foreground="#374151" Margin="0,8,0,4"/>
+                                <ItemsControl ItemsSource="{Binding SelectedModelFromCatalog.Ports}">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <TextBlock>
+                                                <TextBlock.Text>
+                                                    <MultiBinding StringFormat="{}{0}: {1} шт.">
+                                                        <Binding Path="Type"/>
+                                                        <Binding Path="Count"/>
+                                                    </MultiBinding>
+                                                </TextBlock.Text>
+                                            </TextBlock>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+
+                                <!-- Средняя цена -->
+                                <TextBlock Text="Средняя цена:" Foreground="#6B7280" FontSize="12" Margin="0,8,0,4"/>
+                                <TextBlock Grid.Column="1" VerticalAlignment="Bottom"
+                                           Text="{Binding AveragePrice, StringFormat='{}{0:N0} ₽'}"
+                                           FontSize="16" Foreground="#059669" FontWeight="Bold"/>
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+                </ScrollViewer>
+            </DataTemplate>
+            
         </ResourceDictionary>
     </Window.Resources>
 

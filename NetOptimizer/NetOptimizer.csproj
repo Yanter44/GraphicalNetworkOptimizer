@@ -15,7 +15,10 @@
     <None Remove="Assets\Images\add.png" />
     <None Remove="Assets\Images\commutator.png" />
     <None Remove="Assets\Images\connect.png" />
+    <None Remove="Assets\Images\connectedGroup.png" />
     <None Remove="Assets\Images\delete.png" />
+    <None Remove="Assets\Images\devices.png" />
+    <None Remove="Assets\Images\disconnectGroup.png" />
     <None Remove="Assets\Images\edit.png" />
     <None Remove="Assets\Images\error.png" />
     <None Remove="Assets\Images\file.png" />
@@ -65,6 +68,7 @@
     <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.2" />
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="10.0.2" />
     <PackageReference Include="Microsoft.Extensions.Http" Version="9.0.0" />
+    <PackageReference Include="Microsoft.Xaml.Behaviors.Wpf" Version="1.1.142" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
   </ItemGroup>
 
@@ -81,7 +85,16 @@
     <Resource Include="Assets\Images\connect.png">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Resource>
+    <Resource Include="Assets\Images\connectedGroup.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
     <Resource Include="Assets\Images\delete.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Assets\Images\devices.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Assets\Images\disconnectGroup.png">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Resource>
     <Resource Include="Assets\Images\edit.png">

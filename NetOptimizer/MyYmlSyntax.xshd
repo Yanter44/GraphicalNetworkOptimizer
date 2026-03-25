@@ -28,6 +28,7 @@
 			<Word>network</Word>
 			<Word>nodes</Word>
 			<Word>links</Word>
+			<Word>canvas</Word>
 		</Keywords>
 		
 		<Keywords color="InnerSectionKeywords">
@@ -45,6 +46,12 @@
 			<Word>src_port</Word>
 			<Word>dst</Word>
 			<Word>dst_port</Word>
+			<Word>vendor</Word>
+			<Word>sfp_count</Word>
+			<Word>poe</Word>
+			<Word>layer</Word>
+			<Word>width</Word>
+			<Word>height</Word>
 		</Keywords>
 		
 		<Rule color="Numbers">

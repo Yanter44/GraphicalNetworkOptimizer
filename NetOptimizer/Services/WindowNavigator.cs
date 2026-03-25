@@ -40,6 +40,18 @@ namespace NetOptimizer.Services
             viewModel.Message = message;
             newWindow.ShowDialog();
         }
+        public void ShowModalView<TView, TViewModel>(Action<TViewModel> initialize)
+          where TView : Window
+          where TViewModel : class
+        {
+            var viewModel = _serviceProvider.GetRequiredService<TViewModel>();
+            var newWindow = _serviceProvider.GetRequiredService<TView>();
+            newWindow.DataContext = viewModel;
+
+            initialize?.Invoke(viewModel); 
+
+            newWindow.ShowDialog();
+        }
         public void ShowModalView<TView, TViewModel>(object model) where TView : Window
                                                                    where TViewModel : class
         {

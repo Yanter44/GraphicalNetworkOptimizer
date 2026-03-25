@@ -1,6 +1,8 @@
 ﻿using NetOptimizer.Enums;
 using NetOptimizer.Interfaces;
 using NetOptimizer.Models;
+using NetOptimizer.Models.DeviceModels;
+using NetOptimizer.Models.DeviceModels.DeviceSettings;
 using NetOptimizer.ViewModels;
 using NetOptimizer.Views.DopViews;
 using System.IO;
@@ -25,7 +27,8 @@ namespace NetOptimizer.Services
         private void InitializeDictionaryKeywords()
         {
             dictionaryKeywords.Add(KeywordsStructureType.NetworkSection, new List<string>() { "name" });
-            dictionaryKeywords.Add(KeywordsStructureType.NodesSection, new List<string>() { "id", "type", "model", "ip", "port_type", "port_count" });
+            dictionaryKeywords.Add(KeywordsStructureType.NodesSection, new List<string>(){ "id", "type", "model", "vendor", "port_count", "sfp_count", "poe", "layer", "x", "y"});
+            dictionaryKeywords.Add(KeywordsStructureType.CanvasSection, new List<string>() { "width", "height" });
             dictionaryKeywords.Add(KeywordsStructureType.LinksSection, new List<string>() { "src", "src_port", "dst", "dst_port" });
         }
         public async Task<NetworkMap> CheckConfigAsync(string configText)
@@ -93,6 +96,7 @@ namespace NetOptimizer.Services
                 "network" => KeywordsStructureType.NetworkSection,
                 "nodes" => KeywordsStructureType.NodesSection,
                 "links" => KeywordsStructureType.LinksSection,
+                "canvas" => KeywordsStructureType.CanvasSection,
                 _ => (KeywordsStructureType?)null
             };
 
@@ -108,20 +112,31 @@ namespace NetOptimizer.Services
                     }
                 }
             }
-
+            if(section == "canvas")
+            {
+                string height = buffer.GetValueOrDefault("height", "500");
+                string width = buffer.GetValueOrDefault("width", "500");
+                ResultMap.CanvasSettings = new CanvasSettings(int.Parse(height), int.Parse(height));
+            }
             if (section == "nodes")
             {
                 string id = buffer.GetValueOrDefault("id", "Unknown");
                 string typeStr = buffer.GetValueOrDefault("type", "pc").ToLower();
                 string devicemodel = buffer.GetValueOrDefault("model", "UnknowModel").ToLower();
+                string vendor = buffer.GetValueOrDefault("vendor", "Generic");
                 int ports = int.TryParse(buffer.GetValueOrDefault("port_count", "1"), out var p) ? p : 1;
 
                 Device device = typeStr switch
                 {
-                    "router" => new RouterDevice(id, ports),
-                    "switch" => new SwitchDevice(id, ports),
-                    //"server" => new ServerDevice(id, ports),
-                    "pc" => new PcDevice(id)
+                    "switch" => new SwitchDevice(id, new SwitchSettings
+                    {
+                        Model = devicemodel,
+                        Vendor = vendor,
+                        TotalPorts = int.TryParse(buffer.GetValueOrDefault("port_count", "1"), out var tp) ? tp : 1,
+                        SupportsPoe = buffer.GetValueOrDefault("poe", "false").ToLower() == "true",
+                        DeviceLayer = Enum.TryParse<DeviceLayer>(buffer.GetValueOrDefault("layer", "L2"), out var l) ? l : DeviceLayer.L2
+                    }),
+                    _ => null
                 };
                 device.DeviceModel = devicemodel;
                 ResultMap.Devices.Add(device);
@@ -206,7 +221,6 @@ namespace NetOptimizer.Services
                 return "произошла ошибка";
             }
         }
-
 
         public async Task<bool> CreateYamlFile(string path, string fileName, string yamltext)
         {

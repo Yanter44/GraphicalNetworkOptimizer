@@ -6,6 +6,7 @@
         xmlns:avalonEdit="http://icsharpcode.net/sharpdevelop/avalonedit"
         xmlns:conv="clr-namespace:NetOptimizer.Convertors"
         xmlns:local="clr-namespace:NetOptimizer"
+        xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
         xmlns:behaviors="clr-namespace:NetOptimizer.Behaviors"
         mc:Ignorable="d"
         Icon="/Assets/Icons/gnologo.ico"
@@ -15,6 +16,8 @@
     <Window.Resources>
         <ResourceDictionary>
             <conv:DeviceTypeToIconConverter x:Key="DeviceTypeToIconConverter"/>
+            <conv:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
+       
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="/Views/ResourcesDictionary/MainWindowResources.xaml"/>
             </ResourceDictionary.MergedDictionaries>
@@ -47,7 +50,7 @@
 
         <Grid>
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="220" MinWidth="220" MaxWidth="450"/>
+                <ColumnDefinition Width="240" MinWidth="240" MaxWidth="450"/>
                 <ColumnDefinition Width="4"/>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="4"/>
@@ -104,6 +107,7 @@
                                     <RowDefinition Height="Auto" />
                                     <RowDefinition Height="Auto" />
                                     <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
                                     <RowDefinition Height="*" />
                                 </Grid.RowDefinitions>
 
@@ -128,53 +132,44 @@
                                             </DataTemplate>
                                         </ItemsControl.ItemTemplate>
                                     </ItemsControl>
-
                                     <Separator Margin="10,15,10,0" Background="#EEE"/>
                                 </StackPanel>
 
                                 <StackPanel Grid.Row="2" Margin="0,0,0,15">
+                                    <TextBlock Text="Группы:" FontWeight="SemiBold" Margin="0,0,0,10" Foreground="#333"/>
+
+                                    <Border BorderBrush="#CECECE" BorderThickness="1" CornerRadius="8" Padding="10" Background="White">
+                                        <Grid MaxHeight="120">
+                                            <ScrollViewer VerticalScrollBarVisibility="Auto" Margin="0,0,0,5">
+                                                <ItemsControl ItemsSource="{Binding editorViewModel.DeviceGroups}"
+                                                              ItemTemplate="{StaticResource DeviceGroupItemTemplate}"/>
+                                            </ScrollViewer>
+                                            <Button Command="{Binding editorViewModel.OpenAddGroupWindowCommand}"
+                                                    HorizontalAlignment="Right" VerticalAlignment="Bottom"
+                                                    Width="24" Height="24" Cursor="Hand" Margin="0,0,0,0">
+                                                <Button.Template>
+                                                    <ControlTemplate TargetType="Button">
+                                                        <Grid>
+                                                            <Ellipse Fill="#6DB0FA"/>
+                                                            <TextBlock Text="+" Foreground="White" FontWeight="Bold" 
+                                                                       HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,0,0,2"/>
+                                                        </Grid>
+                                                    </ControlTemplate>
+                                                </Button.Template>
+                                            </Button>
+                                        </Grid>
+                                    </Border>
+                                </StackPanel>
+
+                                <StackPanel Grid.Row="3" Margin="0,0,0,15">
                                     <TextBlock Text="Устройства:" FontWeight="SemiBold" Margin="0,0,0,10" Foreground="#333"/>
-
-                                    <ItemsControl ItemsSource="{Binding editorViewModel.AvailableDevices}">
-                                        <ItemsControl.ItemTemplate>
-                                            <DataTemplate>
-                                                <Grid Margin="0,5">
-                                                    <Grid.ColumnDefinitions>
-                                                        <ColumnDefinition Width="25"/>
-                                                        <ColumnDefinition Width="90"/>
-                                                        <ColumnDefinition Width="*"/>
-                                                        <ColumnDefinition Width="25"/>
-                                                    </Grid.ColumnDefinitions>
-
-                                                    <Image Source="{Binding Type, Converter={StaticResource DeviceTypeToIconConverter}}" 
-                                                           Width="18" Height="18" HorizontalAlignment="Left"/>
-
-                                                    <TextBlock Foreground="Black" Grid.Column="1" 
-                                                               Text="{Binding DeviceName}" VerticalAlignment="Center"/>
-
-                                                    <Slider Grid.Column="2" 
-                                                            Minimum="0" 
-                                                            Maximum="{Binding MaxCount}" 
-                                                            Value="{Binding Count, Mode=TwoWay}"
-                                                            TickFrequency="1" 
-                                                            IsSnapToTickEnabled="True"
-                                                            VerticalAlignment="Center"/>
-
-                                                    <TextBlock Grid.Column="3" 
-                                                               Text="{Binding Count}" 
-                                                               VerticalAlignment="Center" 
-                                                               HorizontalAlignment="Right" 
-                                                               FontWeight="Bold" 
-                                                               Foreground="#4A89F3"/>
-                                                </Grid>
-                                            </DataTemplate>
-                                        </ItemsControl.ItemTemplate>
-                                    </ItemsControl>
-
+                                    <ItemsControl ItemsSource="{Binding editorViewModel.AvailableDevices}"
+                                                  ItemTemplateSelector="{StaticResource DeviceTemplateSelector}"/>
+                                    
                                     <Separator Margin="10,15,10,0" Background="#EEE"/>
                                 </StackPanel>
 
-                                <StackPanel Grid.Row="3">
+                                <StackPanel Grid.Row="4">
                                     <TextBlock Text="Бюджет:" FontWeight="SemiBold" Margin="0,0,0,10" Foreground="#333"/>
                                     <Grid Margin="0,5">
                                         <Grid.ColumnDefinitions>
@@ -185,17 +180,17 @@
                                         </Grid.ColumnDefinitions>
                                         <Image Source="/Assets/Images/rubl.png" Width="18" Height="18" HorizontalAlignment="Left"/>
                                         <TextBlock Foreground="Black" Grid.Column="1" Text="Лимит (тыс.)" VerticalAlignment="Center"/>
-                                        <Slider x:Name="SliderBudget" Grid.Column="2" Minimum="10" Maximum="500" TickFrequency="10" IsSnapToTickEnabled="True"/>
+                                        <Slider x:Name="SliderBudget" Value="{Binding editorViewModel.Budget, Mode=TwoWay}" Grid.Column="2" Minimum="0" Maximum="999" TickFrequency="10" IsSnapToTickEnabled="True"/>
                                         <StackPanel Grid.Column="3" Orientation="Horizontal" HorizontalAlignment="Right">
                                             <TextBlock Text="{Binding ElementName=SliderBudget, Path=Value}" VerticalAlignment="Center" FontWeight="Bold" Foreground="#4A89F3"/>
                                         </StackPanel>
                                     </Grid>
                                 </StackPanel>
 
-                                <StackPanel Grid.Row="4" VerticalAlignment="Bottom" >
-                                    <Button Content="Создать" Height="30" Width="150" Foreground="White" FontWeight="SemiBold" Cursor="Hand">
+                                <StackPanel Grid.Row="5" VerticalAlignment="Bottom" >
+                                    <Button Content="Создать" Command="{Binding editorViewModel.CreateNetworkByUserPropertiesCommand}"  Height="30" Width="150" Foreground="White" FontWeight="SemiBold" Cursor="Hand">
                                         <Button.Template>
-                                            <ControlTemplate TargetType="Button">
+                                            <ControlTemplate TargetType="{x:Type Button}">
                                                 <Border x:Name="border" Background="#4A89F3" CornerRadius="10">
                                                     <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                                 </Border>
@@ -231,9 +226,9 @@
                             </Grid.RowDefinitions>
 
                             <TextBlock Grid.Row="0"
-                                       Text="DEVICES"
+                                       Text="Доступные устройства"
                                        HorizontalAlignment="Center"
-                                       Margin="10,10,0,0"
+                                       Margin="0,10,0,0"
                                        FontWeight="Bold"
                                        Foreground="#888"
                                        FontSize="10"/>
@@ -284,9 +279,9 @@
                                           HorizontalScrollBarVisibility="Disabled"  
                                           VerticalScrollBarVisibility="Auto">
                                 <StackPanel>
-                                    <TextBlock Text="Created Devices"
+                                    <TextBlock Text="Добавленные устройства"
                                                HorizontalAlignment="Center"
-                                               Margin="10,10,0,0"
+                                               Margin="0,10,0,0"
                                                FontWeight="Bold"
                                                Foreground="#888"
                                                FontSize="10"/>
@@ -295,7 +290,7 @@
                                              SelectedItem="{Binding SelectedDevice}"
                                              Background="Transparent"
                                              BorderThickness="0"
-                                             HorizontalContentAlignment="Stretch">
+                                             HorizontalContentAlignment="Stretch" Margin="0,5,0,0">
                                         <ListBox.ItemContainerStyle>
                                             <Style TargetType="ListBoxItem">
                                                 <Setter Property="Template">
@@ -338,7 +333,6 @@
                                                                     <Image Source="/Assets/Images/reconnect.png"/>
                                                                 </MenuItem.Icon>
                                                             </MenuItem>
-
                                                             <Separator />
 
                                                             <MenuItem Header="Удалить" Foreground="Red"
@@ -360,7 +354,7 @@
                                            Source="{Binding LogicDevice.Type, Converter={StaticResource DeviceTypeToIconConverter}}" />
                                                         <StackPanel VerticalAlignment="Center">
                                                             <Label Content="{Binding DeviceName}" Foreground="Black" FontSize="14" Padding="0"/>
-                                                            <TextBlock Text="{Binding DeviceModel}" Foreground="Gray" FontSize="10" Margin="5,0,0,0"/>
+                                                            <TextBlock  Text="{Binding DeviceModel}" Foreground="Gray" FontSize="10" Margin="5,0,0,0"/>
                                                         </StackPanel>
                                                     </StackPanel>
                                                 </Border>
@@ -378,13 +372,12 @@
                           Background="#F0F0F0" ShowsPreview="True" Cursor="SizeWE"/>
 
             <Grid Grid.Column="2" Background="#DFE3E6" ClipToBounds="True">
-                <Canvas x:Name="MainCanvas" Width="3000" Height="3000" 
-                        MouseWheel="MainCanvas_MouseWheel" MouseDown="MainCanvas_MouseDown" 
-                        MouseUp="MainCanvas_MouseUp" MouseMove="MainCanvas_MouseMove" 
-                        Margin="-288,-247,-36,-247">
-
-                    <Rectangle x:Name="SelectionBox" Stroke="DodgerBlue" StrokeThickness="1" 
-                               Fill="#331E90FF" Visibility="Collapsed" IsHitTestVisible="False"/>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="39*"/>
+                    <RowDefinition Height="554*"/>
+                </Grid.RowDefinitions>
+                <Canvas x:Name="MainCanvas" DataContext="{Binding CanvasVM}" Width="{Binding CanvasWidth}"
+                        Height="{Binding CanvasHeight}" Grid.RowSpan="2">
 
                     <Canvas.Background>
                         <VisualBrush TileMode="Tile" Viewport="0,0,40,40" ViewportUnits="Absolute">
@@ -397,15 +390,80 @@
                         </VisualBrush>
                     </Canvas.Background>
 
+                    <i:Interaction.Behaviors>
+                        <behaviors:CanvasInteractionBehavior/>
+                    </i:Interaction.Behaviors>
+
                     <Canvas.RenderTransform>
                         <TransformGroup>
-                            <ScaleTransform x:Name="CanvasScale" ScaleX="1" ScaleY="1" />
-                            <TranslateTransform x:Name="CanvasTranslate" X="0" Y="0" />
+                            <ScaleTransform ScaleX="{Binding CanvasScale}"
+                                            ScaleY="{Binding CanvasScale}"/>
+
+                            <TranslateTransform X="{Binding CanvasOffset.X}" Y="{Binding CanvasOffset.Y}"/>
                         </TransformGroup>
                     </Canvas.RenderTransform>
+                    <Polyline x:Name="TempLine" Stroke="Gray"  StrokeThickness="2" Visibility="Collapsed"/>
+                    <ItemsControl ItemsSource="{Binding DevicesOnCanvas}" DataContext="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=DataContext}">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <Canvas />
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+
+                        <ItemsControl.ItemContainerStyle>
+                            <Style TargetType="ContentPresenter">
+                                <Setter Property="Canvas.Left" Value="{Binding X}" />
+                                <Setter Property="Canvas.Top" Value="{Binding Y}" />
+                            </Style>
+                        </ItemsControl.ItemContainerStyle>
+
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Grid Width="64">
+                                    <Border  x:Name="SelectionBorder" Background="#4087CEFA" CornerRadius="4"
+                                             Visibility="{Binding IsSelected, Converter={StaticResource BoolToVisibilityConverter}}"
+                                             IsHitTestVisible="False"/>
+
+                                    <StackPanel Cursor="Hand" Background="Transparent">
+
+                                        <i:Interaction.Behaviors>
+                                            <behaviors:DeviceDragBehavior/>
+                                        </i:Interaction.Behaviors>
+
+                                        <Image Width="48" Height="48" Source="{Binding ImageSource}" />
+
+                                        <TextBlock Text="{Binding DeviceName}" HorizontalAlignment="Center" FontSize="10"/>
+
+                                    </StackPanel>
+                                </Grid>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+
+                    <ItemsControl ItemsSource="{Binding DataContext.Connections, RelativeSource={RelativeSource AncestorType=Window}}">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <Canvas />
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Polyline Stroke="Gray" StrokeThickness="2" Points="{Binding Points}" />
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                    <Rectangle Stroke="DodgerBlue"
+                               StrokeThickness="1"
+                               Fill="#331E90FF"    
+                               Width="{Binding SelectionRect.Width}"
+                               Height="{Binding SelectionRect.Height}"
+                               Canvas.Left="{Binding SelectionRect.X}"
+                               Canvas.Top="{Binding SelectionRect.Y}"
+                               IsHitTestVisible="False"/>
                 </Canvas>
 
-                <StackPanel VerticalAlignment="Bottom" HorizontalAlignment="Right" Margin="10" IsHitTestVisible="False">
+
+                <StackPanel VerticalAlignment="Bottom" HorizontalAlignment="Right" Margin="0,0,10,10" IsHitTestVisible="False" Grid.Row="1">
                     <TextBlock Text="Движение: Средняя кнопка мыши" Foreground="#99000000" FontSize="10"/>
                     <TextBlock Text="Зум: Колесо мыши" Foreground="#99000000" FontSize="10"/>
                     <TextBlock Text="Выделение: Левая кнопка мыши" Foreground="#99000000" FontSize="10"/>

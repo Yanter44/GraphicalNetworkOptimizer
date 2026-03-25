@@ -4,12 +4,13 @@ using NetOptimizer.Enums;
 using NetOptimizer.Interfaces;
 using NetOptimizer.Services;
 using NetOptimizer.ViewModels;
+using NetOptimizer.ViewModels.AddNewGroupWindoww;
+using NetOptimizer.ViewModels.ConnectToGroupWindoww;
+using NetOptimizer.ViewModels.MainWindow;
+using NetOptimizer.ViewModels.MainWindoww;
 using NetOptimizer.Views;
 using NetOptimizer.Views.DopViews;
 using NetOptimizer.Views.MainWindow;
-using System.Configuration;
-using System.Data;
-using System.Diagnostics;
 using System.Windows;
 namespace NetOptimizer
 {
@@ -35,12 +36,17 @@ namespace NetOptimizer
                  services.AddTransient<CreateDeviceWindow>();
                  services.AddTransient<ErrorWindow>();
                  services.AddTransient<InfoWindow>();
+                 services.AddTransient<AddNewGroupWindow>();
+                 services.AddTransient<ConnectToGroupWindow>();
 
-
+                 services.AddTransient<AddNewGroupWindowViewModel>();
+                 services.AddTransient<ConnectToGroupWindowViewModel>();
+                 services.AddTransient<EditorViewModel>();
+                 services.AddTransient<SandboxViewModel>();
+                 services.AddTransient<CanvasViewModel>();
                  services.AddTransient<MainWindowViewModel>();
                  services.AddTransient<ErrorWindowViewModel>();
                  services.AddTransient<InfoWindowViewModel>();
-
              }).Build();
         }
         protected override async void OnStartup(StartupEventArgs e)

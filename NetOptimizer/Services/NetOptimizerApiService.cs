@@ -13,7 +13,17 @@ namespace NetOptimizer.Services
         {
             _httpClientFactory = httpClientFactory;
         }
-
+        public async Task<List<RouterResponceDto>> GetAllRoutersAsync()
+        {
+            var client = _httpClientFactory.CreateClient(ApiServers.NetOptimizerApi.ToString());
+            var response = await client.GetAsync("/Inventory/GetAllRouters");
+            if (response.IsSuccessStatusCode)
+            {
+                var json = await response.Content.ReadAsStringAsync();
+                return JsonConvert.DeserializeObject<List<RouterResponceDto>>(json);
+            }
+            return new List<RouterResponceDto>();
+        }
         public async Task<List<CommutatorResponceDto>> GetAllSwitchesAsync()
         {
             var client = _httpClientFactory.CreateClient(ApiServers.NetOptimizerApi.ToString());
@@ -26,6 +36,17 @@ namespace NetOptimizer.Services
             }
 
             return new List<CommutatorResponceDto>();
+        }
+        public async Task<List<PcResponceDto>> GetAllPcsAsync()
+        {
+            var client = _httpClientFactory.CreateClient(ApiServers.NetOptimizerApi.ToString());
+            var response = await client.GetAsync("/Inventory/GetAllPcs");
+            if (response.IsSuccessStatusCode)
+            {
+                var json = await response.Content.ReadAsStringAsync();
+                return JsonConvert.DeserializeObject<List<PcResponceDto>>(json);
+            }
+            return new List<PcResponceDto>();
         }
     }
 }

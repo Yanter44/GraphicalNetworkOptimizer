@@ -1,4 +1,4 @@
-﻿using NetOptimizer.Models.AddDeviceSettingsModels;
+﻿using NetOptimizer.Models.DeviceModels.DeviceSettings;
 using NetOptimizer.Models.Dtos;
 
 namespace NetOptimizer.Services
