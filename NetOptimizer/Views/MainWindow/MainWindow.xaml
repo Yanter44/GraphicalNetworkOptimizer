@@ -17,7 +17,8 @@
         <ResourceDictionary>
             <conv:DeviceTypeToIconConverter x:Key="DeviceTypeToIconConverter"/>
             <conv:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
-       
+            <conv:ToolTypeToShapeConverter x:Key="ToolTypeToShapeConverter"/>
+            <conv:CanvasCursorIsDrawingConverter x:Key="CanvasCursorIsDrawingConverter"/>
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="/Views/ResourcesDictionary/MainWindowResources.xaml"/>
             </ResourceDictionary.MergedDictionaries>
@@ -100,7 +101,7 @@
                             </StackPanel>
                         </TabItem.Header>
 
-                        <ScrollViewer VerticalScrollBarVisibility="Auto" Margin="0,0,0,40">
+                        <ScrollViewer behaviors:ScrollBarWheelDirectionBehavior.OrientationScroll="Vertical"  Margin="0,0,0,40">
                             <Grid Margin="5">
                                 <Grid.RowDefinitions>
                                     <RowDefinition Height="Auto" />
@@ -140,7 +141,7 @@
 
                                     <Border BorderBrush="#CECECE" BorderThickness="1" CornerRadius="8" Padding="10" Background="White">
                                         <Grid MaxHeight="120">
-                                            <ScrollViewer VerticalScrollBarVisibility="Auto" Margin="0,0,0,5">
+                                            <ScrollViewer behaviors:ScrollBarWheelDirectionBehavior.OrientationScroll="Vertical" Margin="0,0,0,5">
                                                 <ItemsControl ItemsSource="{Binding editorViewModel.DeviceGroups}"
                                                               ItemTemplate="{StaticResource DeviceGroupItemTemplate}"/>
                                             </ScrollViewer>
@@ -150,7 +151,7 @@
                                                 <Button.Template>
                                                     <ControlTemplate TargetType="Button">
                                                         <Grid>
-                                                            <Ellipse Fill="#6DB0FA"/>
+                                                            <Ellipse Fill="#2D6EE7"/>
                                                             <TextBlock Text="+" Foreground="White" FontWeight="Bold" 
                                                                        HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,0,0,2"/>
                                                         </Grid>
@@ -211,6 +212,7 @@
                             </Grid>
                         </ScrollViewer>
                     </TabItem>
+                    
                     <TabItem Style="{StaticResource ModernTabItemStyle}">
                         <TabItem.Header>
                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
@@ -218,8 +220,11 @@
                                 <TextBlock Text="Песочница" VerticalAlignment="Center"/>
                             </StackPanel>
                         </TabItem.Header>
+                        
                         <Grid>
                             <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
                                 <RowDefinition Height="Auto"/>
                                 <RowDefinition Height="Auto"/>
                                 <RowDefinition Height="*"/>
@@ -274,8 +279,59 @@
                                 </ItemsControl>
                             </ScrollViewer>
 
+                            <TextBlock Grid.Row="2"
+                                       Text="Библиотека элементов"
+                                       HorizontalAlignment="Center"
+                                       Margin="0,10,0,0"
+                                       FontWeight="Bold"
+                                       Foreground="#888"
+                                       FontSize="10"/>
+                            <ScrollViewer behaviors:ScrollBarWheelDirectionBehavior.OrientationScroll="Horizontal" Grid.Row="3"
+                                          HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled"  Margin="10,5">
+                                <ItemsControl ItemsSource="{Binding sandboxViewModel.AvailableTools}">
+                                    <ItemsControl.ItemsPanel>
+                                        <ItemsPanelTemplate>
+                                            <StackPanel Orientation="Horizontal" Margin="5"/>
+                                        </ItemsPanelTemplate>
+                                    </ItemsControl.ItemsPanel>
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <StackPanel Orientation="Vertical" Margin="0,0,12,0" Cursor="Hand">
+                                                <Border x:Name="iconBorder" Background="White" BorderThickness="1" 
+                                                        BorderBrush="#EDEDED" Width="45" Height="45" CornerRadius="10">
+                                                    <Border.InputBindings>
+                                                        <MouseBinding MouseAction="LeftClick"
+                                                                      Command="{Binding DataContext.sandboxViewModel.PrepareForDrawSelectedUIElementCommand, 
+                                                                                RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                                                       CommandParameter="{Binding}"/>
+                                                    </Border.InputBindings>
+                                                    <ContentControl Content="{Binding Type, Converter={StaticResource ToolTypeToShapeConverter}}"/>
+                                                    <Border.Style>
+                                                        <Style TargetType="Border">
+                                                            <Style.Triggers>
+                                                                <Trigger Property="IsMouseOver" Value="True">
+                                                                    <Setter Property="Background" Value="#DEDEDE"/>
+                                                                </Trigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </Border.Style>
+                                                </Border>
+                                                <TextBlock Text="{Binding ToolName}"
+                                                           HorizontalAlignment="Center"
+                                                           FontSize="10"
+                                                           Foreground="#555"
+                                                           Margin="0,4,0,0"/>
+                                            </StackPanel>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </ScrollViewer>
+
+                         
+
+
                             <ScrollViewer behaviors:ScrollBarWheelDirectionBehavior.OrientationScroll="Vertical"
-                                          Grid.Row="2" Margin="0,0,0,35"
+                                          Grid.Row="4" Margin="0,0,0,35"
                                           HorizontalScrollBarVisibility="Disabled"  
                                           VerticalScrollBarVisibility="Auto">
                                 <StackPanel>
@@ -319,16 +375,16 @@
                                                     <Border.ContextMenu>
                                                         <ContextMenu>
                                                             <MenuItem Header="Подключиться"
-                                                  Command="{Binding PlacementTarget.Tag.ConnectCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
-                                                  CommandParameter="{Binding}">
+                                                                      Command="{Binding PlacementTarget.Tag.ConnectCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
+                                                                      CommandParameter="{Binding}">
                                                                 <MenuItem.Icon>
                                                                     <Image Source="/Assets/Images/connect.png"/>
                                                                 </MenuItem.Icon>
                                                             </MenuItem>
 
                                                             <MenuItem Header="Изменить"
-                                                  Command="{Binding PlacementTarget.Tag.OpenUpdateDeviceWindowCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
-                                                  CommandParameter="{Binding}">
+                                                                      Command="{Binding PlacementTarget.Tag.OpenUpdateDeviceWindowCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
+                                                                      CommandParameter="{Binding}">
                                                                 <MenuItem.Icon>
                                                                     <Image Source="/Assets/Images/reconnect.png"/>
                                                                 </MenuItem.Icon>
@@ -336,8 +392,8 @@
                                                             <Separator />
 
                                                             <MenuItem Header="Удалить" Foreground="Red"
-                                                  Command="{Binding PlacementTarget.Tag.RemoveDeviceCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
-                                                  CommandParameter="{Binding}">
+                                                                      Command="{Binding PlacementTarget.Tag.RemoveDeviceCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
+                                                                      CommandParameter="{Binding}">
                                                                 <MenuItem.Icon>
                                                                     <Image Source="/Assets/Images/delete.png"/>
                                                                 </MenuItem.Icon>
@@ -351,7 +407,7 @@
 
                                                     <StackPanel Orientation="Horizontal">
                                                         <Image Width="30" Height="30" Margin="10"
-                                           Source="{Binding LogicDevice.Type, Converter={StaticResource DeviceTypeToIconConverter}}" />
+                                                               Source="{Binding LogicDevice.Type, Converter={StaticResource DeviceTypeToIconConverter}}" />
                                                         <StackPanel VerticalAlignment="Center">
                                                             <Label Content="{Binding DeviceName}" Foreground="Black" FontSize="14" Padding="0"/>
                                                             <TextBlock  Text="{Binding DeviceModel}" Foreground="Gray" FontSize="10" Margin="5,0,0,0"/>
@@ -362,8 +418,10 @@
                                         </ListBox.ItemTemplate>
                                     </ListBox>
                                 </StackPanel>
+
                             </ScrollViewer>
                         </Grid>
+                        
                     </TabItem>
                 </TabControl>
             </Grid>
@@ -376,7 +434,7 @@
                     <RowDefinition Height="39*"/>
                     <RowDefinition Height="554*"/>
                 </Grid.RowDefinitions>
-                <Canvas x:Name="MainCanvas" DataContext="{Binding CanvasVM}" Width="{Binding CanvasWidth}"
+                <Canvas x:Name="MainCanvas" Cursor="{Binding IsDrawing, Converter={StaticResource CanvasCursorIsDrawingConverter}}" DataContext="{Binding CanvasVM}" Width="{Binding CanvasWidth}"
                         Height="{Binding CanvasHeight}" Grid.RowSpan="2">
 
                     <Canvas.Background>
@@ -402,7 +460,7 @@
                             <TranslateTransform X="{Binding CanvasOffset.X}" Y="{Binding CanvasOffset.Y}"/>
                         </TransformGroup>
                     </Canvas.RenderTransform>
-                    <Polyline x:Name="TempLine" Stroke="Gray"  StrokeThickness="2" Visibility="Collapsed"/>
+                    <Polyline x:Name="TempLine" StrokeDashArray="4 2" Stroke="Gray" StrokeThickness="2" Visibility="Collapsed"/>
                     <ItemsControl ItemsSource="{Binding DevicesOnCanvas}" DataContext="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=DataContext}">
                         <ItemsControl.ItemsPanel>
                             <ItemsPanelTemplate>
@@ -439,7 +497,8 @@
                             </DataTemplate>
                         </ItemsControl.ItemTemplate>
                     </ItemsControl>
-
+ 
+                    <!--Линии подключения-->
                     <ItemsControl ItemsSource="{Binding DataContext.Connections, RelativeSource={RelativeSource AncestorType=Window}}">
                         <ItemsControl.ItemsPanel>
                             <ItemsPanelTemplate>
@@ -448,10 +507,12 @@
                         </ItemsControl.ItemsPanel>
                         <ItemsControl.ItemTemplate>
                             <DataTemplate>
-                                <Polyline Stroke="Gray" StrokeThickness="2" Points="{Binding Points}" />
+                                <Polyline Stroke="Gray" StrokeDashArray="4 2" StrokeThickness="2" Points="{Binding Points}" />
                             </DataTemplate>
                         </ItemsControl.ItemTemplate>
                     </ItemsControl>
+                    <!--UI Элементы пользователя-->
+                    <!--<ItemsControl ItemsSource="{Binding DataContext.}"-->
                     <Rectangle Stroke="DodgerBlue"
                                StrokeThickness="1"
                                Fill="#331E90FF"    

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Windows.Shapes;
 
-namespace NetOptimizer.Models
+namespace NetOptimizer.Models.UIElements
 {
     public class VisualLink
     {

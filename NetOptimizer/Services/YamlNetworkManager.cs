@@ -3,6 +3,7 @@ using NetOptimizer.Interfaces;
 using NetOptimizer.Models;
 using NetOptimizer.Models.DeviceModels;
 using NetOptimizer.Models.DeviceModels.DeviceSettings;
+using NetOptimizer.Models.UIElements;
 using NetOptimizer.ViewModels;
 using NetOptimizer.Views.DopViews;
 using System.IO;

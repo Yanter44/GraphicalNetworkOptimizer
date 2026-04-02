@@ -1,4 +1,5 @@
-﻿using NetOptimizer.Models;
+﻿using NetOptimizer.Models.Dtos;
+using NetOptimizer.Models.UIElements;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -21,7 +22,9 @@ namespace NetOptimizer.ViewModels.MainWindoww
         private double _canvasHeight;
         public double CanvasWidth { get => _canvasWidth; set { _canvasWidth = value; OnPropertyChanged(); } }
         public double CanvasHeight { get => _canvasHeight; set { _canvasHeight = value; OnPropertyChanged(); } }
+        public ObservableCollection<DeviceConnection> Connections { get; } = new ObservableCollection<DeviceConnection>();
         public ObservableCollection<DeviceOnCanvas> Devices { get; set; }  = new ObservableCollection<DeviceOnCanvas>();
+        public ObservableCollection<UIElementBase> UIObjects { get; set; } = new();
         public Point CanvasOffset
         {
             get => _canvasOffset;
@@ -43,9 +46,24 @@ namespace NetOptimizer.ViewModels.MainWindoww
         public bool IsSelecting
         {
             get => _isSelecting;
-            set { _isSelecting = value; OnPropertyChanged(); }
+            set { _isSelecting = value; OnPropertyChanged();  }
         }
-
+        private UIToolElementToAddDto _currentTool;
+        public UIToolElementToAddDto CurrentTool
+        {
+            get => _currentTool;
+            set
+            {
+                _currentTool = value;
+                OnPropertyChanged();
+            }
+        }
+        private bool _isDrawing;
+        public bool IsDrawing { get => _isDrawing; set { _isDrawing = value; OnPropertyChanged(); } }
+        public void SetCurrentTool(UIToolElementToAddDto tool)
+        {
+            CurrentTool = tool;
+        }
         public void Zoom(double delta)
         {
             double zoomSpeed = 0.1;
@@ -81,7 +99,6 @@ namespace NetOptimizer.ViewModels.MainWindoww
             foreach (var device in Devices)
             {
                 Rect deviceRect = new Rect(device.X, device.Y, 64, 64);
-
                 device.IsSelected = SelectionRect.IntersectsWith(deviceRect);
             }
         }

@@ -31,14 +31,16 @@ namespace NetOptimizer.ViewModels.MainWindow
         public ICommand OpenAddGroupWindowCommand { get; }
         public ICommand RemoveDeviceGroupCommand { get; }
         public ICommand OpenConnectGroupWindowCommand { get; }
+        public ICommand DisconnectFromGroupCommand { get; }
         public EditorViewModel(IWindowNavigator windowNavigator, DeviceCatalogService catalogService)
         {
-            _windowNavigator = windowNavigator;
+            _windowNavigator = windowNavigator; 
             _catalogService = catalogService;          
             CreateNetworkByUserPropertiesCommand = new AsyncRelayCommand(CreateNetworkByUserProperties);
             OpenAddGroupWindowCommand = new RelayCommand(OpenAddGroupWindow);
             RemoveDeviceGroupCommand = new RelayCommand(obj => RemoveDeviceGroup(obj));
             OpenConnectGroupWindowCommand = new RelayCommand(obj => OpenConnectGroupWindow(obj));
+            DisconnectFromGroupCommand = new RelayCommand(obj => DisconnectFromGroup(obj));
         }
         private void RemoveDeviceGroup(object obj)
         {
@@ -47,21 +49,43 @@ namespace NetOptimizer.ViewModels.MainWindow
                 DeviceGroups.Remove(group);
             }
         }
+        private void DisconnectFromGroup(object obj)
+        {
+            if (obj is DeviceAllocation deviceAllocationDto)
+            {
+                var existGroup = DeviceGroups.Where(x => x.Id == deviceAllocationDto.Group.Id).FirstOrDefault();
+                if(existGroup != null)
+                {
+                    deviceAllocationDto.Device.Allocations.Remove(deviceAllocationDto);
+                    existGroup.GroupAllocations.Remove(deviceAllocationDto);
+                }
+            }
+        }
         private void OpenConnectGroupWindow(object obj)
         {
-            if (obj is AvailableDevicesForEditorDto)
+            if (obj is AvailableDevicesForEditorDto deviceDto)
             {
                 _windowNavigator.ShowModalView<ConnectToGroupWindow, ConnectToGroupWindowViewModel>(vm =>
                 {
                     vm.DeviceGroups = this.DeviceGroups;
-                    vm.TriedConnectDevice = (AvailableDevicesForEditorDto)obj;
+                    vm.TriedConnectDevice = deviceDto;
                     vm.DeviceConnected += (result) =>
                     {
                         var (group, device) = result;
-                        if (!group.GroupDevices.Contains(device))
+
+                        var existing = device.Allocations.FirstOrDefault(a => a.Group.Id == group.Id);
+                        if (existing == null)
                         {
-                            group.GroupDevices.Add(device);
-                            return true; 
+                            var newAllocation = new DeviceAllocation
+                            {
+                                
+                                Group = group,
+                                Device = device,
+                                Count = 1
+                            };           
+                            device.Allocations.Add(newAllocation);
+                            group.GroupAllocations.Add(newAllocation);
+                            return true;
                         }
                         return false;
                     };

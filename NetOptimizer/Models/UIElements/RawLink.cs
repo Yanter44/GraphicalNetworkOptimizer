@@ -1,6 +1,4 @@
-﻿
-
-namespace NetOptimizer.Models
+﻿namespace NetOptimizer.Models.UIElements
 {
     public class RawLink
     {

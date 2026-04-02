@@ -1,5 +1,6 @@
 ﻿using Microsoft.Xaml.Behaviors;
 using NetOptimizer.Models;
+using NetOptimizer.Models.UIElements;
 using NetOptimizer.ViewModels.MainWindow;
 using System;
 using System.Collections.Generic;

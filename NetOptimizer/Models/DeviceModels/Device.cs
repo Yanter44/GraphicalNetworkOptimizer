@@ -12,7 +12,6 @@ namespace NetOptimizer.Models.DeviceModels
         public string Vendor { get; set; } 
         public DeviceType Type { get; protected set; }
         public List<Port> Ports { get; } = new List<Port>();
-
         protected Device(string name) => Name = name;
     }
 }

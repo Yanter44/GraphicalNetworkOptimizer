@@ -6,7 +6,7 @@ using System.Text;
 using System.Windows;
 using System.Windows.Media;
 
-namespace NetOptimizer.Models
+namespace NetOptimizer.Models.UIElements
 {
     public class DeviceConnection : INotifyPropertyChanged
     {

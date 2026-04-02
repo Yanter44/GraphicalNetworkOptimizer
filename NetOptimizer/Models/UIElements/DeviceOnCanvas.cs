@@ -4,7 +4,7 @@ using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Windows.Media.Imaging;
 
-namespace NetOptimizer.Models
+namespace NetOptimizer.Models.UIElements
 {
     public class DeviceOnCanvas : INotifyPropertyChanged
     {

@@ -34,6 +34,7 @@ namespace NetOptimizer.ViewModels.AddNewGroupWindoww
             {
                 var newgroupModel = new DeviceGroup()
                 {
+                    Id = Guid.NewGuid(),
                     GroupName = GroupName,
                 };
                 bool result = GroupCreated.Invoke(newgroupModel);

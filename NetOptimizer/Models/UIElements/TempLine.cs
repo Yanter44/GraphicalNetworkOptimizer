@@ -5,7 +5,7 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using System.Windows;
 
-namespace NetOptimizer.Models
+namespace NetOptimizer.Models.UIElements
 {
     public class TempLine : INotifyPropertyChanged
     {

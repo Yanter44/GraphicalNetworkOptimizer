@@ -6,6 +6,7 @@ using NetOptimizer.Models.DeviceModels;
 using NetOptimizer.Models.DeviceModels.DeviceSettings;
 using NetOptimizer.Models.Dtos;
 using NetOptimizer.Models.Enums;
+using NetOptimizer.Models.UIElements;
 using NetOptimizer.Services;
 using NetOptimizer.ViewModels.DeviceSettingss;
 using NetOptimizer.ViewModels.MainWindoww;
@@ -33,7 +34,7 @@ namespace NetOptimizer.ViewModels.MainWindow
         public CanvasSettings CanvasSettings { get => _canvasSettings; set { _canvasSettings = value; OnPropertyChanged(); } } 
         public ObservableCollection<DeviceConnection> Connections { get; } = new ObservableCollection<DeviceConnection>();
         public ObservableCollection<DeviceOnCanvas> DevicesOnCanvas => CanvasVM.Devices;
-   
+         
         public event Action<DeviceOnCanvas[]> DevicesUpdated;
 
         public event EventHandler<DeviceOnCanvas> DeviceAdded;
@@ -57,6 +58,7 @@ namespace NetOptimizer.ViewModels.MainWindow
             _windowNavigator = windowNavigator;
             _yamlManager = yamlManager;
             _fileService = fileservice;
+
             CanvasVM = canvasVM;
             CanvasVM.CanvasWidth = 1000;
             CanvasVM.CanvasHeight = 1000;
@@ -70,10 +72,18 @@ namespace NetOptimizer.ViewModels.MainWindow
             InitializeNewProject();
 
             sandboxViewModel.InitializeAllAvailableDevices();
+            sandboxViewModel.InitializeAllAvailableTools();
+            sandboxViewModel.StartDrawTool += OnStartDraw;
+
             editorViewModel.InitializeAvailableTypes();
             editorViewModel.InitializeAllAvailableDevices();
             editorViewModel.GenerationRequested += OnAutoGenerationRequested;
+
             UpdateYamlFromCanvas();
+        }
+        private void OnStartDraw(UIToolElementToAddDto tool)
+        {
+            CanvasVM.SetCurrentTool(tool);
         }
         private Task OnAutoGenerationRequested(List<AvailableDevicesForEditorDto> EndlesnodeDevices, decimal budget)
         {
@@ -112,9 +122,6 @@ namespace NetOptimizer.ViewModels.MainWindow
             decimal budgetForNetwork = budget - totalNodesCost;
 
             return Task.CompletedTask;
-        }
-        private void AutoConnectDevices()
-        {
         }
         public void UpdateYamlFromCanvas()
         {

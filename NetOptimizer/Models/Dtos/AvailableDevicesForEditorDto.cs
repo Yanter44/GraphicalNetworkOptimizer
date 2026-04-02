@@ -1,5 +1,6 @@
 ﻿using NetOptimizer.Enums;
 using NetOptimizer.Models.DeviceModels;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 
@@ -10,6 +11,7 @@ namespace NetOptimizer.Models.Dtos
     {
         public string DeviceName { get; set; }
         public DeviceType Type { get; set; }
+
         private int _count;
         public int MaxCount { get; set; }
         public bool HasCount { get; set; } = true;
@@ -30,6 +32,7 @@ namespace NetOptimizer.Models.Dtos
             get => _deviceSubMenuViewModel;
             init => _deviceSubMenuViewModel = value;
         }
+        public ObservableCollection<DeviceAllocation> Allocations { get; } = new ObservableCollection<DeviceAllocation>();
         public event PropertyChangedEventHandler PropertyChanged;
         protected void OnPropertyChanged([CallerMemberName] string name = null)
             => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
