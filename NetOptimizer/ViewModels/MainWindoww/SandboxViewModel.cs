@@ -18,6 +18,7 @@ namespace NetOptimizer.ViewModels.MainWindow
         public Action<UIToolElementToAddDto> StartDrawTool;
         public ObservableCollection<DeviceToAddDto> AvailableDevices { get; } = new ObservableCollection<DeviceToAddDto>();
         public ObservableCollection<UIToolElementToAddDto> AvailableTools { get; } = new ObservableCollection<UIToolElementToAddDto>();
+        private UIToolElementToAddDto _selectedTool;
         public ICommand OpenCreateDeviceWindowCommand { get; }
         public ICommand PrepareForDrawSelectedUIElementCommand { get; }
         private readonly IWindowNavigator _windowNavigator;
@@ -25,11 +26,17 @@ namespace NetOptimizer.ViewModels.MainWindow
         {
             _windowNavigator = windowNavigator;
             OpenCreateDeviceWindowCommand = new RelayCommand(p => OpenCreateDeviceWindow((DeviceToAddDto)p));
-            PrepareForDrawSelectedUIElementCommand = new RelayCommand(uielem => PrepareForDrawSelectedUIElement((UIToolElementToAddDto)uielem));
+            PrepareForDrawSelectedUIElementCommand = new RelayCommand(uielem => PrepareForDrawSelectedUIElement((UIToolElementToAddDto)uielem));     
         }
-        public void PrepareForDrawSelectedUIElement(UIToolElementToAddDto UiElement)
+        public void PrepareForDrawSelectedUIElement(UIToolElementToAddDto uiElement)
         {
-            StartDrawTool?.Invoke(UiElement);
+            if (_selectedTool != null)
+                _selectedTool.IsSelected = false;
+
+            _selectedTool = uiElement;
+            _selectedTool.IsSelected = true;
+
+            StartDrawTool?.Invoke(uiElement);
         }
         public void OpenCreateDeviceWindow(DeviceToAddDto device) 
         {

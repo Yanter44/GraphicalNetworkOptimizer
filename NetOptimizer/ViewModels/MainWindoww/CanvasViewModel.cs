@@ -1,65 +1,243 @@
-﻿using NetOptimizer.Models.Dtos;
+﻿using NetOptimizer.Enums;
+using NetOptimizer.Interfaces;
+using NetOptimizer.Models;
+using NetOptimizer.Models.DeviceModels;
+using NetOptimizer.Models.DeviceModels.DeviceSettings;
+using NetOptimizer.Models.Dtos;
 using NetOptimizer.Models.UIElements;
-using System;
-using System.Collections.Generic;
+using NetOptimizer.Services;
+using NetOptimizer.ViewModels.DeviceParametrs;
+using NetOptimizer.ViewModels.DeviceSettingss;
+using NetOptimizer.Views;
+using NetOptimizer.Views.DopViews;
+using Newtonsoft.Json.Bson;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
-using System.Text;
 using System.Windows;
+using System.Windows.Media;
 
 namespace NetOptimizer.ViewModels.MainWindoww
 {
     public class CanvasViewModel : INotifyPropertyChanged
     {
+
+        private const int MaxConnectionsBetweenDevices = 6;
+
         private Point _canvasOffset;
         private double _canvasScale = 1;
 
         private Rect _selectionRect;
         private bool _isSelecting;
+        private bool _isDrawSelection;
 
         private double _canvasWidth;
         private double _canvasHeight;
+        private UIToolElementToAddDto _currentTool;
         public double CanvasWidth { get => _canvasWidth; set { _canvasWidth = value; OnPropertyChanged(); } }
         public double CanvasHeight { get => _canvasHeight; set { _canvasHeight = value; OnPropertyChanged(); } }
+        public Point CanvasOffset { get => _canvasOffset; set { _canvasOffset = value; OnPropertyChanged(); } }
+        public double CanvasScale { get => _canvasScale; set { _canvasScale = value; OnPropertyChanged(); }}
+        public Rect SelectionRect { get => _selectionRect; set { _selectionRect = value; OnPropertyChanged(); } }
+        public bool IsDrawingSelection { get => _isDrawSelection; set { _isDrawSelection = value; OnPropertyChanged(); } }
+        public bool IsSelecting { get => _isSelecting; set { _isSelecting = value; OnPropertyChanged(); } }
+        public UIToolElementToAddDto CurrentTool { get => _currentTool; set { _currentTool = value;  OnPropertyChanged(); }}
+        private bool _isDrawing;
+        public bool IsDrawing { get => _isDrawing; set { _isDrawing = value; OnPropertyChanged(); } }
+
+
         public ObservableCollection<DeviceConnection> Connections { get; } = new ObservableCollection<DeviceConnection>();
         public ObservableCollection<DeviceOnCanvas> Devices { get; set; }  = new ObservableCollection<DeviceOnCanvas>();
         public ObservableCollection<UIElementBase> UIObjects { get; set; } = new();
-        public Point CanvasOffset
-        {
-            get => _canvasOffset;
-            set { _canvasOffset = value; OnPropertyChanged(); }
-        }
 
-        public double CanvasScale
-        {
-            get => _canvasScale;
-            set { _canvasScale = value; OnPropertyChanged(); }
-        }
+        public event Action<DeviceOnCanvas[]> DevicesUpdated;
 
-        public Rect SelectionRect
-        {
-            get => _selectionRect;
-            set { _selectionRect = value; OnPropertyChanged(); }
-        }
+        public event EventHandler<DeviceOnCanvas> DeviceAdded;
 
-        public bool IsSelecting
+        public event Action<DeviceOnCanvas, DeviceOnCanvas> ConnectionRequested;
+
+        private readonly IWindowNavigator _windowNavigator;
+        public CanvasViewModel(IWindowNavigator windowNavigator)
         {
-            get => _isSelecting;
-            set { _isSelecting = value; OnPropertyChanged();  }
+            EventAggregator.Instance.DeviceCreated += (dto, settings) => OnDeviceCreated(dto, settings);
+            _windowNavigator = windowNavigator;
         }
-        private UIToolElementToAddDto _currentTool;
-        public UIToolElementToAddDto CurrentTool
+        private void OnDeviceCreated(DeviceToAddDto dto, DeviceSettingsBase settings, double x = 500, double y = 500)
         {
-            get => _currentTool;
-            set
+            Device logicDevice = (dto.Type, settings) switch
             {
-                _currentTool = value;
-                OnPropertyChanged();
+                (DeviceType.PC, PcSettingsViewModel p) => new PcDevice(p.Name, p.GetSettings()),
+                (DeviceType.Switch, SwitchSettingViewModel s) => new SwitchDevice(s.Name, s.GetSettings()),
+                (DeviceType.Router, RouterSettingsViewModel r) => new RouterDevice(r.Name, r.GetSettings()),
+                _ => null
+            };
+            if (logicDevice == null) return;
+            var deviceOnCanvas = new DeviceOnCanvas(logicDevice, x, y);
+            Devices.Add(deviceOnCanvas);
+            // UpdateYamlFromCanvas();
+        }
+
+        public void DeleteDevice(DeviceOnCanvas device)
+        {
+            var connectionsToRemove = Connections.Where(c => c.Source == device || c.Target == device).ToList();
+            var neighbors = connectionsToRemove
+                            .SelectMany(c => new[] { c.Source, c.Target })
+                            .Where(d => d != device)
+                            .Distinct()
+                            .ToArray();
+
+            foreach (var conn in connectionsToRemove)
+            {
+                conn.SourcePort?.Unlink();
+                conn.TargetPort?.Unlink();
+                Connections.Remove(conn);
+            }
+
+            Devices.Remove(device);
+            //UpdateYamlFromCanvas();
+            DevicesUpdated?.Invoke(neighbors);
+        }
+        public void DrawAllConnectionsForDevice(DeviceOnCanvas deviceOnCanvas)
+        {
+            foreach (var port in deviceOnCanvas.LogicDevice.Ports)
+            {
+                if (port.IsLinked)
+                {
+                    var remotePort = port.ConnectedTo;
+                    var targetVisual = Devices.FirstOrDefault(d => d.LogicDevice == remotePort.Owner);
+
+                    if (targetVisual != null)
+                    {
+                        ConnectionRequested?.Invoke(deviceOnCanvas, targetVisual);
+                    }
+                }
             }
         }
-        private bool _isDrawing;
-        public bool IsDrawing { get => _isDrawing; set { _isDrawing = value; OnPropertyChanged(); } }
+        public void ShowPortError(Port port) => _windowNavigator.ShowModalView<ErrorWindow, ErrorWindowViewModel>($"Ошибка: Порт {port.PortName} уже занят!");
+        public void ShowDeviceParametrsWindow(DeviceOnCanvas device)
+        {
+            _windowNavigator.ShowModalView<DeviceParametrsWindow, DeviceParametrsViewModel>(device);
+        }
+        public void MoveDevice(DeviceOnCanvas device, double dx, double dy)
+        {
+            var target = Devices.FirstOrDefault(d => d == device);
+            if (target == null) return;
+
+            target.X += dx;
+            target.Y += dy;
+        }
+        public void MoveUIElement(UIElementBase element, Vector delta)
+        {
+            if (element == null) return;
+
+            element.X += delta.X;
+            element.Y += delta.Y;
+
+            switch (element)
+            {
+                case LineElement line:
+                    line.Start = new Point(line.Start.X + delta.X, line.Start.Y + delta.Y);
+                    line.End = new Point(line.End.X + delta.X, line.End.Y + delta.Y);
+                    break;
+
+                case CurveElement curve:
+                    if (curve.Points == null || curve.Points.Count == 0)
+                        return;
+                    var newPoints = new PointCollection();
+
+                    foreach (var p in curve.Points)
+                    {
+                        newPoints.Add(new Point(p.X + delta.X, p.Y + delta.Y));
+                    }
+
+                    curve.Points = newPoints;
+                    break;
+
+                case EllipseElement:
+                case LabelElement:
+                    break;
+            }
+        }
+        public bool TryConnectPorts(DeviceOnCanvas sourceDevice, Port sourcePort,
+                                    DeviceOnCanvas targetDevice, Port targetPort)
+        {
+            if (targetPort.IsLinked)
+                return ShowError($"Порт {targetPort.PortName} уже занят!");
+
+            if (sourcePort.Type != targetPort.Type)
+                return ShowError($"Нельзя соединить {sourcePort.Type} с {targetPort.Type}");
+
+            try
+            {
+                sourcePort.LinkTo(targetPort);
+
+                var conn = new DeviceConnection
+                {
+                    Source = sourceDevice,
+                    Target = targetDevice,
+                    SourcePort = sourcePort,
+                    TargetPort = targetPort
+                };
+
+                Connections.Add(conn);
+
+                var group = GetConnectionsBetween(sourceDevice, targetDevice);
+
+                for (int i = 0; i < group.Count; i++)
+                {
+                    group[i].ConnectionIndex = i;
+                }
+
+                foreach (var c in group)
+                {
+                    if (c.ConnectionIndex < MaxConnectionsBetweenDevices)
+                        c.UpdateLine();
+                }
+                return true;
+            }
+            catch (Exception ex)
+            {
+                return ShowError(ex.Message);
+            }
+            bool ShowError(string message)
+            {
+                _windowNavigator.ShowModalView<ErrorWindow, ErrorWindowViewModel>(message);
+                return false;
+            }
+        }
+        public List<DeviceConnection> GetConnectionsBetween(DeviceOnCanvas a, DeviceOnCanvas b)
+        {
+            return Connections
+                .Where(c =>
+                    (c.Source == a && c.Target == b) ||
+                    (c.Source == b && c.Target == a))
+                .ToList();
+        }
+        public void SelectDevice(DeviceOnCanvas device, bool isSelected)
+        {
+            if (device != null)
+                device.IsSelected = isSelected;
+        }
+        public void SelectUiObject(UIElementBase uiobject, bool isSelected)
+        {
+            if(uiobject != null)
+                uiobject.IsSelected = isSelected;
+        }    
+        public void DeleteUiObject(UIElementBase uiObject)
+        {
+            UIObjects.Remove(uiObject);
+        }
+        public void DeleteSelected()
+        {
+            var uiObjects = UIObjects.Where(x => x.IsSelected).ToList();
+            var devices = Devices.Where(x => x.IsSelected).ToList();
+
+            foreach (var obj in uiObjects)
+                DeleteUiObject(obj);
+
+            foreach (var device in devices)
+                DeleteDevice(device);
+        }
         public void SetCurrentTool(UIToolElementToAddDto tool)
         {
             CurrentTool = tool;
@@ -84,6 +262,7 @@ namespace NetOptimizer.ViewModels.MainWindoww
         {
             SelectionRect = new Rect(start, new Size(0, 0));
             IsSelecting = true;
+            IsDrawingSelection = true;
         }
 
         public void UpdateSelection(Point start, Point current)
@@ -101,12 +280,82 @@ namespace NetOptimizer.ViewModels.MainWindoww
                 Rect deviceRect = new Rect(device.X, device.Y, 64, 64);
                 device.IsSelected = SelectionRect.IntersectsWith(deviceRect);
             }
+
+            foreach (var uiObject in UIObjects)
+            {
+                if (uiObject is LineElement line)
+                {
+                    uiObject.IsSelected = LineNearRect(line.Start, line.End, SelectionRect);
+                }
+                else if (uiObject is RectangleElement rect)
+                {
+                    Rect r = new Rect(rect.X, rect.Y, rect.Width, rect.Height);
+                    uiObject.IsSelected = SelectionRect.IntersectsWith(r);
+                }
+                else if (uiObject is EllipseElement ellipse)
+                {
+                    Rect r = new Rect(ellipse.X, ellipse.Y, ellipse.Width, ellipse.Height);
+                    uiObject.IsSelected = SelectionRect.IntersectsWith(r);
+                }
+                else if (uiObject is LabelElement label)
+                {
+                    Rect r = new Rect(label.X, label.Y, label.Width, 20); // высоту можно нормальную потом
+                    uiObject.IsSelected = SelectionRect.IntersectsWith(r);
+                }
+                else if (uiObject is CurveElement curve)
+                {
+                    uiObject.IsSelected = curve.Points.Any(p =>
+                    {
+                        var globalPoint = new Point(
+                            p.X + curve.X,
+                            p.Y + curve.Y
+                        );
+
+                        return SelectionRect.Contains(globalPoint);
+                    });
+                }
+            }
+        }
+        private bool LineIntersectsRect(Point p1, Point p2, Rect rect)
+        {
+            if (rect.Contains(p1) || rect.Contains(p2))
+                return true;
+
+            return LineIntersectsLine(p1, p2, new Point(rect.Left, rect.Top), new Point(rect.Right, rect.Top)) ||
+                   LineIntersectsLine(p1, p2, new Point(rect.Right, rect.Top), new Point(rect.Right, rect.Bottom)) ||
+                   LineIntersectsLine(p1, p2, new Point(rect.Right, rect.Bottom), new Point(rect.Left, rect.Bottom)) ||
+                   LineIntersectsLine(p1, p2, new Point(rect.Left, rect.Bottom), new Point(rect.Left, rect.Top));
         }
 
+        private bool LineIntersectsLine(Point a1, Point a2, Point b1, Point b2)
+        {
+            double d = (a2.X - a1.X) * (b2.Y - b1.Y) - (a2.Y - a1.Y) * (b2.X - b1.X);
+            if (d == 0) return false;
+
+            double u = ((b1.X - a1.X) * (b2.Y - b1.Y) - (b1.Y - a1.Y) * (b2.X - b1.X)) / d;
+            double v = ((b1.X - a1.X) * (a2.Y - a1.Y) - (b1.Y - a1.Y) * (a2.X - a1.X)) / d;
+
+            return (u >= 0 && u <= 1 && v >= 0 && v <= 1);
+        }
+
+        private bool LineNearRect(Point p1, Point p2, Rect rect, double tolerance = 5)
+        {
+            Rect expanded = new Rect(
+                rect.X - tolerance,
+                rect.Y - tolerance,
+                rect.Width + tolerance * 2,
+                rect.Height + tolerance * 2);
+
+            return LineIntersectsRect(p1, p2, expanded);
+        }
+        public void StopDrawSelection()
+        {
+            SelectionRect = new Rect();
+            IsDrawingSelection = false;
+        }
         public void StopSelection()
         {
             IsSelecting = false;
-            SelectionRect = new Rect();
         }
 
         public event PropertyChangedEventHandler PropertyChanged;

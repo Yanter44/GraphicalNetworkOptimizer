@@ -19,9 +19,6 @@ namespace NetOptimizer.ViewModels.MainWindow
     {
         private readonly DeviceCatalogService _catalogService;
         private readonly IWindowNavigator _windowNavigator;
-
-        private decimal _Budget;
-        public decimal Budget { get => _Budget; set { _Budget = value; OnPropertyChanged(); } }
         public ObservableCollection<AvailableDevicesForEditorDto> AvailableDevices { get; } = new ObservableCollection<AvailableDevicesForEditorDto>();
         public ObservableCollection<AvailableTypesOfObjectForEditorDto> AvailableTypes { get; } = new ObservableCollection<AvailableTypesOfObjectForEditorDto>();
         public ObservableCollection<DeviceGroup> DeviceGroups { get; } = new ObservableCollection<DeviceGroup>();
@@ -107,33 +104,7 @@ namespace NetOptimizer.ViewModels.MainWindow
         }
         private async Task CreateNetworkByUserProperties()
         {
-            var Convertedbudget = Budget * 1000;
-            var devicesToCreate = AvailableDevices.Where(d => d.Count > 0).ToList();      
-            GenerationRequested?.Invoke(devicesToCreate, Convertedbudget);
-        }
-        public void InitializeAvailableTypes()
-        {
-            var types = new List<AvailableTypesOfObjectForEditorDto>
-            {
-                new() { TypeOfObject = "Квартира", Type = PlacementType.Apartment },
-                new() { TypeOfObject = "Малый офис", Type = PlacementType.SmallOffice },
-                new() { TypeOfObject = "Средний офис", Type = PlacementType.MediumOffice },
-                new() { TypeOfObject = "Предприятие", Type = PlacementType.Enterprise }
-            };
 
-            foreach (var t in types)
-            {
-                t.PropertyChanged += (s, e) =>
-                {
-                    if (e.PropertyName == nameof(AvailableTypesOfObjectForEditorDto.IsSelected))
-                    {
-                        var changedItem = (AvailableTypesOfObjectForEditorDto)s;
-                        if (changedItem.IsSelected)
-                            OnTypeSelected(changedItem);
-                    }
-                };
-                AvailableTypes.Add(t);
-            }
         }
 
         private void OnTypeSelected(AvailableTypesOfObjectForEditorDto selected)

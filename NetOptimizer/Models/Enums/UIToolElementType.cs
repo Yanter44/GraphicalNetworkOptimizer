@@ -6,6 +6,7 @@ namespace NetOptimizer.Models.Enums
 {
     public enum UIToolElementType
     {
+        Cursor,
         Label,
         Line,
         Сurve,

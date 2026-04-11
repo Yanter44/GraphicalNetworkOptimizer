@@ -6,6 +6,7 @@ using NetOptimizer.Services;
 using NetOptimizer.ViewModels;
 using NetOptimizer.ViewModels.AddNewGroupWindoww;
 using NetOptimizer.ViewModels.ConnectToGroupWindoww;
+using NetOptimizer.ViewModels.DeviceParametrs;
 using NetOptimizer.ViewModels.MainWindow;
 using NetOptimizer.ViewModels.MainWindoww;
 using NetOptimizer.Views;
@@ -38,7 +39,9 @@ namespace NetOptimizer
                  services.AddTransient<InfoWindow>();
                  services.AddTransient<AddNewGroupWindow>();
                  services.AddTransient<ConnectToGroupWindow>();
+                 services.AddTransient<DeviceParametrsWindow>();
 
+                 services.AddTransient<DeviceParametrsViewModel>();
                  services.AddTransient<AddNewGroupWindowViewModel>();
                  services.AddTransient<ConnectToGroupWindowViewModel>();
                  services.AddTransient<EditorViewModel>();

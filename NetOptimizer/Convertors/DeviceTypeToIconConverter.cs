@@ -12,6 +12,7 @@ namespace NetOptimizer.Convertors
             {
                 string imageName = type switch
                 {
+
                     DeviceType.PC => "pc.png",
                     DeviceType.Router => "router.png",
                     DeviceType.Switch => "switch.png",
@@ -19,6 +20,7 @@ namespace NetOptimizer.Convertors
                     DeviceType.Printer => "printer.png",
                     DeviceType.IpVideoCam => "videocam.png",
                     DeviceType.AccessPoint => "accesspoint.png",
+                    DeviceType.ISP => "cloud.png",
                     _ => "default.png"
                 };
 

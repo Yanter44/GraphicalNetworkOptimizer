@@ -2,6 +2,7 @@
 using NetOptimizer.Models;
 using NetOptimizer.Models.UIElements;
 using NetOptimizer.ViewModels.MainWindow;
+using NetOptimizer.ViewModels.MainWindoww;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -13,6 +14,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using System.Windows.Threading;
+using System.Xml.Linq;
 
 namespace NetOptimizer.Behaviors
 {
@@ -23,6 +25,15 @@ namespace NetOptimizer.Behaviors
         private FrameworkElement _activeElement;
         private Point _lastMousePosition;
         private DispatcherTimer _tooltipTimer;
+        private CanvasViewModel сanvasVM
+        {
+            get
+            {
+                var vm = GetMainVM();
+                return vm?.CanvasVM;
+            }
+        }
+        private CanvasInteractionBehavior canvasInteractionBehavior;
         protected override void OnAttached()
         {
             AssociatedObject.MouseDown += OnMouseDown;
@@ -30,14 +41,18 @@ namespace NetOptimizer.Behaviors
             AssociatedObject.MouseUp += OnMouseUp;
             AssociatedObject.MouseEnter += OnMouseEnter;
             AssociatedObject.MouseLeave += OnMouseLeave;
-
+       
+            canvasInteractionBehavior = GetCanvasBehavior();
+            if (canvasInteractionBehavior != null)
+                canvasInteractionBehavior.ConnectionCreated += OnConnectionCreated;
+            AssociatedObject.Loaded += OnLoaded;
+        }
+        private void OnLoaded(object sender, RoutedEventArgs e)
+        {
+            сanvasVM.DevicesUpdated += OnDevicesUpdated;
             var canvasBehavior = GetCanvasBehavior();
             if (canvasBehavior != null)
                 canvasBehavior.ConnectionCreated += OnConnectionCreated;
-
-            var vm = GetMainVM();
-            if (vm != null)
-                vm.DevicesUpdated += OnDevicesUpdated;
         }
         private void OnDevicesUpdated(DeviceOnCanvas[] devices)
         {
@@ -77,12 +92,11 @@ namespace NetOptimizer.Behaviors
         private void OnMouseEnter(object sender, MouseEventArgs e)
         {
             var device = AssociatedObject.DataContext as DeviceOnCanvas;
-            var vm = GetMainVM();
-            if (device != null && vm != null)
+            if (device != null)
             {
-                vm.SelectDevice(device, true); 
+                сanvasVM.SelectDevice(device, true);
             }
-            if(_tooltipTimer == null)
+            if (_tooltipTimer == null)
             {
                 _tooltipTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(3) };
                 _tooltipTimer.Start();
@@ -92,11 +106,11 @@ namespace NetOptimizer.Behaviors
                     ShowDeviceToolTip(device);
                 };
             }
-             _tooltipTimer.Stop();  
-             _tooltipTimer.Start();         
+            _tooltipTimer.Stop();
+            _tooltipTimer.Start();
         }
 
-        
+
         private void ShowDeviceToolTip(DeviceOnCanvas device)
         {
             if (AssociatedObject.ToolTip == null)
@@ -148,7 +162,6 @@ namespace NetOptimizer.Behaviors
                 {
                     portRow.Inlines.Add(new Run("❌ DOWN") { Foreground = Brushes.IndianRed });
                 }
-
                 portsStack.Children.Add(portRow);
             }
 
@@ -171,10 +184,9 @@ namespace NetOptimizer.Behaviors
         private void OnMouseLeave(object sender, MouseEventArgs e)
         {
             var device = AssociatedObject.DataContext as DeviceOnCanvas;
-            var vm = GetMainVM();
-            if (device != null && vm != null)
+            if (device != null && сanvasVM.IsSelecting == false)
             {
-                vm.SelectDevice(device, false);
+                сanvasVM.SelectDevice(device, false);
             }
             if (AssociatedObject.ToolTip is ToolTip tt)
                 tt.IsOpen = false;
@@ -184,8 +196,16 @@ namespace NetOptimizer.Behaviors
 
         private void OnMouseDown(object sender, MouseButtonEventArgs e)
         {
-            var canvasBehavior = GetCanvasBehavior();
+            if(e.ClickCount == 2)
+            {
+                var element = sender as FrameworkElement;
+                var device = element?.DataContext as DeviceOnCanvas;
 
+                if (device == null) return;
+
+                сanvasVM.ShowDeviceParametrsWindow(device);
+            } 
+            var canvasBehavior = GetCanvasBehavior();
             if (canvasBehavior?.IsTryingToConnect == true)
             {
                 var element = sender as FrameworkElement;
@@ -203,10 +223,8 @@ namespace NetOptimizer.Behaviors
             }
             if (e.LeftButton == MouseButtonState.Pressed)
             {
-                
                 _isDragging = true;
                 _activeElement = sender as FrameworkElement;
-                _clickPosition = e.GetPosition(_activeElement);
                 _lastMousePosition = e.GetPosition(_activeElement.Parent as Canvas);
                 _activeElement.CaptureMouse();
                 e.Handled = true;
@@ -254,7 +272,7 @@ namespace NetOptimizer.Behaviors
 
                     if (port.IsLinked)
                     {
-                        vm?.ShowPortError(port);
+                        сanvasVM.ShowPortError(port);
                         return;
                     }
                     if (canvasBehavior.IsTryingToConnect)
@@ -274,8 +292,7 @@ namespace NetOptimizer.Behaviors
             var deleteItem = new MenuItem { Header = "Удалить", Icon = CreateIcon("/Assets/Images/delete.png") };
             deleteItem.Click += (s, e) =>
             {
-                var vm = GetMainVM();
-                vm?.RemoveDevice(device);
+                сanvasVM?.DeleteDevice(device);
             };
             menu.Items.Add(deleteItem);
 
@@ -285,23 +302,24 @@ namespace NetOptimizer.Behaviors
         {
             var window = Window.GetWindow(AssociatedObject);
             if (window == null) return;
+            var canvas = window.FindName("MainCanvas") as Canvas;
+            if (canvas == null) return;
 
-            var  _connectionLine = window.FindName("TempLine") as Polyline;
-            if (_connectionLine == null) return;
+            var line = new Line
+            {
+                Stroke = Brushes.Gray,
+                StrokeThickness = 2,
+                StrokeDashArray = new DoubleCollection { 4, 2 }
+            };
+
+            canvas.Children.Add(line);
 
             Point startPoint = new Point(sourceDevice.X + 32, sourceDevice.Y + 32);
 
-            var canvas = window.FindName("MainCanvas") as Canvas; 
-            if (canvas == null) return;
-
-            var canvasBehavior = Interaction.GetBehaviors(canvas)
-                                            .OfType<CanvasInteractionBehavior>()
-                                            .FirstOrDefault();
-            if (canvasBehavior != null)
-            {
-                canvasBehavior.StartConnectionLine(startPoint, _connectionLine, sourceDevice, sourceport);
-            }
+            var behavior = GetCanvasBehavior();
+            behavior?.StartConnectionLine(startPoint, line, sourceDevice, sourceport);
         }
+
         private MenuItem CreatePortMenuItem(Port port) => new MenuItem
         {
             Header = $"{(port.IsLinked ? "●" : "○")} {port.PortName} {port.PortNumber} ({(port.IsLinked ? "Linked" : "Not Linked")})",
@@ -331,14 +349,20 @@ namespace NetOptimizer.Behaviors
             double adjustedDx = dx / vm.CanvasVM.CanvasScale;
             double adjustedDy = dy / vm.CanvasVM.CanvasScale;
 
-            if (device.IsSelected)
+            var selectedDevices = vm.CanvasVM.Devices
+                .Where(x => x.IsSelected)
+                .ToList();
+
+            if (selectedDevices.Count > 1)
             {
-                foreach (var selected in vm.DevicesOnCanvas.Where(d => d.IsSelected))
-                    vm.MoveDevice(selected, adjustedDx, adjustedDy);
+                foreach (var dev in selectedDevices)
+                {
+                    vm.CanvasVM.MoveDevice(dev, adjustedDx, adjustedDy);
+                }
             }
             else
             {
-                vm.MoveDevice(device, adjustedDx, adjustedDy);
+                vm.CanvasVM.MoveDevice(device, adjustedDx, adjustedDy);
             }
             _lastMousePosition = currentMouse;
         }

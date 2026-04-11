@@ -15,6 +15,7 @@
                              GlassFrameThickness="0"
                              ResizeBorderThickness="0"/>
     </shell:WindowChrome.WindowChrome>
+
     <Border Background="#FCFBFE" CornerRadius="16"
           BorderThickness="1"    BorderBrush="#EDEDED" SnapsToDevicePixels="True">
 

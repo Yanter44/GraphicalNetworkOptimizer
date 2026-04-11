@@ -7,9 +7,9 @@ namespace NetOptimizer.Convertors
         public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
         {
             if (value is bool isSelected && isSelected)
-                return Brushes.DodgerBlue; // Цвет рамки при выделении
+                return Brushes.DodgerBlue; 
 
-            return Brushes.Transparent; // Цвет когда не выделено
+            return Brushes.Transparent; 
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)

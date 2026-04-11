@@ -1,10 +1,35 @@
-﻿using System.Windows;
+﻿using System.ComponentModel;
+using System.Windows;
 
 namespace NetOptimizer.Models.UIElements
 {
     public class LineElement : UIElementBase
     {
-        public Point Start { get; set; }
-        public Point End { get; set; }
+        private Point _startPoint;
+        private Point _endPoint;
+        public Point Start
+        {
+            get => _startPoint;
+            set
+            {
+                if (_startPoint != value)
+                {
+                    _startPoint = value;
+                    OnPropertyChanged(nameof(Start));
+                }
+            }
+        }
+        public Point End
+        {
+            get => _endPoint;
+            set
+            {
+                if (_endPoint != value)
+                {
+                    _endPoint = value;
+                    OnPropertyChanged(nameof(End));
+                }
+            }
+        }
     }
 }

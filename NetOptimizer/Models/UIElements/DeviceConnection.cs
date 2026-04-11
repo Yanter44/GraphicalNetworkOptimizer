@@ -10,6 +10,14 @@ namespace NetOptimizer.Models.UIElements
 {
     public class DeviceConnection : INotifyPropertyChanged
     {
+        public int ConnectionIndex { get; set; }
+        public double X1 { get; set; }
+        public double Y1 { get; set; }
+        public double X2 { get; set; }
+        public double Y2 { get; set; }
+        public Port SourcePort { get; set; }
+        public Port TargetPort { get; set; }
+
         private DeviceOnCanvas _source;
         public DeviceOnCanvas Source
         {
@@ -22,7 +30,7 @@ namespace NetOptimizer.Models.UIElements
                     _source = value;
                     if (_source != null) _source.PropertyChanged += Device_PropertyChanged;
                     OnPropertyChanged(nameof(Source));
-                    UpdatePoints();
+                    UpdateLine();
                 }
             }
         }
@@ -39,67 +47,63 @@ namespace NetOptimizer.Models.UIElements
                     _target = value;
                     if (_target != null) _target.PropertyChanged += Device_PropertyChanged;
                     OnPropertyChanged(nameof(Target));
-                    UpdatePoints();
+                    UpdateLine();
                 }
             }
-        }
-
-        public Port SourcePort { get; set; }
-        public Port TargetPort { get; set; }
-
-        private PointCollection _points = new PointCollection();
-        public PointCollection Points
-        { get => _points;
-          private set { _points = value; OnPropertyChanged(); } }
-
-        public DeviceConnection()
-        {
-            _points = new PointCollection();
         }
 
         public void Device_PropertyChanged(object sender, PropertyChangedEventArgs e)
         {
             if (e.PropertyName == nameof(DeviceOnCanvas.X) || e.PropertyName == nameof(DeviceOnCanvas.Y))
             {
-                UpdateEdgePoints(sender as DeviceOnCanvas);
+                UpdateLine();
             }
         }
 
-        private void UpdateEdgePoints(DeviceOnCanvas movedDevice)
-        {
-            if (_points.Count < 2) return;
-            var newPoints = new PointCollection(_points);
-
-            if (movedDevice == Source)
-                newPoints[0] = new Point(Source.X + 32, Source.Y + 32);
-            else if (movedDevice == Target)
-                newPoints[newPoints.Count - 1] = new Point(Target.X + 32, Target.Y + 32);
-
-            Points = newPoints; 
-        }
-
-        public void UpdatePoints()
+        public void UpdateLine()
         {
             if (Source == null || Target == null) return;
 
-            var newPoints = new PointCollection(_points.Count >= 2 ? _points : new[] {
-                    new Point(Source.X + 32, Source.Y + 32),
-                    new Point(Target.X + 32, Target.Y + 32)
-             });
+            double dx = Target.X - Source.X;
+            double dy = Target.Y - Source.Y;
 
-            newPoints[0] = new Point(Source.X + 32, Source.Y + 32);
-            newPoints[newPoints.Count - 1] = new Point(Target.X + 32, Target.Y + 32);
+            double len = Math.Sqrt(dx * dx + dy * dy);
+            if (len == 0) return;
 
-            Points = newPoints;
-        }
-        public void AddIntermediatePoint(Point p)
-        {
-            if (_points.Count > 1)
-                _points.Insert(_points.Count - 1, p);
+            double nx = -dy / len;
+            double ny = dx / len;
+
+            double spacing = 7;
+            double offset = 0;
+            if (ConnectionIndex < 3)
+            {
+                offset = (ConnectionIndex - 0.2) * spacing;
+            }
             else
-                _points.Add(p);
+            {
 
-            OnPropertyChanged(nameof(Points));
+                offset = -(ConnectionIndex - 2) * spacing;
+            }
+
+            double ox = nx * offset;
+            double oy = ny * offset;
+
+            double cx1 = Source.X + 32 + ox;
+            double cy1 = Source.Y + 32 + oy;
+
+            double cx2 = Target.X + 32 + ox;
+            double cy2 = Target.Y + 32 + oy;
+
+            X1 = cx1;
+            Y1 = cy1;
+            X2 = cx2;
+            Y2 = cy2;
+
+            OnPropertyChanged(nameof(X1));
+            OnPropertyChanged(nameof(Y1));
+            OnPropertyChanged(nameof(X2));
+            OnPropertyChanged(nameof(Y2));
+
         }
 
         public event PropertyChangedEventHandler PropertyChanged;

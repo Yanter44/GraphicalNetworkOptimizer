@@ -1,0 +1,12 @@
+﻿<Window x:Class="NetOptimizer.Views.DeviceParametrsWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:local="clr-namespace:NetOptimizer.Views"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d"
+        Title="Параметры устройства" Height="450" Width="500">
+    <Grid>
+        
+    </Grid>
+</Window>

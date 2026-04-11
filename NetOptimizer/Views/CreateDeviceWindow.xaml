@@ -16,11 +16,12 @@
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="/Views/ResourcesDictionary/CreateDeviceWindowResources.xaml"/>
+                <ResourceDictionary Source="/Views/ResourcesDictionary/MainWindowResources.xaml"/>
             </ResourceDictionary.MergedDictionaries>
 
             <!-- ПК -->
             <DataTemplate DataType="{x:Type deviceSettingsViewModels:PcSettingsViewModel}">
-                <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Height="350">
+                <ScrollViewer behaviors:ScrollBarWheelDirectionBehavior.OrientationScroll="Vertical" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Height="350">
                     <StackPanel Grid.Row="1" Margin="14,10,10,0">
                         <TextBlock Text="Имя устройства" Foreground="#6B7280" FontSize="12" Margin="0,0,0,4"/>
                         <Border CornerRadius="8" Background="#F3F6FA" Padding="5">
@@ -131,7 +132,7 @@
 
             <!-- Коммутатор -->
             <DataTemplate DataType="{x:Type deviceSettingsViewModels:SwitchSettingViewModel}">
-                <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Height="350">
+                <ScrollViewer behaviors:ScrollBarWheelDirectionBehavior.OrientationScroll="Vertical" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Height="350">
                     <StackPanel Margin="14,10,10,0">
                         <!-- Имя устройства -->
                         <TextBlock Text="Имя устройства" Foreground="#6B7280" FontSize="12" Margin="0,0,0,4"/>
@@ -209,7 +210,7 @@
 
             <!-- Роутер -->
             <DataTemplate DataType="{x:Type deviceSettingsViewModels:RouterSettingsViewModel}">
-                <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Height="350">
+                <ScrollViewer behaviors:ScrollBarWheelDirectionBehavior.OrientationScroll="Vertical" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Height="350">
                     <StackPanel Margin="14,10,10,0">
                         <!-- Имя устройства -->
                         <TextBlock Text="Имя устройства" Foreground="#6B7280" FontSize="12" Margin="0,0,0,4"/>

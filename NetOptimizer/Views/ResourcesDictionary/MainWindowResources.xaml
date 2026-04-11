@@ -2,9 +2,12 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:deviceSettingsViewModels ="clr-namespace:NetOptimizer.ViewModels.DeviceSettingss"
                     xmlns:converters="clr-namespace:NetOptimizer.Convertors"
-                    xmlns:selectors="clr-namespace:NetOptimizer.Views.Selectors">
+                    xmlns:selectors="clr-namespace:NetOptimizer.Views.Selectors"
+                    xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
+                    xmlns:behaviors="clr-namespace:NetOptimizer.Behaviors">
     <!-- =====================Конверторы==================== -->
     <converters:DeviceTypeToIconConverter x:Key="DeviceTypeToIconConverter"/>
+    <converters:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
     <converters:DeviceTypeToAbstractNameConverter x:Key="DeviceTypeToAbstractNameConverter"/>
     <!-- ===================== Стили ==================== -->
     <Style TargetType="Menu">
@@ -496,4 +499,117 @@
     <selectors:DeviceTemplateSelector x:Key="DeviceTemplateSelector"
                                WithCountTemplate="{StaticResource DeviceWithCountTemplate}"
                                WithoutCountTemplate="{StaticResource DeviceWithoutCountTemplate}"/>
+
+
+    <DataTemplate x:Key="RectangleTemplate">
+        <Grid>
+            <Rectangle Fill="Transparent" Stroke="Black" StrokeThickness="2"
+                       Width="{Binding Width}" Height="{Binding Height}"
+                       Cursor="Hand">
+            </Rectangle>
+            <Rectangle Fill="Transparent" Stroke="#1892E8" StrokeThickness="2"
+                       Width="{Binding Width}" Height="{Binding Height}"
+                       Cursor="Hand" Visibility="{Binding IsSelected, Converter={StaticResource BoolToVisibilityConverter}}">
+            </Rectangle>
+            <i:Interaction.Behaviors>
+                <behaviors:UIElementsDragBehavior/>
+            </i:Interaction.Behaviors>
+        </Grid>
+    </DataTemplate>
+
+    <DataTemplate x:Key="EllipseTemplate">
+        <Grid>
+            <Ellipse Fill="Transparent" Stroke="Black" StrokeThickness="2"
+                     Width="{Binding Width}" Height="{Binding Height}"
+                     Cursor="Hand">
+            </Ellipse>
+            <Ellipse Fill="Transparent" Stroke="#1892E8" StrokeThickness="2"
+                     Width="{Binding Width}" Height="{Binding Height}"
+                     Cursor="Hand" Visibility="{Binding IsSelected, Converter={StaticResource BoolToVisibilityConverter}}">
+            </Ellipse>
+            <i:Interaction.Behaviors>
+                <behaviors:UIElementsDragBehavior/>
+            </i:Interaction.Behaviors>
+        </Grid>
+
+    </DataTemplate>
+
+    <DataTemplate x:Key="LineTemplate">
+        <Grid>
+            <Line  Stroke="Transparent" StrokeThickness="20"
+                   X1="{Binding Start.X}"
+                   Y1="{Binding Start.Y}"
+                   X2="{Binding End.X}"
+                   Y2="{Binding End.Y}" Cursor="Hand"></Line>
+
+            <Line Stroke="#1892E8" StrokeThickness="4"
+                  X1="{Binding Start.X}"
+                  Y1="{Binding Start.Y}"
+                  X2="{Binding End.X}"
+                  Y2="{Binding End.Y}"
+                  Visibility="{Binding IsSelected, Converter={StaticResource BoolToVisibilityConverter}}">
+            </Line>
+            <Line Stroke="Black" StrokeThickness="2"
+                  X1="{Binding Start.X}"
+                  Y1="{Binding Start.Y}"
+                  X2="{Binding End.X}"
+                  Y2="{Binding End.Y}">
+            </Line>
+            <i:Interaction.Behaviors>
+                <behaviors:UIElementsDragBehavior/>
+            </i:Interaction.Behaviors>
+        </Grid>
+        
+    </DataTemplate>
+
+    <DataTemplate x:Key="LabelTemplate">
+        <Grid>
+            <TextBlock Text="{Binding Text}" Width="{Binding Width}"
+                Cursor="Hand" TextAlignment="Center">
+            </TextBlock>
+            <Border BorderBrush="#1892E8" BorderThickness="2"  Visibility="{Binding IsSelected, Converter={StaticResource BoolToVisibilityConverter}}">
+                <TextBlock Text="{Binding Text}" Foreground="Transparent" Width="{Binding Width}"
+                           Cursor="Hand" TextAlignment="Center">
+                </TextBlock>
+            </Border>
+            <i:Interaction.Behaviors>
+                <behaviors:UIElementsDragBehavior/>
+            </i:Interaction.Behaviors>
+        </Grid>
+    </DataTemplate>
+    
+    <DataTemplate x:Key="CurveTemplate">
+        <Grid>
+            <Polyline Points="{Binding Points}"
+                  Stroke="Transparent"
+                  StrokeThickness="20"
+                  Cursor="Hand"/>
+            <Polyline Points="{Binding Points}"
+                  Stroke="#1892E8"
+                  StrokeThickness="4"
+                  Visibility="{Binding IsSelected, Converter={StaticResource BoolToVisibilityConverter}}"/>
+            <Polyline Points="{Binding Points}" 
+             Stroke="Black" 
+             StrokeThickness="2"
+             StrokeLineJoin="Round"
+             StrokeStartLineCap="Round"
+             StrokeEndLineCap="Round" >
+            </Polyline>
+            <i:Interaction.Behaviors>
+                <behaviors:UIElementsDragBehavior/>
+            </i:Interaction.Behaviors>
+        </Grid>
+ 
+    </DataTemplate>
+    
+    <selectors:UIElementTemplateSelector x:Key="UISelector"
+        RectangleTemplate="{StaticResource RectangleTemplate}"
+        EllipseTemplate="{StaticResource EllipseTemplate}"
+        LineTemplate="{StaticResource LineTemplate}"
+        LabelTemplate="{StaticResource LabelTemplate}" 
+        CurveTemplate="{StaticResource CurveTemplate}"/>
+    
+    
+    
+    
 </ResourceDictionary>

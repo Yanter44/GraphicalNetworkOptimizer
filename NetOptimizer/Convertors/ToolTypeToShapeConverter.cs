@@ -7,6 +7,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Media;
+using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 
 namespace NetOptimizer.Convertors
@@ -17,6 +18,15 @@ namespace NetOptimizer.Convertors
         {
             switch (value)
             {
+                case UIToolElementType.Cursor:
+                    var img = new Image
+                    {
+                        Source = new BitmapImage(new Uri("pack://application:,,,/Assets/Images/cursor.png")),
+                        Width = 26,
+                        Height = 26,
+                    };
+                    RenderOptions.SetBitmapScalingMode(img, BitmapScalingMode.HighQuality);
+                    return img;
                 case UIToolElementType.Label:
                     return new TextBlock { Text = "T", Foreground = Brushes.Black, FontSize = 18, HorizontalAlignment = HorizontalAlignment.Center, VerticalAlignment = VerticalAlignment.Center };
 

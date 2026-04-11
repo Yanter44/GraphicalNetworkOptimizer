@@ -13,9 +13,11 @@
     <None Remove="Assets\Icons\gnologo.ico" />
     <None Remove="Assets\Images\accesspoint.png" />
     <None Remove="Assets\Images\add.png" />
+    <None Remove="Assets\Images\cloud.png" />
     <None Remove="Assets\Images\commutator.png" />
     <None Remove="Assets\Images\connect.png" />
     <None Remove="Assets\Images\connectedGroup.png" />
+    <None Remove="Assets\Images\cursor.png" />
     <None Remove="Assets\Images\delete.png" />
     <None Remove="Assets\Images\devices.png" />
     <None Remove="Assets\Images\disconnectGroup.png" />
@@ -79,6 +81,9 @@
     <Resource Include="Assets\Images\add.png">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Resource>
+    <Resource Include="Assets\Images\cloud.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
     <Resource Include="Assets\Images\commutator.png">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Resource>
@@ -86,6 +91,9 @@
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Resource>
     <Resource Include="Assets\Images\connectedGroup.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Assets\Images\cursor.png">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Resource>
     <Resource Include="Assets\Images\delete.png">

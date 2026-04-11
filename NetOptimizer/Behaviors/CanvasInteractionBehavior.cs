@@ -1,10 +1,12 @@
 ﻿using Microsoft.Xaml.Behaviors;
 using NetOptimizer.Models;
+using NetOptimizer.Models.Dtos;
 using NetOptimizer.Models.Enums;
 using NetOptimizer.Models.UIElements;
 using NetOptimizer.ViewModels.MainWindow;
 using NetOptimizer.ViewModels.MainWindoww;
 using System.Diagnostics;
+using System.Runtime.Intrinsics.X86;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
@@ -24,25 +26,36 @@ namespace NetOptimizer.Behaviors
         private UIElement _drawElement;
 
         private bool _isPanning;
-        public  Polyline _connectionLine;
+        public  Line _connectionLine;
         private DeviceOnCanvas _sourceDevice;
         private Port _sourcePort;
         public bool IsTryingToConnect => _connectionLine != null;
         public event Action<DeviceOnCanvas, DeviceOnCanvas> ConnectionCreated;
+        private CanvasViewModel VM => AssociatedObject.DataContext as CanvasViewModel;
         protected override void OnAttached()
         {
             AssociatedObject.MouseWheel += OnWheel;
             AssociatedObject.MouseDown += OnMouseDown;
             AssociatedObject.MouseMove += OnMouseMove;
             AssociatedObject.MouseUp += OnMouseUp;
+            AssociatedObject.KeyDown += OnKeyDown;
         }
-        private CanvasViewModel VM => AssociatedObject.DataContext as CanvasViewModel;
-        public void StartConnectionLine(Point start, Polyline line, DeviceOnCanvas sourceDevice, Port sourcePort)
-        {  
+        private void OnKeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Delete)
+            {
+                VM?.DeleteSelected();
+            }
+        }
+        public void StartConnectionLine(Point start, Line line, DeviceOnCanvas sourceDevice, Port sourcePort)
+        {
             _connectionLine = line;
-            _connectionLine.Points.Clear();
-            _connectionLine.Points.Add(start);
-            _connectionLine.Points.Add(start);
+
+            _connectionLine.X1 = start.X;
+            _connectionLine.Y1 = start.Y;
+            _connectionLine.X2 = start.X;
+            _connectionLine.Y2 = start.Y;
+            _connectionLine.IsHitTestVisible = false;
             _connectionLine.Visibility = Visibility.Visible;
 
             _sourceDevice = sourceDevice;
@@ -52,9 +65,12 @@ namespace NetOptimizer.Behaviors
         public void FinishConnection(DeviceOnCanvas targetDevice, Port targetPort)
         {
             var window = Window.GetWindow(AssociatedObject);
-            if (window?.DataContext is MainWindowViewModel vm && _sourceDevice != null && _sourcePort != null)
+
+            if (window?.DataContext is MainWindowViewModel vm &&
+                _sourceDevice != null &&
+                _sourcePort != null)
             {
-                if (vm.TryConnectPorts(_sourceDevice, _sourcePort, targetDevice, targetPort, _connectionLine?.Points))
+                if (VM.TryConnectPorts(_sourceDevice, _sourcePort, targetDevice, targetPort))
                 {
                     StopConnectionLine();
                     ConnectionCreated?.Invoke(_sourceDevice, targetDevice);
@@ -71,9 +87,11 @@ namespace NetOptimizer.Behaviors
 
         private void OnMouseDown(object sender, MouseButtonEventArgs e)
         {
+            AssociatedObject.Focus();
             if (VM == null) return;
 
-            if (e.OriginalSource is FrameworkElement fe && fe.DataContext is DeviceOnCanvas)
+            bool isDeviceClick = e.OriginalSource is FrameworkElement fe && fe.DataContext is DeviceOnCanvas;
+            if (isDeviceClick)
                 return;
 
             if (e.MiddleButton == MouseButtonState.Pressed)
@@ -82,28 +100,32 @@ namespace NetOptimizer.Behaviors
                 _lastMouse = e.GetPosition((UIElement)AssociatedObject.Parent);
                 AssociatedObject.CaptureMouse();
             }
+
             if (e.LeftButton == MouseButtonState.Pressed)
             {
-                if (VM.CurrentTool != null)
+                if (VM.CurrentTool != null && VM.CurrentTool.Type != UIToolElementType.Cursor)
                 {
                     StartDrawing(e.GetPosition(AssociatedObject));
                     return;
                 }
-                if (_connectionLine != null)
+                if (VM.IsSelecting)
                 {
-                    Point pos = e.GetPosition(AssociatedObject);
-                    _connectionLine.Points[_connectionLine.Points.Count - 1] = pos;
-                    _connectionLine.Points.Add(pos);
+                    foreach (var d in VM.Devices)
+                        d.IsSelected = false;
+
+                    foreach (var uiObject in VM.UIObjects)
+                        uiObject.IsSelected = false;
+
+                    VM.StopSelection();
+                
                 }
-                else
-                {
-                    _selectionStart = e.GetPosition(AssociatedObject);
-                    VM.StartSelection(_selectionStart);
-                }   
+                _selectionStart = e.GetPosition(AssociatedObject);
+                VM.StartSelection(_selectionStart);
             }
-            if(e.RightButton == MouseButtonState.Pressed)
+
+            if (e.RightButton == MouseButtonState.Pressed)
             {
-                if(_connectionLine != null)
+                if (_connectionLine != null)
                 {
                     StopConnectionLine();
                 }
@@ -173,7 +195,6 @@ namespace NetOptimizer.Behaviors
                 Canvas.SetLeft(_drawElement, start.X);
                 Canvas.SetTop(_drawElement, start.Y);
             }
-
             AssociatedObject.Children.Add(_drawElement);
         }
 
@@ -206,7 +227,6 @@ namespace NetOptimizer.Behaviors
                             }
                             break;
                         }
-
                     case UIToolElementType.Elipse:
                         {
                             double size = Math.Max(w, h);
@@ -243,10 +263,8 @@ namespace NetOptimizer.Behaviors
             if (_connectionLine != null)
             {
                 Point pos = e.GetPosition(AssociatedObject);
-                if (_connectionLine.Points.Count > 0)
-                {
-                    _connectionLine.Points[_connectionLine.Points.Count - 1] = pos;
-                }
+                _connectionLine.X2 = pos.X;
+                _connectionLine.Y2 = pos.Y;
             }
             if (_isPanning)
             {
@@ -256,7 +274,7 @@ namespace NetOptimizer.Behaviors
                 _lastMouse = current;
             }
 
-            if (VM.IsSelecting)
+            if (VM.IsDrawingSelection)
             {
                 Point current = e.GetPosition(AssociatedObject);
                 VM.UpdateSelection(_selectionStart, current);
@@ -267,7 +285,7 @@ namespace NetOptimizer.Behaviors
             _isPanning = false;
             if (VM.IsDrawing)
             {
-                if(VM.CurrentTool.Type == UIToolElementType.Arrow)
+                if (VM.CurrentTool.Type == UIToolElementType.Arrow)
                 {
                     var arrow = _drawElement as Line;
                     AddArrowTip(arrow);
@@ -300,8 +318,8 @@ namespace NetOptimizer.Behaviors
                         creatableObject = new LineElement
                         {
                             Type = UIToolElementType.Line,
-                            X = (line.X1 + line.X2) / 2,
-                            Y = (line.Y1 + line.Y2) / 2,
+                            X = Canvas.GetLeft(line),
+                            Y = Canvas.GetTop(line),
                             Start = new Point(line.X1, line.Y1),
                             End = new Point(line.X2, line.Y2)
                         };
@@ -312,40 +330,79 @@ namespace NetOptimizer.Behaviors
                             Type = UIToolElementType.Сurve,
                             X = Canvas.GetLeft(poly),
                             Y = Canvas.GetTop(poly),
-                            Points = new List<Point>(poly.Points)
+                            Points = new PointCollection(poly.Points)
                         };
                         break;
 
                     case TextBox tb:
-                        creatableObject = new LabelElement
+                        tb.Focus();
+                        bool isFinalized = false;
+                        tb.LostFocus += (s, args) =>
                         {
-                            Type = UIToolElementType.Label,
-                            X = Canvas.GetLeft(tb),
-                            Y = Canvas.GetTop(tb),
-                            Width = tb.Width,
-                            Text = tb.Text
+                            if (isFinalized) return;
+                            isFinalized = true;
+                            FinalizeTextEntry(tb);
                         };
-                        break;
-                    
-                }
-                _drawElement = null;
-                VM.IsDrawing = false;
+                        tb.KeyDown += (s, args) =>
+                        {
+                            if (args.Key == Key.Enter)
+                            {
+                                if (isFinalized) return;
+                                isFinalized = true;
+
+                                FinalizeTextEntry(tb);
+                            }
+                        };
+
+                        _drawElement = null;
+                        VM.IsDrawing = false;
+                        return;
+                }     
                 if (creatableObject != null)
                 {
                     VM.UIObjects.Add(creatableObject);
                 }
+                if (_drawElement != null)
+                {
+                    AssociatedObject.Children.Remove(_drawElement);
+                    _drawElement = null;
+                }
+                VM.IsDrawing = false;
             }
-            if (VM.IsSelecting)
-                VM.StopSelection();
-
+            if (VM.IsDrawingSelection)
+            {
+                VM.StopDrawSelection();
+                if (!VM.Devices.Any(x => x.IsSelected) && !VM.UIObjects.Any(x => x.IsSelected))
+                {
+                    VM.StopSelection();
+                }
+            }
             AssociatedObject.ReleaseMouseCapture();
+        }
+        private void FinalizeTextEntry(TextBox tb)
+        {
+            if (string.IsNullOrWhiteSpace(tb.Text))
+            {
+                AssociatedObject.Children.Remove(tb);
+                return;
+            }
+            var label = new LabelElement
+            {
+                Type = UIToolElementType.Label,
+                X = Canvas.GetLeft(tb),
+                Y = Canvas.GetTop(tb),
+                Width = tb.ActualWidth > 0 ? tb.ActualWidth : 100,
+                Text = tb.Text
+            };
+
+            VM.UIObjects.Add(label);
+            AssociatedObject.Children.Remove(tb);
         }
         public void StopConnectionLine()
         {
             if (_connectionLine == null) return;
-
-            _connectionLine.Points.Clear();
-            _connectionLine.Visibility = Visibility.Collapsed;
+            var canvas = AssociatedObject;
+            canvas.Children.Remove(_connectionLine);
             _connectionLine = null;
         }
         public void AddArrowTip(Line arrowLine)

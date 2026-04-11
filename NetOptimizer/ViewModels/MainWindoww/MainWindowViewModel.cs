@@ -32,14 +32,6 @@ namespace NetOptimizer.ViewModels.MainWindow
 
         private CanvasSettings _canvasSettings;
         public CanvasSettings CanvasSettings { get => _canvasSettings; set { _canvasSettings = value; OnPropertyChanged(); } } 
-        public ObservableCollection<DeviceConnection> Connections { get; } = new ObservableCollection<DeviceConnection>();
-        public ObservableCollection<DeviceOnCanvas> DevicesOnCanvas => CanvasVM.Devices;
-         
-        public event Action<DeviceOnCanvas[]> DevicesUpdated;
-
-        public event EventHandler<DeviceOnCanvas> DeviceAdded;
-
-        public event Action<DeviceOnCanvas, DeviceOnCanvas> ConnectionRequested;
         public EditorViewModel editorViewModel { get; }
         public SandboxViewModel sandboxViewModel { get; }
         public CanvasViewModel CanvasVM { get; }
@@ -65,8 +57,7 @@ namespace NetOptimizer.ViewModels.MainWindow
 
             editorViewModel = editorVM;
             sandboxViewModel = sandboxVM;
-            EventAggregator.Instance.DeviceCreated += (dto, settings) => OnDeviceCreated(dto, settings);
-
+       
             ApplyAndBuildYamlFileCommand = new AsyncRelayCommand(ApplyAndBuildNetwork);
             OpenFinderFileDialogCommand = new RelayCommand(OpenFinderFileFileDialog);
             InitializeNewProject();
@@ -75,7 +66,6 @@ namespace NetOptimizer.ViewModels.MainWindow
             sandboxViewModel.InitializeAllAvailableTools();
             sandboxViewModel.StartDrawTool += OnStartDraw;
 
-            editorViewModel.InitializeAvailableTypes();
             editorViewModel.InitializeAllAvailableDevices();
             editorViewModel.GenerationRequested += OnAutoGenerationRequested;
 
@@ -137,7 +127,7 @@ namespace NetOptimizer.ViewModels.MainWindow
             yaml.AppendLine();
 
             yaml.AppendLine("nodes:");
-            foreach (var device in DevicesOnCanvas)
+            foreach (var device in CanvasVM.Devices)
             {
                 var logic = device.LogicDevice;
 
@@ -161,7 +151,7 @@ namespace NetOptimizer.ViewModels.MainWindow
             yaml.AppendLine("links:");
             var processedLinks = new HashSet<string>();
 
-            foreach (var device in DevicesOnCanvas)
+            foreach (var device in CanvasVM.Devices)
             {
                 foreach (var port in device.LogicDevice.Ports)
                 {
@@ -200,7 +190,7 @@ namespace NetOptimizer.ViewModels.MainWindow
             var resultWrite = await _yamlManager.CheckConfigAsync(resultRead);
             if (resultWrite != null)
             {
-                BuildNetwork(resultWrite);
+               // BuildNetwork(resultWrite);
             }
         }
         private async void OpenFinderFileFileDialog()
@@ -219,154 +209,50 @@ namespace NetOptimizer.ViewModels.MainWindow
 
             await _yamlManager.CreateYamlFile(directory, fileName, _currentYamlText);
         }
-        public void BuildNetwork(NetworkMap networkmap)
-        {
-            CanvasSettings.Width = networkmap.CanvasSettings.Width;
-            CanvasSettings.Height = networkmap.CanvasSettings.Height;
-            var visualLookup = new Dictionary<string, DeviceOnCanvas>();
-            int startX = 100;
+        //public void BuildNetwork(NetworkMap networkmap)
+        //{
+        //    CanvasSettings.Width = networkmap.CanvasSettings.Width;
+        //    CanvasSettings.Height = networkmap.CanvasSettings.Height;
+        //    var visualLookup = new Dictionary<string, DeviceOnCanvas>();
+        //    int startX = 100;
 
-            foreach (var item in networkmap.Devices)
-            {
-                var visual = new DeviceOnCanvas(item, startX, 200);
-                visualLookup[item.Name] = visual;
+        //    foreach (var item in networkmap.Devices)
+        //    {
+        //        var visual = new DeviceOnCanvas(item, startX, 200);
+        //        visualLookup[item.Name] = visual;
 
-                DevicesOnCanvas.Add(visual);
-                DeviceAdded?.Invoke(this, visual);
+        //        DevicesOnCanvas.Add(visual);
+        //        DeviceAdded?.Invoke(this, visual);
 
-                startX += 200;
-            }
-            var processedLinks = new HashSet<int>();
-            foreach (var visual in DevicesOnCanvas)
-            {
-                foreach (var port in visual.LogicDevice.Ports)
-                {
-                    if (port.ConnectedTo == null) continue;
+        //        startX += 200;
+        //    }
+        //    var processedLinks = new HashSet<int>();
+        //    foreach (var visual in DevicesOnCanvas)
+        //    {
+        //        foreach (var port in visual.LogicDevice.Ports)
+        //        {
+        //            if (port.ConnectedTo == null) continue;
 
-                    int linkId = port.GetHashCode() ^ port.ConnectedTo.GetHashCode();
+        //            int linkId = port.GetHashCode() ^ port.ConnectedTo.GetHashCode();
 
-                    if (!processedLinks.Contains(linkId))
-                    {
-                        var sourceVisual = visual;
-                        var targetVisual = DevicesOnCanvas.FirstOrDefault(d => d.LogicDevice == port.ConnectedTo.Owner);
+        //            if (!processedLinks.Contains(linkId))
+        //            {
+        //                var sourceVisual = visual;
+        //                var targetVisual = DevicesOnCanvas.FirstOrDefault(d => d.LogicDevice == port.ConnectedTo.Owner);
 
-                        if (targetVisual != null)
-                        {
+        //                if (targetVisual != null)
+        //                {
 
-                            ConnectionRequested?.Invoke(sourceVisual, targetVisual);
-                            processedLinks.Add(linkId);
-                        }
-                    }
-                }
-            }
-        }
-        public void DrawAllConnectionsForDevice(DeviceOnCanvas deviceOnCanvas)
-        {
-            foreach (var port in deviceOnCanvas.LogicDevice.Ports)
-            {
-                if (port.IsLinked)
-                {
-                    var remotePort = port.ConnectedTo;
-                    var targetVisual = DevicesOnCanvas.FirstOrDefault(d => d.LogicDevice == remotePort.Owner);
-
-                    if (targetVisual != null)
-                    {
-                        ConnectionRequested?.Invoke(deviceOnCanvas, targetVisual);
-                    }
-                }
-            }
-        }
-
-        public bool TryConnectPorts(DeviceOnCanvas sourceDevice, Port sourcePort, DeviceOnCanvas targetDevice, Port targetPort, PointCollection intermediatePoints = null)
-        {
-            if (targetPort.IsLinked)
-                return ShowError($"Порт {targetPort.PortName} уже занят!");
-
-            if (sourcePort.Type != targetPort.Type)
-                return ShowError($"Нельзя соединить {sourcePort.Type} с {targetPort.Type}");
-
-            try
-            {
-                sourcePort.LinkTo(targetPort);
-
-                var conn = new DeviceConnection
-                {
-                    Source = sourceDevice,
-                    Target = targetDevice,
-                    SourcePort = sourcePort,
-                    TargetPort = targetPort,
-                };
-                intermediatePoints?.Skip(1).Take(intermediatePoints.Count - 2)
-                                  .ToList()
-                                  .ForEach(p => conn.AddIntermediatePoint(p));
-
-                conn.UpdatePoints();
-                Connections.Add(conn);
-                UpdateYamlFromCanvas();
-                return true;
-            }
-            catch (Exception ex)
-            {
-                return ShowError(ex.Message);
-            }
-
-            bool ShowError(string message)  // <-- локальная функция
-            {
-                _windowNavigator.ShowModalView<ErrorWindow, ErrorWindowViewModel>(message);
-                return false;
-            }
-        }
-        
-        public void ShowPortError(Port port) =>  _windowNavigator.ShowModalView<ErrorWindow, ErrorWindowViewModel>($"Ошибка: Порт {port.PortName} уже занят!");
-        public void RemoveDevice(DeviceOnCanvas device)
-        {
-            var connectionsToRemove = Connections.Where(c => c.Source == device || c.Target == device).ToList();
-            var neighbors = connectionsToRemove
-                            .SelectMany(c => new[] { c.Source, c.Target })
-                            .Where(d => d != device)
-                            .Distinct()
-                            .ToArray();
-
-            foreach (var conn in connectionsToRemove)
-            {
-                conn.SourcePort?.Unlink();
-                conn.TargetPort?.Unlink();
-                Connections.Remove(conn);
-            }
-
-            DevicesOnCanvas.Remove(device);
-            UpdateYamlFromCanvas();
-            DevicesUpdated?.Invoke(neighbors);
-        }
-
-        public void MoveDevice(DeviceOnCanvas device, double dx, double dy)
-        {
-            var target = DevicesOnCanvas.FirstOrDefault(d => d == device);
-            if (target == null) return;
-
-            target.X += dx;
-            target.Y += dy;
-        }
-        public void SelectDevice(DeviceOnCanvas device, bool isSelected)
-        {
-            if (device != null)
-                device.IsSelected = isSelected;
-        }
-        private void OnDeviceCreated(DeviceToAddDto dto, DeviceSettingsBase settings, double x = 500, double y = 500)
-        {
-            Device logicDevice = (dto.Type, settings) switch
-            {
-                (DeviceType.PC, PcSettingsViewModel p) => new PcDevice(p.Name, p.GetSettings()),
-                (DeviceType.Switch, SwitchSettingViewModel s) => new SwitchDevice(s.Name, s.GetSettings()),
-                (DeviceType.Router, RouterSettingsViewModel r) => new RouterDevice(r.Name, r.GetSettings()),
-                _ => null
-            };
-            if (logicDevice == null) return;
-            var deviceOnCanvas = new DeviceOnCanvas(logicDevice, x, y);
-            DevicesOnCanvas.Add(deviceOnCanvas);
-            UpdateYamlFromCanvas();
-        }
-     
+        //                    ConnectionRequested?.Invoke(sourceVisual, targetVisual);
+        //                    processedLinks.Add(linkId);
+        //                }
+        //            }
+        //        }
+        //    }
+        //}
+ 
+      
+  
         public event PropertyChangedEventHandler PropertyChanged;
         protected void OnPropertyChanged([CallerMemberName] string propertyName = null)
         {
