@@ -3,7 +3,7 @@ using NetOptimizer.Enums;
 using NetOptimizer.Interfaces;
 using NetOptimizer.Models.Dtos;
 using NetOptimizer.Models.Enums;
-using NetOptimizer.ViewModels.CreateDeviceWindow;
+using NetOptimizer.ViewModels.CreateDeviceWindoww;
 using NetOptimizer.Views;
 using System.Collections.ObjectModel;
 using System.ComponentModel;

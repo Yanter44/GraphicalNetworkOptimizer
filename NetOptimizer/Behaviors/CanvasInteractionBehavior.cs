@@ -26,11 +26,7 @@ namespace NetOptimizer.Behaviors
         private UIElement _drawElement;
 
         private bool _isPanning;
-        public  Line _connectionLine;
-        private DeviceOnCanvas _sourceDevice;
-        private Port _sourcePort;
-        public bool IsTryingToConnect => _connectionLine != null;
-        public event Action<DeviceOnCanvas, DeviceOnCanvas> ConnectionCreated;
+
         private CanvasViewModel VM => AssociatedObject.DataContext as CanvasViewModel;
         protected override void OnAttached()
         {
@@ -47,36 +43,7 @@ namespace NetOptimizer.Behaviors
                 VM?.DeleteSelected();
             }
         }
-        public void StartConnectionLine(Point start, Line line, DeviceOnCanvas sourceDevice, Port sourcePort)
-        {
-            _connectionLine = line;
 
-            _connectionLine.X1 = start.X;
-            _connectionLine.Y1 = start.Y;
-            _connectionLine.X2 = start.X;
-            _connectionLine.Y2 = start.Y;
-            _connectionLine.IsHitTestVisible = false;
-            _connectionLine.Visibility = Visibility.Visible;
-
-            _sourceDevice = sourceDevice;
-            _sourcePort = sourcePort;
-        }
-
-        public void FinishConnection(DeviceOnCanvas targetDevice, Port targetPort)
-        {
-            var window = Window.GetWindow(AssociatedObject);
-
-            if (window?.DataContext is MainWindowViewModel vm &&
-                _sourceDevice != null &&
-                _sourcePort != null)
-            {
-                if (VM.TryConnectPorts(_sourceDevice, _sourcePort, targetDevice, targetPort))
-                {
-                    StopConnectionLine();
-                    ConnectionCreated?.Invoke(_sourceDevice, targetDevice);
-                }
-            }
-        }
         private void OnWheel(object sendesr, MouseWheelEventArgs e)
         {
             if (VM == null) return;
@@ -125,9 +92,9 @@ namespace NetOptimizer.Behaviors
 
             if (e.RightButton == MouseButtonState.Pressed)
             {
-                if (_connectionLine != null)
+                if (VM.TempConnectionLine != null)
                 {
-                    StopConnectionLine();
+                    VM.StopConnectionLine();
                 }
             }
         }
@@ -260,11 +227,10 @@ namespace NetOptimizer.Behaviors
                         }
                 }
             }
-            if (_connectionLine != null)
+            if (VM.IsTryingToConnect && VM.TempConnectionLine != null)
             {
                 Point pos = e.GetPosition(AssociatedObject);
-                _connectionLine.X2 = pos.X;
-                _connectionLine.Y2 = pos.Y;
+                VM.TempConnectionLine.End = new Point(pos.X, pos.Y);
             }
             if (_isPanning)
             {
@@ -288,7 +254,6 @@ namespace NetOptimizer.Behaviors
                 if (VM.CurrentTool.Type == UIToolElementType.Arrow)
                 {
                     var arrow = _drawElement as Line;
-                    AddArrowTip(arrow);
                 }
                 UIElementBase creatableObject = null;
                 switch (_drawElement)
@@ -315,15 +280,29 @@ namespace NetOptimizer.Behaviors
                         };
                         break;
                     case Line line:
-                        creatableObject = new LineElement
                         {
-                            Type = UIToolElementType.Line,
-                            X = Canvas.GetLeft(line),
-                            Y = Canvas.GetTop(line),
-                            Start = new Point(line.X1, line.Y1),
-                            End = new Point(line.X2, line.Y2)
-                        };
-                        break;
+                            if (VM.CurrentTool.Type == UIToolElementType.Arrow)
+                            {
+                                creatableObject = new ArrowElement
+                                {
+                                    Type = UIToolElementType.Arrow,
+                                    Start = new Point(line.X1, line.Y1),
+                                    End = new Point(line.X2, line.Y2)
+                                };
+                            }
+                            else
+                            {
+                                creatableObject = new LineElement
+                                {
+                                    Type = UIToolElementType.Line,
+                                    X = Canvas.GetLeft(line),
+                                    Y = Canvas.GetTop(line),
+                                    Start = new Point(line.X1, line.Y1),
+                                    End = new Point(line.X2, line.Y2)
+                                };
+                            }
+                            break;
+                        }
                     case Polyline poly:
                         creatableObject = new CurveElement
                         {
@@ -397,46 +376,6 @@ namespace NetOptimizer.Behaviors
 
             VM.UIObjects.Add(label);
             AssociatedObject.Children.Remove(tb);
-        }
-        public void StopConnectionLine()
-        {
-            if (_connectionLine == null) return;
-            var canvas = AssociatedObject;
-            canvas.Children.Remove(_connectionLine);
-            _connectionLine = null;
-        }
-        public void AddArrowTip(Line arrowLine)
-        {
-            double arrowLength = 10; 
-            double arrowWidth = 5;   
-
-            double angle = Math.Atan2(
-                arrowLine.Y2 - arrowLine.Y1,
-                arrowLine.X2 - arrowLine.X1
-            );
-
-            var left = new Line
-            {
-                Stroke = Brushes.Black,
-                StrokeThickness = arrowLine.StrokeThickness,
-                X1 = arrowLine.X2,
-                Y1 = arrowLine.Y2,
-                X2 = arrowLine.X2 - arrowLength * Math.Cos(angle - Math.PI / 6),
-                Y2 = arrowLine.Y2 - arrowLength * Math.Sin(angle - Math.PI / 6)
-            };
-
-            var right = new Line
-            {
-                Stroke = Brushes.Black,
-                StrokeThickness = arrowLine.StrokeThickness,
-                X1 = arrowLine.X2,
-                Y1 = arrowLine.Y2,
-                X2 = arrowLine.X2 - arrowLength * Math.Cos(angle + Math.PI / 6),
-                Y2 = arrowLine.Y2 - arrowLength * Math.Sin(angle + Math.PI / 6)
-            };
-
-            AssociatedObject.Children.Add(left);
-            AssociatedObject.Children.Add(right);
         }
     }
 }

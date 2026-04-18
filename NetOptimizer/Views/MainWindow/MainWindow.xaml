@@ -6,6 +6,7 @@
         xmlns:avalonEdit="http://icsharpcode.net/sharpdevelop/avalonedit"
         xmlns:conv="clr-namespace:NetOptimizer.Convertors"
         xmlns:local="clr-namespace:NetOptimizer"
+        xmlns:helpers="clr-namespace:NetOptimizer.Helpers"
         xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
         xmlns:behaviors="clr-namespace:NetOptimizer.Behaviors"
         mc:Ignorable="d"
@@ -20,6 +21,9 @@
             <conv:ToolTypeToShapeConverter x:Key="ToolTypeToShapeConverter"/>
             <conv:CanvasCursorIsDrawingConverter x:Key="CanvasCursorIsDrawingConverter"/>
             <conv:SelectionToEffectConverter x:Key="SelectionToEffectConverter"/>
+            <conv:PortHeaderConverter x:Key="PortHeaderConverter"/>
+            <conv:PortColorConverter x:Key="PortColorConverter"/>
+            <conv:NullToVisibilityConverter x:Key="NullToVisibilityConverter"/>
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="/Views/ResourcesDictionary/MainWindowResources.xaml"/>
             </ResourceDictionary.MergedDictionaries>
@@ -429,7 +433,7 @@
                     </Canvas.RenderTransform>
 
                     <!--Устройства-->
-                    <ItemsControl ItemsSource="{Binding Devices}"  Panel.ZIndex="3" >
+                    <ItemsControl x:Name="DevicesList" ItemsSource="{Binding Devices}" Panel.ZIndex="3" >
                         <ItemsControl.ItemsPanel>
                             <ItemsPanelTemplate>
                                 <Canvas />
@@ -446,20 +450,58 @@
                         <ItemsControl.ItemTemplate>
                             <DataTemplate>
                                 <Grid Width="64">
+                                    <Grid.Resources>
+                                        <helpers:BindingProxy x:Key="DeviceProxy" Data="{Binding}" />
+                                    </Grid.Resources>
                                     <Border  x:Name="SelectionBorder" Background="#4087CEFA" CornerRadius="4"
                                              Visibility="{Binding IsSelected, Converter={StaticResource BoolToVisibilityConverter}}"
                                              IsHitTestVisible="False"/>
 
-                                    <StackPanel Cursor="Hand" Background="Transparent">
+                                    <StackPanel x:Name="DevicePanel" Cursor="Hand" Background="Transparent" ToolTipService.InitialShowDelay="2000">
+                                        
+                                        <StackPanel.ToolTip>
+                                            <ToolTip Style="{StaticResource DeviceToolTipStyle}" Content="{Binding}" ContentTemplate="{StaticResource DeviceTooltipTemplate}" />
+                                        </StackPanel.ToolTip>
 
+                                        <StackPanel.ContextMenu >
+                                            <ContextMenu>
+                                                <MenuItem Header="Подключить"
+                                                          ItemsSource="{Binding Data.LogicDevice.Ports, Source={StaticResource DeviceProxy}}">
+                                                    <MenuItem.Icon>
+                                                        <Image Source="/Assets/Images/connect.png" Width="20" Height="20"/>
+                                                    </MenuItem.Icon>
+
+                                                    <MenuItem.ItemContainerStyle>
+                                                        <Style TargetType="MenuItem">
+                                                            <Setter Property="Header">
+                                                                <Setter.Value>
+                                                                    <MultiBinding Converter="{StaticResource PortHeaderConverter}">
+                                                                        <Binding Path="IsLinked"/>
+                                                                        <Binding />
+                                                                    </MultiBinding>
+                                                                </Setter.Value>
+                                                            </Setter>
+                                                            <Setter Property="Foreground" Value="{Binding IsLinked, Converter={StaticResource PortColorConverter}}" />
+
+                                                            <Setter Property="Command" Value="{Binding DataContext.SelectDevicePortCommand, Source={x:Reference DevicesList}}" />
+                                                            <Setter Property="CommandParameter" Value="{Binding}" />
+                                                        </Style>
+                                                    </MenuItem.ItemContainerStyle>
+                                                </MenuItem>
+                                                <Separator/>
+                                                <MenuItem Header="Удалить" Command="{Binding DataContext.DeleteDeviceCommand, Source={x:Reference DevicesList}}"
+                                                          CommandParameter="{Binding Data, Source={StaticResource DeviceProxy}}" >
+                                                    <MenuItem.Icon>
+                                                        <Image Source="/Assets/Images/delete.png" Width="20" Height="20"/>
+                                                    </MenuItem.Icon>
+                                                </MenuItem>
+                                            </ContextMenu>
+                                        </StackPanel.ContextMenu>
                                         <i:Interaction.Behaviors>
                                             <behaviors:DeviceDragBehavior/>
                                         </i:Interaction.Behaviors>
-
                                         <Image Width="48" Height="48" Source="{Binding ImageSource}" />
-
                                         <TextBlock Text="{Binding DeviceName}" HorizontalAlignment="Center" FontSize="10"/>
-
                                     </StackPanel>
                                 </Grid>
                             </DataTemplate>
@@ -474,8 +516,7 @@
                             </ItemsPanelTemplate>
                         </ItemsControl.ItemsPanel>
                         <ItemsControl.ItemTemplate>
-                            <DataTemplate>
-                                
+                            <DataTemplate>              
                                 <Line X1="{Binding X1}" Y1="{Binding Y1}" X2="{Binding X2}" Y2="{Binding Y2}" Stroke="Gray" StrokeDashArray="4 2" StrokeThickness="2" />
                             </DataTemplate>
                         </ItemsControl.ItemTemplate>
@@ -509,6 +550,15 @@
                                Canvas.Left="{Binding SelectionRect.X}"
                                Canvas.Top="{Binding SelectionRect.Y}"
                                IsHitTestVisible="False"/>
+
+                    <Line X1="{Binding TempConnectionLine.Start.X}" 
+                          Y1="{Binding TempConnectionLine.Start.Y}"
+                          X2="{Binding TempConnectionLine.End.X}" 
+                          Y2="{Binding TempConnectionLine.End.Y}"
+                          Stroke="#54CFFF" StrokeThickness="2" StrokeDashArray="4 2"
+                          Panel.ZIndex="10"
+                          IsHitTestVisible="False" 
+                          Visibility="{Binding TempConnectionLine, Converter={StaticResource NullToVisibilityConverter}}" />
                 </Canvas>
 
 

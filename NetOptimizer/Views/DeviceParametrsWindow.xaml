@@ -3,10 +3,145 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:local="clr-namespace:NetOptimizer.Views"
+        xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:shell="clr-namespace:System.Windows.Shell;assembly=PresentationFramework"
+        xmlns:conv="clr-namespace:NetOptimizer.Convertors"
         mc:Ignorable="d"
         Title="Параметры устройства" Height="450" Width="500">
-    <Grid>
-        
-    </Grid>
+    
+    <Window.Resources>
+        <ResourceDictionary>
+            <conv:PortsToStringConverter x:Key="PortsToStringConverter"/>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="/Views/ResourcesDictionary/MainWindowResources.xaml"/>
+                <ResourceDictionary Source="/Views/ResourcesDictionary/DeviceParametrsResources.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Window.Resources>
+    
+    <shell:WindowChrome.WindowChrome>
+        <shell:WindowChrome CaptionHeight="0" CornerRadius="16"
+                            GlassFrameThickness="0" ResizeBorderThickness="0"/>
+    </shell:WindowChrome.WindowChrome>
+
+    <Border Background="#FCFBFE" CornerRadius="16"
+            BorderThickness="1"    BorderBrush="#EDEDED" SnapsToDevicePixels="True">
+
+        <Grid Background="White">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="30"/>
+                <RowDefinition Height="40"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+            <Border Grid.Row="0" Background="#FCFBFE" MouseLeftButtonDown="NavBar_MouseLeftButtonDown" 
+                BorderBrush="#EDEEF4" BorderThickness="0,0,0,1"
+                HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="166"></ColumnDefinition>
+                        <ColumnDefinition Width="166"></ColumnDefinition>
+                        <ColumnDefinition Width="166"></ColumnDefinition>
+                    </Grid.ColumnDefinitions>
+
+                    <TextBlock Grid.Column="1" FontSize="14" TextAlignment="Center"
+                           FontWeight="ExtraLight" VerticalAlignment="Center"  
+                           Text="Параметры устройства"/>
+                    <Button  Command="{Binding CloseCommand}" CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Window}}"
+                             Grid.Column="2" Content="✕" Width="28" Height="28"
+                             HorizontalAlignment="Right" Background="Transparent"
+                             BorderThickness="0" FontSize="14"
+                           Cursor="Hand">
+                        <Button.Template>
+                            <ControlTemplate TargetType="Button">
+                                <Border x:Name="border" Background="#F0F3FC" CornerRadius="10">
+                                    <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </Border>
+                                <ControlTemplate.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter TargetName="border" Property="Background" Value="#FF6079"/>
+                                        <Setter  Property="Foreground" Value="White"/>
+                                    </Trigger>
+                                    <Trigger Property="IsPressed" Value="True">
+                                        <Setter TargetName="border" Property="Background" Value="#BB1E1E"/>
+                                        <Setter Property="Foreground" Value="White"/>
+                                    </Trigger>
+                                </ControlTemplate.Triggers>
+                            </ControlTemplate>
+                        </Button.Template>
+                    </Button>
+                </Grid>
+            </Border>
+
+            <TabControl Grid.Row="1" Padding="0" Grid.RowSpan="2"
+                        Margin="0"   BorderThickness="0">
+                <TabControl.Template>
+                    <ControlTemplate TargetType="TabControl">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*"/>
+                            </Grid.RowDefinitions>
+                            
+                            <UniformGrid Rows="1" Columns="2" Grid.Row="0" IsItemsHost="True"/>
+                            <ContentPresenter Grid.Row="1" ContentSource="SelectedContent"/>
+                        </Grid>
+                    </ControlTemplate>
+                </TabControl.Template>
+
+                <!--Вкладка: Физические свойства-->
+                <TabItem Style="{StaticResource ModernTabItemStyle}" Height="40">
+                    <TabItem.Header>
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                            <Image Source="/Assets/Images/matplata.png" Width="30" Height="30" Margin="0,0,8,0"/>
+                            <TextBlock Text="Физические" VerticalAlignment="Center" Foreground="Black"/>
+                        </StackPanel>
+                    </TabItem.Header>
+                    <Grid>
+                        <Path Stretch="Fill">
+                            <Path.Data>
+                                <RectangleGeometry Rect="0,0,100,100" RadiusX="0" RadiusY="12"/>
+                            </Path.Data>
+
+                            <Path.Fill>
+                                <LinearGradientBrush StartPoint="1,0" EndPoint="1,1">
+                                    <GradientStop Color="#F5F7FA" Offset="0"/>
+                                    <GradientStop Color="#E3F2FD" Offset="1"/>
+                                </LinearGradientBrush>
+                            </Path.Fill>
+                        </Path>
+                        <Border Background="#80FFFFFF" CornerRadius="10" Margin="0"/>
+                        <ContentControl Content="{Binding OpenedDevice}" ContentTemplateSelector="{StaticResource DeviceSpecsSelector}" Margin="15"/>
+                    </Grid>
+                </TabItem>
+                
+                <!--Вкладка: Сетевые свойства-->
+                <TabItem Style="{StaticResource ModernTabItemStyle}" BorderThickness="0,0,0,0"  Height="40">
+                    <TabItem.Header >
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" >
+                            <Image Source="/Assets/Images/internet.png" Width="30" Height="30" Margin="0,0,8,0"/>
+                            <TextBlock Text="Сетевые" VerticalAlignment="Center" Foreground="Black"/>
+                        </StackPanel>
+                    </TabItem.Header>
+                    <Grid>
+                        <Path Stretch="Fill">
+                            <Path.Data>
+                                <RectangleGeometry Rect="0,0,100,100" RadiusX="0" RadiusY="12"/>
+                            </Path.Data>
+
+                            <Path.Fill>
+                                <LinearGradientBrush StartPoint="1,0" EndPoint="1,1">
+                                    <GradientStop Color="#F5F7FA" Offset="0"/>
+                                    <GradientStop Color="#E3F2FD" Offset="1"/>
+                                </LinearGradientBrush>
+                            </Path.Fill>
+                        </Path>
+                        <Border Background="#80FFFFFF" CornerRadius="10" Margin="0"/>
+                        <ContentControl Content="{Binding OpenedDevice}" ContentTemplateSelector="{StaticResource DeviceNetSpecsSelector}" Margin="15"/>
+                    </Grid>
+                </TabItem>
+            </TabControl>
+        </Grid>
+    </Border>
 </Window>

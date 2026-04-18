@@ -11,7 +11,6 @@ namespace NetOptimizer.Models.UIElements
     {
         private Point _start;
         private Point _end;
-
         public Point Start { get => _start; set { _start = value; OnPropertyChanged(); } }
         public Point End { get => _end; set { _end = value; OnPropertyChanged(); } }
 

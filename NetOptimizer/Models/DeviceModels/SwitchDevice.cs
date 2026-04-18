@@ -6,6 +6,7 @@ namespace NetOptimizer.Models.DeviceModels
 {
     public class SwitchDevice : Device
     {
+        public string Vendor { get; set; }
         public DeviceLayer Layer { get; set; }
         public bool SupportsPoe { get; set; }
         public decimal AveragePrice { get; set; }
@@ -13,12 +14,12 @@ namespace NetOptimizer.Models.DeviceModels
         public SwitchDevice(string name, SwitchSettings settings) : base(name)
         {
             this.Type = DeviceType.Switch;
+            this.Vendor = settings.Vendor;
             this.DeviceModel = settings.Model;
             this.Vendor = settings.Vendor;
             this.Layer = settings.DeviceLayer;
             this.SupportsPoe = settings.SupportsPoe;
             this.AveragePrice = settings.AveragePrice;
-
             GeneratePorts(settings.Ports);
         }
 

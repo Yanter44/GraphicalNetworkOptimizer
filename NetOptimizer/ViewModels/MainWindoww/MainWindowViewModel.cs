@@ -209,49 +209,6 @@ namespace NetOptimizer.ViewModels.MainWindow
 
             await _yamlManager.CreateYamlFile(directory, fileName, _currentYamlText);
         }
-        //public void BuildNetwork(NetworkMap networkmap)
-        //{
-        //    CanvasSettings.Width = networkmap.CanvasSettings.Width;
-        //    CanvasSettings.Height = networkmap.CanvasSettings.Height;
-        //    var visualLookup = new Dictionary<string, DeviceOnCanvas>();
-        //    int startX = 100;
-
-        //    foreach (var item in networkmap.Devices)
-        //    {
-        //        var visual = new DeviceOnCanvas(item, startX, 200);
-        //        visualLookup[item.Name] = visual;
-
-        //        DevicesOnCanvas.Add(visual);
-        //        DeviceAdded?.Invoke(this, visual);
-
-        //        startX += 200;
-        //    }
-        //    var processedLinks = new HashSet<int>();
-        //    foreach (var visual in DevicesOnCanvas)
-        //    {
-        //        foreach (var port in visual.LogicDevice.Ports)
-        //        {
-        //            if (port.ConnectedTo == null) continue;
-
-        //            int linkId = port.GetHashCode() ^ port.ConnectedTo.GetHashCode();
-
-        //            if (!processedLinks.Contains(linkId))
-        //            {
-        //                var sourceVisual = visual;
-        //                var targetVisual = DevicesOnCanvas.FirstOrDefault(d => d.LogicDevice == port.ConnectedTo.Owner);
-
-        //                if (targetVisual != null)
-        //                {
-
-        //                    ConnectionRequested?.Invoke(sourceVisual, targetVisual);
-        //                    processedLinks.Add(linkId);
-        //                }
-        //            }
-        //        }
-        //    }
-        //}
- 
-      
   
         public event PropertyChangedEventHandler PropertyChanged;
         protected void OnPropertyChanged([CallerMemberName] string propertyName = null)

@@ -1,4 +1,5 @@
-﻿using NetOptimizer.Enums;
+﻿using NetOptimizer.Common;
+using NetOptimizer.Enums;
 using NetOptimizer.Interfaces;
 using NetOptimizer.Models;
 using NetOptimizer.Models.DeviceModels;
@@ -8,6 +9,7 @@ using NetOptimizer.Models.UIElements;
 using NetOptimizer.Services;
 using NetOptimizer.ViewModels.DeviceParametrs;
 using NetOptimizer.ViewModels.DeviceSettingss;
+using NetOptimizer.ViewModels.MainWindow;
 using NetOptimizer.Views;
 using NetOptimizer.Views.DopViews;
 using Newtonsoft.Json.Bson;
@@ -15,13 +17,16 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Forms;
+using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Shapes;
 
 namespace NetOptimizer.ViewModels.MainWindoww
 {
     public class CanvasViewModel : INotifyPropertyChanged
     {
-
         private const int MaxConnectionsBetweenDevices = 6;
 
         private Point _canvasOffset;
@@ -34,6 +39,12 @@ namespace NetOptimizer.ViewModels.MainWindoww
         private double _canvasWidth;
         private double _canvasHeight;
         private UIToolElementToAddDto _currentTool;
+        private bool _isDrawing;
+        private bool _isTryingToConnect;
+        private TempLine _tempConnectionLine;
+
+        private DeviceOnCanvas _sourceDevice;
+        private Port _sourcePort;
         public double CanvasWidth { get => _canvasWidth; set { _canvasWidth = value; OnPropertyChanged(); } }
         public double CanvasHeight { get => _canvasHeight; set { _canvasHeight = value; OnPropertyChanged(); } }
         public Point CanvasOffset { get => _canvasOffset; set { _canvasOffset = value; OnPropertyChanged(); } }
@@ -42,13 +53,14 @@ namespace NetOptimizer.ViewModels.MainWindoww
         public bool IsDrawingSelection { get => _isDrawSelection; set { _isDrawSelection = value; OnPropertyChanged(); } }
         public bool IsSelecting { get => _isSelecting; set { _isSelecting = value; OnPropertyChanged(); } }
         public UIToolElementToAddDto CurrentTool { get => _currentTool; set { _currentTool = value;  OnPropertyChanged(); }}
-        private bool _isDrawing;
         public bool IsDrawing { get => _isDrawing; set { _isDrawing = value; OnPropertyChanged(); } }
-
-
+        public bool IsTryingToConnect { get => _isTryingToConnect; set { _isTryingToConnect = value; OnPropertyChanged(); } }
+        public TempLine TempConnectionLine { get => _tempConnectionLine; set { _tempConnectionLine = value; OnPropertyChanged(); } }
         public ObservableCollection<DeviceConnection> Connections { get; } = new ObservableCollection<DeviceConnection>();
         public ObservableCollection<DeviceOnCanvas> Devices { get; set; }  = new ObservableCollection<DeviceOnCanvas>();
         public ObservableCollection<UIElementBase> UIObjects { get; set; } = new();
+
+        private CanvasClipBoard _clipboard = new();
 
         public event Action<DeviceOnCanvas[]> DevicesUpdated;
 
@@ -57,8 +69,12 @@ namespace NetOptimizer.ViewModels.MainWindoww
         public event Action<DeviceOnCanvas, DeviceOnCanvas> ConnectionRequested;
 
         private readonly IWindowNavigator _windowNavigator;
+        public ICommand DeleteDeviceCommand { get; }
+        public ICommand SelectDevicePortCommand { get; }
         public CanvasViewModel(IWindowNavigator windowNavigator)
         {
+            DeleteDeviceCommand = new RelayCommand(obj => DeleteDevice(obj));
+            SelectDevicePortCommand = new RelayCommand(obj => SelectDevicePort(obj));
             EventAggregator.Instance.DeviceCreated += (dto, settings) => OnDeviceCreated(dto, settings);
             _windowNavigator = windowNavigator;
         }
@@ -76,26 +92,103 @@ namespace NetOptimizer.ViewModels.MainWindoww
             Devices.Add(deviceOnCanvas);
             // UpdateYamlFromCanvas();
         }
-
-        public void DeleteDevice(DeviceOnCanvas device)
+        public void SelectDevicePort(object obj)
         {
-            var connectionsToRemove = Connections.Where(c => c.Source == device || c.Target == device).ToList();
-            var neighbors = connectionsToRemove
-                            .SelectMany(c => new[] { c.Source, c.Target })
-                            .Where(d => d != device)
-                            .Distinct()
-                            .ToArray();
-
-            foreach (var conn in connectionsToRemove)
+            var port = obj as Port;
+            var deviceOnCanvas = Devices.FirstOrDefault(deviceOnCanvas => deviceOnCanvas.LogicDevice == port.Owner);
+            if (port.IsLinked)
             {
-                conn.SourcePort?.Unlink();
-                conn.TargetPort?.Unlink();
-                Connections.Remove(conn);
+                ShowPortError(port);
+                return;
+            }
+            if (IsTryingToConnect)
+            {
+                if(deviceOnCanvas != null)
+                {
+                    FinishConnection(deviceOnCanvas, port);
+                }  
+            }
+            else
+            {
+                StartDrawConnectionLine(deviceOnCanvas, port);
+            }
+        }
+        public void FinishConnection(DeviceOnCanvas targetDevice, Port targetPort)
+        {
+            if (TryConnectPorts(_sourceDevice, _sourcePort, targetDevice, targetPort))
+            {
+                StopConnectionLine();
+            }
+        }
+        public void StopConnectionLine()
+        {
+            if (TempConnectionLine == null) return;
+            IsTryingToConnect = false;
+            TempConnectionLine = null;
+        }
+        public void CopySelected()
+        {
+            _clipboard = new CanvasClipBoard();
+
+            var selectedDevices = Devices.Where(d => d.IsSelected).ToList();
+            var selectedUI = UIObjects.Where(u => u.IsSelected).ToList();
+
+            foreach (var device in selectedDevices)
+            {
+                var modelCopiedDevice = new DeviceOnCanvas(device.LogicDevice, device.X, device.Y)
+                {
+                    LogicDevice = device.LogicDevice,
+                    IsSelected = false
+                };
+                _clipboard.Devices.Add(modelCopiedDevice);
             }
 
-            Devices.Remove(device);
-            //UpdateYamlFromCanvas();
-            DevicesUpdated?.Invoke(neighbors);
+            foreach (var ui in selectedUI)
+            {
+           //     var uielement = new UiEle
+            //    _clipboard.UIElements.Add(ui);
+            }
+
+            foreach (var conn in Connections)
+            {
+                if (selectedDevices.Contains(conn.Source) &&
+                    selectedDevices.Contains(conn.Target))
+                {
+                    _clipboard.Connections.Add(conn);
+                }
+            }
+        }
+        private void StartDrawConnectionLine(DeviceOnCanvas sourceDevice, Port sourceport)
+        {
+            IsTryingToConnect = true;
+            _sourceDevice = sourceDevice;
+            _sourcePort = sourceport;
+            TempConnectionLine = new TempLine
+            {
+                Start = new Point(sourceDevice.X + 32, sourceDevice.Y + 32),
+                End = new Point(sourceDevice.X + 32, sourceDevice.Y + 32)
+            };
+        }
+        public void DeleteDevice(object obj)
+        {
+            var device = obj as DeviceOnCanvas;
+            var connectionsToRemove = Connections.Where(c => c.Source == device || c.Target == device).ToList();
+                var neighbors = connectionsToRemove
+                                .SelectMany(c => new[] { c.Source, c.Target })
+                                .Where(d => d != device)
+                                .Distinct()
+                                .ToArray();
+
+                foreach (var conn in connectionsToRemove)
+                {
+                    conn.SourcePort?.Unlink();
+                    conn.TargetPort?.Unlink();
+                    Connections.Remove(conn);
+                }
+
+                Devices.Remove(device);
+                //UpdateYamlFromCanvas();
+                DevicesUpdated?.Invoke(neighbors);
         }
         public void DrawAllConnectionsForDevice(DeviceOnCanvas deviceOnCanvas)
         {
@@ -114,10 +207,8 @@ namespace NetOptimizer.ViewModels.MainWindoww
             }
         }
         public void ShowPortError(Port port) => _windowNavigator.ShowModalView<ErrorWindow, ErrorWindowViewModel>($"Ошибка: Порт {port.PortName} уже занят!");
-        public void ShowDeviceParametrsWindow(DeviceOnCanvas device)
-        {
-            _windowNavigator.ShowModalView<DeviceParametrsWindow, DeviceParametrsViewModel>(device);
-        }
+        public void ShowDeviceParametrsWindow(DeviceOnCanvas device) => _windowNavigator.ShowModalView<DeviceParametrsWindow, DeviceParametrsViewModel>(device);
+        
         public void MoveDevice(DeviceOnCanvas device, double dx, double dy)
         {
             var target = Devices.FirstOrDefault(d => d == device);
@@ -286,6 +377,13 @@ namespace NetOptimizer.ViewModels.MainWindoww
                 if (uiObject is LineElement line)
                 {
                     uiObject.IsSelected = LineNearRect(line.Start, line.End, SelectionRect);
+                }
+                else if (uiObject is ArrowElement arrow)
+                {
+                    uiObject.IsSelected =
+                        LineNearRect(arrow.Start, arrow.End, SelectionRect) || 
+                        LineNearRect(arrow.End, arrow.Tip1, SelectionRect) ||    
+                        LineNearRect(arrow.End, arrow.Tip2, SelectionRect);    
                 }
                 else if (uiObject is RectangleElement rect)
                 {

@@ -72,10 +72,6 @@ namespace NetOptimizer.Behaviors
         private void OnMouseMove(object sender, MouseEventArgs e)
         {
             if (!_isDragging) return;
-
-            var vm = GetMainVM();
-            if (vm == null) return;
-
             var element = AssociatedObject.DataContext as UIElementBase;
             if (element == null) return;
 
@@ -84,12 +80,12 @@ namespace NetOptimizer.Behaviors
             double dx = currentMouse.X - _lastMousePosition.X;
             double dy = currentMouse.Y - _lastMousePosition.Y;
 
-            double adjustedDx = dx / vm.CanvasVM.CanvasScale;
-            double adjustedDy = dy / vm.CanvasVM.CanvasScale;
+            double adjustedDx = dx / canvasVM.CanvasScale;
+            double adjustedDy = dy / canvasVM.CanvasScale;
 
             Vector delta = new Vector(adjustedDx, adjustedDy);
 
-            var selectedElements = vm.CanvasVM.UIObjects
+            var selectedElements = canvasVM.UIObjects
                 .Where(x => x.IsSelected)
                 .ToList();
 
@@ -97,12 +93,12 @@ namespace NetOptimizer.Behaviors
             {
                 foreach (var el in selectedElements)
                 {
-                    vm.CanvasVM.MoveUIElement(el, delta);
+                    canvasVM.MoveUIElement(el, delta);
                 }
             }
             else
             {
-                vm.CanvasVM.MoveUIElement(element, delta);
+                canvasVM.MoveUIElement(element, delta);
             }
 
             _lastMousePosition = currentMouse;

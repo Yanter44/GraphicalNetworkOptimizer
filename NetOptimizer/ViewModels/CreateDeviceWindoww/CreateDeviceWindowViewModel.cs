@@ -9,7 +9,7 @@ using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Input;
 
-namespace NetOptimizer.ViewModels.CreateDeviceWindow
+namespace NetOptimizer.ViewModels.CreateDeviceWindoww
 {
     public class CreateDeviceWindowViewModel : INotifyPropertyChanged
     {

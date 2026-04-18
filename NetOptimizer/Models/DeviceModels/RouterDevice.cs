@@ -7,6 +7,7 @@ namespace NetOptimizer.Models.DeviceModels
 {
     public class RouterDevice : Device
     {
+        public string Vendor { get; set; }
         public bool IsManaged { get; set; }
         public WifiOptions WifiOptions { get; set; } = new();
         public PerformanceSpecs Performance { get; set; } = new();
@@ -15,12 +16,14 @@ namespace NetOptimizer.Models.DeviceModels
         public RouterDevice(string name, RouterSettings settings) : base(name)
         {
             this.Type = DeviceType.Router;
+            this.Vendor = settings.Vendor;
             this.DeviceModel = settings.Model;
             this.IsManaged = settings.IsManaged;
             this.AveragePrice = settings.AveragePrice;
             this.WifiOptions = settings.WifiOptions;
             this.Performance = settings.Performance;
             this.ProtocolSupport = settings.ProtocolSupport;
+
             GeneratePorts(settings.Ports);
         }
 

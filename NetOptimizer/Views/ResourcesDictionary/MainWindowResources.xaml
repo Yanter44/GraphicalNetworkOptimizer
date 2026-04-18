@@ -15,14 +15,15 @@
         <Setter Property="Foreground" Value="#333"/>
         <Setter Property="Padding" Value="5,2"/>
     </Style>
-    
+
     <Style x:Key="ModernTabItemStyle" TargetType="TabItem">
         <Setter Property="Template">
+            
             <Setter.Value>
                 <ControlTemplate TargetType="TabItem">
                     <Border x:Name="headerBorder" 
                         Background="Transparent" 
-                        BorderThickness="0,0,0,2" 
+                        BorderThickness="0,0,0,2"                       
                         BorderBrush="Transparent"
                         Cursor="Hand"
                         Padding="10,5">
@@ -317,7 +318,23 @@
             </Setter.Value>
         </Setter>
     </Style>
-
+    <!--Стиль девайс тултипа при наведении-->
+    <Style x:Key="DeviceToolTipStyle" TargetType="ToolTip">
+        <Setter Property="OverridesDefaultStyle" Value="True"/>
+        <Setter Property="HasDropShadow" Value="False"/>
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="BorderThickness" Value="0"/>
+        <Setter Property="Padding" Value="0"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="ToolTip">
+                    <Border Background="Transparent">
+                        <ContentPresenter />
+                    </Border>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
     <!-- =====================ДАТА ТЕМПЛЕЙТЫ ==================== -->
     
     <DataTemplate DataType="{x:Type deviceSettingsViewModels:PcSubMenuViewModel}">
@@ -507,7 +524,7 @@
                        Width="{Binding Width}" Height="{Binding Height}"
                        Cursor="Hand">
             </Rectangle>
-            <Rectangle Fill="Transparent" Stroke="#1892E8" StrokeThickness="2"
+            <Rectangle Fill="Transparent" Stroke="#1892E8" StrokeThickness="2" 
                        Width="{Binding Width}" Height="{Binding Height}"
                        Cursor="Hand" Visibility="{Binding IsSelected, Converter={StaticResource BoolToVisibilityConverter}}">
             </Rectangle>
@@ -519,11 +536,11 @@
 
     <DataTemplate x:Key="EllipseTemplate">
         <Grid>
-            <Ellipse Fill="Transparent" Stroke="Black" StrokeThickness="2"
+            <Ellipse Fill="Transparent" Stroke="Black" StrokeThickness="2" 
                      Width="{Binding Width}" Height="{Binding Height}"
                      Cursor="Hand">
             </Ellipse>
-            <Ellipse Fill="Transparent" Stroke="#1892E8" StrokeThickness="2"
+            <Ellipse Fill="Transparent" Stroke="#1892E8" StrokeThickness="2" 
                      Width="{Binding Width}" Height="{Binding Height}"
                      Cursor="Hand" Visibility="{Binding IsSelected, Converter={StaticResource BoolToVisibilityConverter}}">
             </Ellipse>
@@ -536,20 +553,20 @@
 
     <DataTemplate x:Key="LineTemplate">
         <Grid>
-            <Line  Stroke="Transparent" StrokeThickness="20"
+            <Line  Stroke="Transparent" StrokeThickness="20" Cursor="Hand"
                    X1="{Binding Start.X}"
                    Y1="{Binding Start.Y}"
                    X2="{Binding End.X}"
-                   Y2="{Binding End.Y}" Cursor="Hand"></Line>
+                   Y2="{Binding End.Y}"></Line>
 
-            <Line Stroke="#1892E8" StrokeThickness="4"
+            <Line Stroke="#1892E8" StrokeThickness="4" Cursor="Hand"
                   X1="{Binding Start.X}"
                   Y1="{Binding Start.Y}"
                   X2="{Binding End.X}"
                   Y2="{Binding End.Y}"
                   Visibility="{Binding IsSelected, Converter={StaticResource BoolToVisibilityConverter}}">
             </Line>
-            <Line Stroke="Black" StrokeThickness="2"
+            <Line Stroke="Black" StrokeThickness="2" Cursor="Hand"
                   X1="{Binding Start.X}"
                   Y1="{Binding Start.Y}"
                   X2="{Binding End.X}"
@@ -559,7 +576,6 @@
                 <behaviors:UIElementsDragBehavior/>
             </i:Interaction.Behaviors>
         </Grid>
-        
     </DataTemplate>
 
     <DataTemplate x:Key="LabelTemplate">
@@ -568,7 +584,7 @@
                 Cursor="Hand" TextAlignment="Center">
             </TextBlock>
             <Border BorderBrush="#1892E8" BorderThickness="2"  Visibility="{Binding IsSelected, Converter={StaticResource BoolToVisibilityConverter}}">
-                <TextBlock Text="{Binding Text}" Foreground="Transparent" Width="{Binding Width}"
+                <TextBlock Text="{Binding Text}" Foreground="Transparent" Width="{Binding Width}" 
                            Cursor="Hand" TextAlignment="Center">
                 </TextBlock>
             </Border>
@@ -587,19 +603,64 @@
             <Polyline Points="{Binding Points}"
                   Stroke="#1892E8"
                   StrokeThickness="4"
-                  Visibility="{Binding IsSelected, Converter={StaticResource BoolToVisibilityConverter}}"/>
+                  Cursor="Hand"
+                  Visibility="{Binding IsSelected, Converter={StaticResource BoolToVisibilityConverter}}" />
             <Polyline Points="{Binding Points}" 
              Stroke="Black" 
              StrokeThickness="2"
              StrokeLineJoin="Round"
              StrokeStartLineCap="Round"
-             StrokeEndLineCap="Round" >
+             StrokeEndLineCap="Round" Cursor="Hand" >
             </Polyline>
             <i:Interaction.Behaviors>
                 <behaviors:UIElementsDragBehavior/>
             </i:Interaction.Behaviors>
         </Grid>
- 
+    </DataTemplate>
+    
+    <DataTemplate x:Key="ArrowTemplate">
+        <Grid>
+            <Line Stroke="Transparent" StrokeThickness="20"  Cursor="Hand"
+                  X1="{Binding Start.X}" Y1="{Binding Start.Y}"
+                  X2="{Binding End.X}" Y2="{Binding End.Y}" />
+
+            <Line Stroke="Transparent" StrokeThickness="20" Cursor="Hand"
+                  X1="{Binding End.X}" Y1="{Binding End.Y}"
+                  X2="{Binding Tip1.X}" Y2="{Binding Tip1.Y}"/>
+
+            <Line Stroke="Transparent" StrokeThickness="20" Cursor="Hand"
+                  X1="{Binding End.X}" Y1="{Binding End.Y}"
+                  X2="{Binding Tip2.X}" Y2="{Binding Tip2.Y}"/>
+
+
+            <Line Stroke="Black" StrokeThickness="2" Cursor="Hand"
+                  X1="{Binding Start.X}" Y1="{Binding Start.Y}"
+                  X2="{Binding End.X}" Y2="{Binding End.Y}"/>
+
+            <Line Stroke="Black" StrokeThickness="2" Cursor="Hand"
+                  X1="{Binding End.X}" Y1="{Binding End.Y}"
+                  X2="{Binding Tip1.X}" Y2="{Binding Tip1.Y}"/>
+
+            <Line Stroke="Black" StrokeThickness="2" Cursor="Hand"
+                  X1="{Binding End.X}" Y1="{Binding End.Y}"
+                  X2="{Binding Tip2.X}" Y2="{Binding Tip2.Y}"/>
+
+
+            <Line Stroke="#1892E8" StrokeThickness="2" Cursor="Hand"
+                  X1="{Binding Start.X}" Y1="{Binding Start.Y}"
+                  X2="{Binding End.X}" Y2="{Binding End.Y}" Visibility="{Binding IsSelected, Converter={StaticResource BoolToVisibilityConverter}}"/>
+
+            <Line Stroke="#1892E8" StrokeThickness="2" Cursor="Hand"
+                  X1="{Binding End.X}" Y1="{Binding End.Y}"
+                  X2="{Binding Tip1.X}" Y2="{Binding Tip1.Y}" Visibility="{Binding IsSelected, Converter={StaticResource BoolToVisibilityConverter}}"/>
+
+            <Line Stroke="#1892E8" StrokeThickness="2" Cursor="Hand"
+                  X1="{Binding End.X}" Y1="{Binding End.Y}"
+                  X2="{Binding Tip2.X}" Y2="{Binding Tip2.Y}" Visibility="{Binding IsSelected, Converter={StaticResource BoolToVisibilityConverter}}"/>
+            <i:Interaction.Behaviors>
+                <behaviors:UIElementsDragBehavior/>
+            </i:Interaction.Behaviors>
+        </Grid>
     </DataTemplate>
     
     <selectors:UIElementTemplateSelector x:Key="UISelector"
@@ -607,9 +668,78 @@
         EllipseTemplate="{StaticResource EllipseTemplate}"
         LineTemplate="{StaticResource LineTemplate}"
         LabelTemplate="{StaticResource LabelTemplate}" 
-        CurveTemplate="{StaticResource CurveTemplate}"/>
-    
-    
-    
-    
+        CurveTemplate="{StaticResource CurveTemplate}"
+        ArrowTemplate="{StaticResource ArrowTemplate}"/>
+
+    <DataTemplate x:Key="DeviceTooltipTemplate">
+        <Border Background="#F50A0A0A"
+            BorderBrush="#54CFFF"
+            BorderThickness="1"
+            CornerRadius="3"
+            Padding="10">
+            <StackPanel>
+                <TextBlock Text="{Binding DeviceName}"
+                       Foreground="White"
+                       FontWeight="Bold"
+                       FontSize="12"
+                       Margin="0,0,0,5"/>
+
+                <Separator Background="DimGray" Margin="0,2,0,5"/>
+                <ItemsControl ItemsSource="{Binding LogicDevice.Ports}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+
+                            <StackPanel Orientation="Horizontal" Margin="0,1">
+                                <TextBlock Text="{Binding PortNumber}"
+                                       Foreground="LightGray"/>
+
+                                <TextBlock Text=": " Foreground="LightGray"/>
+                                <TextBlock>
+                                    <TextBlock.Style>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="Text" Value="❌ DOWN"/>
+                                            <Setter Property="Foreground" Value="IndianRed"/>
+
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding IsLinked}" Value="True">
+                                                    <Setter Property="Text" Value="✔ LINK"/>
+                                                    <Setter Property="Foreground" Value="LimeGreen"/>
+                                                    <Setter Property="FontWeight" Value="SemiBold"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBlock.Style>
+                                </TextBlock>
+
+                                <TextBlock Text=" → "
+                                       Foreground="Orange"
+                                       FontWeight="Bold"
+                                       Visibility="{Binding IsLinked, Converter={StaticResource BoolToVisibilityConverter}}"/>
+
+                                <TextBlock Text="{Binding ConnectedTo.Owner.Name}"
+                                       Foreground="Gray"
+                                       FontSize="10"
+                                       Visibility="{Binding IsLinked, Converter={StaticResource BoolToVisibilityConverter}}"/>
+
+                                <TextBlock Text=" ["
+                                       Foreground="Gray"
+                                       FontSize="10"
+                                       Visibility="{Binding IsLinked, Converter={StaticResource BoolToVisibilityConverter}}"/>
+
+                                <TextBlock Text="{Binding ConnectedTo.PortNumber}"
+                                       Foreground="Gray"
+                                       FontSize="10"
+                                       Visibility="{Binding IsLinked, Converter={StaticResource BoolToVisibilityConverter}}"/>
+                                <TextBlock Text="]"
+                                       Foreground="Gray"
+                                       FontSize="10"
+                                       Visibility="{Binding IsLinked, Converter={StaticResource BoolToVisibilityConverter}}"/>
+                            </StackPanel>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+
+            </StackPanel>
+        </Border>
+    </DataTemplate>
 </ResourceDictionary>

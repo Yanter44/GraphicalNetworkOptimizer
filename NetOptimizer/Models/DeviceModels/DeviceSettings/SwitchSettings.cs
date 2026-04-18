@@ -8,8 +8,8 @@ namespace NetOptimizer.Models.DeviceModels.DeviceSettings
 {
     public class SwitchSettings : DeviceSettingsBase
     {
-        public string Model { get; set; }
         public string Vendor { get; set; }
+        public string Model { get; set; }
         public int TotalPorts { get; set; }
         public bool SupportsPoe { get; set; }
         public List<PortDto> Ports { get; set; } = new List<PortDto>();

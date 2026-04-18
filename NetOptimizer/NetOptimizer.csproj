@@ -27,22 +27,33 @@
     <None Remove="Assets\Images\gno_logo.png" />
     <None Remove="Assets\Images\help.png" />
     <None Remove="Assets\Images\info.png" />
+    <None Remove="Assets\Images\internet.png" />
+    <None Remove="Assets\Images\internet2.png" />
+    <None Remove="Assets\Images\internet3.png" />
+    <None Remove="Assets\Images\matplata.png" />
     <None Remove="Assets\Images\minus.png" />
+    <None Remove="Assets\Images\model.png" />
     <None Remove="Assets\Images\new_project.png" />
     <None Remove="Assets\Images\open_flesh.png" />
     <None Remove="Assets\Images\pc.png" />
     <None Remove="Assets\Images\plus.png" />
+    <None Remove="Assets\Images\port.png" />
     <None Remove="Assets\Images\printer.png" />
+    <None Remove="Assets\Images\processor.png" />
+    <None Remove="Assets\Images\ram.png" />
     <None Remove="Assets\Images\reconnect.png" />
     <None Remove="Assets\Images\redact.png" />
     <None Remove="Assets\Images\router.png" />
     <None Remove="Assets\Images\rubl.png" />
     <None Remove="Assets\Images\save_card.png" />
     <None Remove="Assets\Images\server.png" />
+    <None Remove="Assets\Images\settings.png" />
+    <None Remove="Assets\Images\ssd.png" />
     <None Remove="Assets\Images\switch.png" />
     <None Remove="Assets\Images\topology.png" />
     <None Remove="Assets\Images\videocam.png" />
     <None Remove="Assets\Images\wifi.png" />
+    <None Remove="Assets\Images\zavod.png" />
     <None Remove="MyYmlSyntax.xshd" />
   </ItemGroup>
 
@@ -123,7 +134,22 @@
     <Resource Include="Assets\Images\info.png">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Resource>
+    <Resource Include="Assets\Images\internet.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Assets\Images\internet2.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Assets\Images\internet3.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Assets\Images\matplata.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
     <Resource Include="Assets\Images\minus.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Assets\Images\model.png">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Resource>
     <Resource Include="Assets\Images\new_project.png">
@@ -138,7 +164,16 @@
     <Resource Include="Assets\Images\plus.png">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Resource>
+    <Resource Include="Assets\Images\port.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
     <Resource Include="Assets\Images\printer.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Assets\Images\processor.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Assets\Images\ram.png">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Resource>
     <Resource Include="Assets\Images\reconnect.png">
@@ -159,6 +194,12 @@
     <Resource Include="Assets\Images\server.png">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Resource>
+    <Resource Include="Assets\Images\settings.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Assets\Images\ssd.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
     <Resource Include="Assets\Images\switch.png">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Resource>
@@ -169,6 +210,9 @@
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Resource>
     <Resource Include="Assets\Images\wifi.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Assets\Images\zavod.png">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Resource>
   </ItemGroup>

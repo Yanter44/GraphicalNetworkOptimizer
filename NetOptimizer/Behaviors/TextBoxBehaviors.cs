@@ -1,37 +1,49 @@
-﻿using System.Windows;
+﻿using Microsoft.Xaml.Behaviors;
+using System.Text.RegularExpressions;
+using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 
 namespace NetOptimizer.Behaviors
 {
-    public static class TextBoxBehaviors
+    public class TextBoxBehaviors : Behavior<TextBox>
     {
-        public static DependencyProperty IsNumericProperty = DependencyProperty
-             .RegisterAttached("IsNumeric", typeof(bool), typeof(TextBoxBehaviors), new PropertyMetadata(false, CheckAndSubscribeToMethod));
+    
 
-        public static void SetIsNumeric(UIElement element, bool value) => element.SetValue(IsNumericProperty, value);
-        public static bool GetIsNumeric(UIElement element) => (bool)element.GetValue(IsNumericProperty);
-        public static void CheckAndSubscribeToMethod(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        public static readonly DependencyProperty ModeProperty =
+            DependencyProperty.Register(nameof(Mode), typeof(Models.Enums.InputType), typeof(TextBoxBehaviors),
+                new PropertyMetadata(Models.Enums.InputType.OnlyNumbers));
+
+        public Models.Enums.InputType Mode
         {
-            if (d is TextBox tb)
-            {
-                if ((bool)e.NewValue) 
-                    tb.PreviewTextInput += CheckWhatCharIsNumeric;
-                else
-                    tb.PreviewTextInput -= CheckWhatCharIsNumeric;
-            }
-
+            get => (Models.Enums.InputType)GetValue(ModeProperty);
+            set => SetValue(ModeProperty, value);
         }
-        private static void CheckWhatCharIsNumeric(object sender, TextCompositionEventArgs e)
+
+        protected override void OnAttached()
         {
-            if (sender is TextBox tb)
+            base.OnAttached();
+            AssociatedObject.PreviewTextInput += OnTextInput;
+            AssociatedObject.PreviewKeyDown += OnPreviewKeyDown;
+        }
+        protected override void OnDetaching()
+        {
+            base.OnDetaching();
+            AssociatedObject.PreviewTextInput -= OnTextInput;
+            AssociatedObject.PreviewKeyDown -= OnPreviewKeyDown;
+        }
+
+        private void OnTextInput(object sender, TextCompositionEventArgs e)
+        {
+            string pattern = Mode == Models.Enums.InputType.NumbersAndDots ? "[^0-9.]+" : "[^0-9]+";
+            e.Handled = new Regex(pattern).IsMatch(e.Text);
+        }
+
+        private void OnPreviewKeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Space)
             {
-                var textToInt = int.TryParse(e.Text, out int result);
-                if (!textToInt)
-                {
-                    e.Handled = true;
-                }
-                else { e.Handled = false; }
+                e.Handled = true;
             }
         }
     }

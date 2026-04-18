@@ -1,4 +1,4 @@
-﻿using NetOptimizer.ViewModels.CreateDeviceWindow;
+﻿using NetOptimizer.ViewModels.CreateDeviceWindoww;
 using System.Windows;
 using System.Windows.Input;
 
