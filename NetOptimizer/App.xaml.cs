@@ -6,7 +6,9 @@ using NetOptimizer.Services;
 using NetOptimizer.ViewModels;
 using NetOptimizer.ViewModels.AddNewGroupWindoww;
 using NetOptimizer.ViewModels.ConnectToGroupWindoww;
+using NetOptimizer.ViewModels.CreateVlanOnDeviceWindoww;
 using NetOptimizer.ViewModels.DeviceParametrs;
+using NetOptimizer.ViewModels.DeviceParametrsViewModels;
 using NetOptimizer.ViewModels.MainWindow;
 using NetOptimizer.ViewModels.MainWindoww;
 using NetOptimizer.Views;
@@ -40,7 +42,10 @@ namespace NetOptimizer
                  services.AddTransient<AddNewGroupWindow>();
                  services.AddTransient<ConnectToGroupWindow>();
                  services.AddTransient<DeviceParametrsWindow>();
+                 services.AddTransient<CreateVlanOnDeviceWindow>();
 
+                 services.AddSingleton<DeviceViewModelFactory>();
+                 services.AddTransient<CreateVlanOnDeviceViewModel>();
                  services.AddTransient<DeviceParametrsViewModel>();
                  services.AddTransient<AddNewGroupWindowViewModel>();
                  services.AddTransient<ConnectToGroupWindowViewModel>();

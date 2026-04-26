@@ -18,7 +18,9 @@
     <None Remove="Assets\Images\connect.png" />
     <None Remove="Assets\Images\connectedGroup.png" />
     <None Remove="Assets\Images\cursor.png" />
+    <None Remove="Assets\Images\datatable.png" />
     <None Remove="Assets\Images\delete.png" />
+    <None Remove="Assets\Images\deletebucket.png" />
     <None Remove="Assets\Images\devices.png" />
     <None Remove="Assets\Images\disconnectGroup.png" />
     <None Remove="Assets\Images\edit.png" />
@@ -27,9 +29,14 @@
     <None Remove="Assets\Images\gno_logo.png" />
     <None Remove="Assets\Images\help.png" />
     <None Remove="Assets\Images\info.png" />
+    <None Remove="Assets\Images\interfaceabstract.png" />
     <None Remove="Assets\Images\internet.png" />
     <None Remove="Assets\Images\internet2.png" />
     <None Remove="Assets\Images\internet3.png" />
+    <None Remove="Assets\Images\lag.png" />
+    <None Remove="Assets\Images\level.png" />
+    <None Remove="Assets\Images\lightning.png" />
+    <None Remove="Assets\Images\listabstract.png" />
     <None Remove="Assets\Images\matplata.png" />
     <None Remove="Assets\Images\minus.png" />
     <None Remove="Assets\Images\model.png" />
@@ -40,6 +47,8 @@
     <None Remove="Assets\Images\port.png" />
     <None Remove="Assets\Images\printer.png" />
     <None Remove="Assets\Images\processor.png" />
+    <None Remove="Assets\Images\protocols.png" />
+    <None Remove="Assets\Images\puppet2.png" />
     <None Remove="Assets\Images\ram.png" />
     <None Remove="Assets\Images\reconnect.png" />
     <None Remove="Assets\Images\redact.png" />
@@ -48,10 +57,13 @@
     <None Remove="Assets\Images\save_card.png" />
     <None Remove="Assets\Images\server.png" />
     <None Remove="Assets\Images\settings.png" />
+    <None Remove="Assets\Images\sppeed.png" />
     <None Remove="Assets\Images\ssd.png" />
     <None Remove="Assets\Images\switch.png" />
     <None Remove="Assets\Images\topology.png" />
+    <None Remove="Assets\Images\trashbucket.png" />
     <None Remove="Assets\Images\videocam.png" />
+    <None Remove="Assets\Images\vlans.png" />
     <None Remove="Assets\Images\wifi.png" />
     <None Remove="Assets\Images\zavod.png" />
     <None Remove="MyYmlSyntax.xshd" />
@@ -107,7 +119,13 @@
     <Resource Include="Assets\Images\cursor.png">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Resource>
+    <Resource Include="Assets\Images\datatable.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
     <Resource Include="Assets\Images\delete.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Assets\Images\deletebucket.png">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Resource>
     <Resource Include="Assets\Images\devices.png">
@@ -134,6 +152,9 @@
     <Resource Include="Assets\Images\info.png">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Resource>
+    <Resource Include="Assets\Images\interfaceabstract.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
     <Resource Include="Assets\Images\internet.png">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Resource>
@@ -141,6 +162,18 @@
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Resource>
     <Resource Include="Assets\Images\internet3.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Assets\Images\lag.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Assets\Images\level.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Assets\Images\lightning.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Assets\Images\listabstract.png">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Resource>
     <Resource Include="Assets\Images\matplata.png">
@@ -173,6 +206,12 @@
     <Resource Include="Assets\Images\processor.png">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Resource>
+    <Resource Include="Assets\Images\protocols.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Assets\Images\puppet2.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
     <Resource Include="Assets\Images\ram.png">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Resource>
@@ -197,6 +236,9 @@
     <Resource Include="Assets\Images\settings.png">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Resource>
+    <Resource Include="Assets\Images\sppeed.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
     <Resource Include="Assets\Images\ssd.png">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Resource>
@@ -206,7 +248,13 @@
     <Resource Include="Assets\Images\topology.png">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Resource>
+    <Resource Include="Assets\Images\trashbucket.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
     <Resource Include="Assets\Images\videocam.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Assets\Images\vlans.png">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Resource>
     <Resource Include="Assets\Images\wifi.png">

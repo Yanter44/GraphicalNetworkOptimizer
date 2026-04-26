@@ -59,8 +59,8 @@ namespace NetOptimizer.ViewModels.DeviceSettingss
         public int TotalPorts => (SelectedModelFromCatalog?.TotalPorts) ?? 0;
         public List<PortDto> Ports => SelectedModelFromCatalog?.Ports;
         public WifiOptions WifiOptions => SelectedModelFromCatalog?.WifiOptions;
-        public PerformanceSpecs Performance => SelectedModelFromCatalog?.Performance;
-        public ProtocolSupport ProtocolSupport => SelectedModelFromCatalog?.ProtocolSupport;
+        public RouterPerformanceSpecs Performance => SelectedModelFromCatalog?.Performance;
+        public RouterProtocolSupport ProtocolSupport => SelectedModelFromCatalog?.ProtocolSupport;
         public decimal AveragePrice => (SelectedModelFromCatalog?.AveragePrice) ?? 0; 
         public RouterSettingsViewModel(List<RouterResponceDto> catalog)
         {

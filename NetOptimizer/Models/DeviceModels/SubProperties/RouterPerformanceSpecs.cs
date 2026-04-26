@@ -4,7 +4,7 @@ using System.Text;
 
 namespace NetOptimizer.Models.DeviceModels.SubProperties
 {
-    public class PerformanceSpecs
+    public class RouterPerformanceSpecs
     {
         public double RoutingThroughputGbps { get; set; }
         public int RamMb { get; set; }

@@ -143,7 +143,7 @@ namespace NetOptimizer.ViewModels.MainWindow
 
                     yaml.AppendLine($"    port_count: {rj45Count + sfpCount}");
                     yaml.AppendLine($"    sfp_count: {sfpCount}");
-                    yaml.AppendLine($"    poe: {sw.SupportsPoe.ToString().ToLower()}");
+                    yaml.AppendLine($"    poe: {sw.PoeSpecs.SupportsPoe.ToString().ToLower()}");
                     yaml.AppendLine($"    layer: \"{sw.Layer}\"");
                 }
                 yaml.AppendLine($"");

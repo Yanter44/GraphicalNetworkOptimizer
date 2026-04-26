@@ -22,15 +22,6 @@ namespace NetOptimizer.Services
             AvailablePcs = pcs.ToList();
             AvailableSwitches = commutators.ToList();
             AvailableRouters = routers.ToList();
-            AvailablePrinters.Add(new PrinterResponceDto()   // <--- добавляю принтер лишь для тестов
-            {
-                Model = "Epson",
-                Ports = new List<PortDto>() 
-                {
-                    new PortDto() { Type = Enums.PortType.RJ45, Count = 1, Speed = "1Гбит/с", SupportsPoe = false}
-                },
-                AveragePrice = 11000,
-            });
         }
 
     }

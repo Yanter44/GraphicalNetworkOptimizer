@@ -121,26 +121,26 @@ namespace NetOptimizer.Services
             }
             if (section == "nodes")
             {
-                string id = buffer.GetValueOrDefault("id", "Unknown");
-                string typeStr = buffer.GetValueOrDefault("type", "pc").ToLower();
-                string devicemodel = buffer.GetValueOrDefault("model", "UnknowModel").ToLower();
-                string vendor = buffer.GetValueOrDefault("vendor", "Generic");
-                int ports = int.TryParse(buffer.GetValueOrDefault("port_count", "1"), out var p) ? p : 1;
+                //string id = buffer.GetValueOrDefault("id", "Unknown");
+                //string typeStr = buffer.GetValueOrDefault("type", "pc").ToLower();
+                //string devicemodel = buffer.GetValueOrDefault("model", "UnknowModel").ToLower();
+                //string vendor = buffer.GetValueOrDefault("vendor", "Generic");
+                //int ports = int.TryParse(buffer.GetValueOrDefault("port_count", "1"), out var p) ? p : 1;
 
-                Device device = typeStr switch
-                {
-                    "switch" => new SwitchDevice(id, new SwitchSettings
-                    {
-                        Model = devicemodel,
-                        Vendor = vendor,
-                        TotalPorts = int.TryParse(buffer.GetValueOrDefault("port_count", "1"), out var tp) ? tp : 1,
-                        SupportsPoe = buffer.GetValueOrDefault("poe", "false").ToLower() == "true",
-                        DeviceLayer = Enum.TryParse<DeviceLayer>(buffer.GetValueOrDefault("layer", "L2"), out var l) ? l : DeviceLayer.L2
-                    }),
-                    _ => null
-                };
-                device.DeviceModel = devicemodel;
-                ResultMap.Devices.Add(device);
+                //Device device = typeStr switch
+                //{
+                //    "switch" => new SwitchDevice(id, new SwitchSettings
+                //    {
+                //        Model = devicemodel,
+                //        Vendor = vendor,
+                //        TotalPorts = int.TryParse(buffer.GetValueOrDefault("port_count", "1"), out var tp) ? tp : 1,
+                //        PoeSpecs. = buffer.GetValueOrDefault("poe", "false").ToLower() == "true",
+                //        DeviceLayer = Enum.TryParse<DeviceLayer>(buffer.GetValueOrDefault("layer", "L2"), out var l) ? l : DeviceLayer.L2
+                //    }),
+                //    _ => null
+                //};
+                //device.DeviceModel = devicemodel;
+                //ResultMap.Devices.Add(device);
             }
             else if (section == "links")
             {

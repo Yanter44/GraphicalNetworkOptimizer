@@ -1,5 +1,6 @@
 ﻿using NetOptimizer.Models.DeviceModels;
 using NetOptimizer.Models.UIElements;
+using NetOptimizer.ViewModels.DeviceParametrsViewModels;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -13,21 +14,19 @@ namespace NetOptimizer.Views.Selectors
         public DataTemplate PcTemplate { get; set; }
         public DataTemplate SwitchTemplate { get; set; }
         public DataTemplate RouterTemplate { get; set; }
-
         public override DataTemplate SelectTemplate(object item, DependencyObject container)
         {
-            if (item is DeviceOnCanvas deviceOnCanvas && deviceOnCanvas.LogicDevice != null)
+            if (item is DeviceViewModelBase vm)
             {
-                return deviceOnCanvas.LogicDevice switch
+                return vm switch
                 {
-                    PcDevice => PcTemplate,
-                    SwitchDevice => SwitchTemplate,
-                    RouterDevice => RouterTemplate,
-                    _ => base.SelectTemplate(item, container)
+                    PcDeviceViewModel => PcTemplate,
+                    SwitchDeviceViewModel => SwitchTemplate,
+                    RouterDeviceViewModel => RouterTemplate,
+                    _ => null
                 };
             }
-
-            return base.SelectTemplate(item, container);
+            return null;
         }
     }
 }

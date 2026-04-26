@@ -10,8 +10,8 @@ namespace NetOptimizer.Models.DeviceModels
         public string Vendor { get; set; }
         public bool IsManaged { get; set; }
         public WifiOptions WifiOptions { get; set; } = new();
-        public PerformanceSpecs Performance { get; set; } = new();
-        public ProtocolSupport ProtocolSupport { get; set; } = new();
+        public RouterPerformanceSpecs Performance { get; set; } = new();
+        public RouterProtocolSupport ProtocolSupport { get; set; } = new();
         public decimal AveragePrice { get; set; }
         public RouterDevice(string name, RouterSettings settings) : base(name)
         {
@@ -23,7 +23,6 @@ namespace NetOptimizer.Models.DeviceModels
             this.WifiOptions = settings.WifiOptions;
             this.Performance = settings.Performance;
             this.ProtocolSupport = settings.ProtocolSupport;
-
             GeneratePorts(settings.Ports);
         }
 
@@ -47,6 +46,7 @@ namespace NetOptimizer.Models.DeviceModels
                     {
                         PortName = $"{dto.Type}",
                         PortNumber = $"{slot}/{port}",
+                       
                         Type = dto.Type,
                         Owner = this
                     });

@@ -7,16 +7,420 @@
 
     <!-- =====================Конверторы==================== -->
     <conv:PortsToStringConverter x:Key="PortsToStringConverter"/>
-
+    <conv:BoolToIndexConverter x:Key="BoolToIndexConverter"/>
+    <conv:SwitchPortModeToIndexConverter x:Key="SwitchPortModeToIndexConverter"/>
+    <conv:PortModeVisibilityConverter x:Key="PortModeVisibilityConverter"/>
     <!-- =====================Стили==================== -->
- 
+    <Style x:Key="ModernCheckBox" TargetType="CheckBox">
+        <Setter Property="Cursor" Value="Hand"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="CheckBox">
+
+                    <Border x:Name="Border"
+                        Width="16"
+                        Height="16"
+                        CornerRadius="3"
+                        Background="White"
+                        BorderBrush="#A0A0A0"
+                        BorderThickness="1"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center">
+
+                        <Grid>
+                            <Path x:Name="CheckMark"
+                              Data="M2,8 L6,12 L14,3"
+                              Stroke="White"
+                              StrokeThickness="2"
+                              HorizontalAlignment="Center"
+                              VerticalAlignment="Center"
+                              Visibility="Hidden"/>
+                        </Grid>
+                    </Border>
+
+                    <ControlTemplate.Triggers>
+
+                        <!-- Checked -->
+                        <Trigger Property="IsChecked" Value="True">
+                            <Setter TargetName="CheckMark" Property="Visibility" Value="Visible"/>
+                            <Setter TargetName="Border" Property="Background" Value="#43C706"/>
+                            <Setter TargetName="Border" Property="BorderBrush" Value="#43C706"/>
+                        </Trigger>
+
+                        <!-- Hover -->
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="Border" Property="BorderBrush" Value="#4A9CF5"/>
+                        </Trigger>
+
+                        <!-- Disabled -->
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter TargetName="Border" Property="Opacity" Value="0.4"/>
+                        </Trigger>
+
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="ModernComboBox" TargetType="ComboBox">
+        <Setter Property="Background" Value="#F3F6FA"/>
+        <Setter Property="BorderBrush" Value="#EDEEF4"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="Cursor" Value="Hand"></Setter>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="ComboBox">
+                    <Grid>
+                        <Border x:Name="MainBorder"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="8"/>
+
+                        <ToggleButton x:Name="ToggleButton"
+                                       Background="Transparent" 
+                                       BorderThickness="0"
+                                       HorizontalContentAlignment="Stretch"
+                                       VerticalContentAlignment="Stretch"
+                                       IsChecked="{Binding IsDropDownOpen, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}">
+                            <ToggleButton.Style>
+                                <Style TargetType="ToggleButton">
+                                    <Setter Property="Template">
+                                        <Setter.Value>
+                                            <ControlTemplate TargetType="ToggleButton">
+                                                <Border Background="Transparent"/>
+                                            </ControlTemplate>
+                                        </Setter.Value>
+                                    </Setter>
+                                </Style>
+                            </ToggleButton.Style>
+                        </ToggleButton>
+
+                        <Grid Margin="{TemplateBinding Padding}" IsHitTestVisible="False">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+
+                            <ContentPresenter Content="{TemplateBinding SelectionBoxItem}"
+                                              ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}"
+                                              VerticalAlignment="Center"/>
+
+                            <Path Grid.Column="1" 
+                                  Data="M0,0 L4,4 L8,0" 
+                                  Stroke="#6B7280" 
+                                  StrokeThickness="2" 
+                                  VerticalAlignment="Center" 
+                                  Margin="10,0,0,0"/>
+                        </Grid>
+
+                        <Popup x:Name="PART_Popup" AllowsTransparency="True"
+                               IsOpen="{Binding IsDropDownOpen, RelativeSource={RelativeSource TemplatedParent}}"
+                               Placement="Bottom" >
+                            <Border Background="White" BorderBrush="#EDEEF4"
+                                    BorderThickness="1" CornerRadius="8"
+                                    MinWidth="{TemplateBinding ActualWidth}" MaxHeight="{TemplateBinding MaxDropDownHeight}">
+                                <ScrollViewer x:Name="DropDownScrollViewer">
+                                    <ItemsPresenter />
+                                </ScrollViewer>
+                            </Border>
+                        </Popup>
+                    </Grid>
+
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="MainBorder" Property="BorderBrush" Value="#3B82F6"/>
+                            <Setter TargetName="MainBorder" Property="Background" Value="#F0F7FF"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="ModernDataGridStyle" TargetType="DataGrid">
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="BorderThickness" Value="0"/>
+        <Setter Property="RowHeight" Value="40"/>
+        <Setter Property="GridLinesVisibility" Value="Vertical"/>
+        <Setter Property="HeadersVisibility" Value="Column"/>
+        <Setter Property="AutoGenerateColumns" Value="False"/>
+        <Setter Property="CanUserAddRows" Value="False"/>
+        <Setter Property="IsReadOnly" Value="True"/>
+        <Setter Property="SelectionMode" Value="Single"/>
+        <Setter Property="SelectionUnit" Value="FullRow"/>
+        <Setter Property="ColumnHeaderHeight" Value="35"/>
+        <Setter Property="HorizontalScrollBarVisibility" Value="Disabled"/>
+        <Setter Property="VerticalScrollBarVisibility" Value="Auto"/>
+
+        <Setter Property="ColumnHeaderStyle">
+            <Setter.Value>
+                <Style TargetType="DataGridColumnHeader">
+                    <Setter Property="Background" Value="Transparent"/>
+                    <Setter Property="Foreground" Value="#6B7280"/>
+                    <Setter Property="FontWeight" Value="SemiBold"/>
+                    <Setter Property="Padding" Value="10,5"/>
+                    <Setter Property="BorderThickness" Value="0,0,0,1"/>
+                    <Setter Property="BorderBrush" Value="#E5E7EB"/>
+                    <Setter Property="HorizontalContentAlignment" Value="Center"/>
+                </Style>
+            </Setter.Value>
+        </Setter>
+
+        <Setter Property="RowStyle">
+            <Setter.Value>
+                <Style TargetType="DataGridRow">
+                    <Setter Property="Background" Value="Transparent"/>
+                    <Setter Property="BorderThickness" Value="0,0,0,1"/>
+                    <Setter Property="BorderBrush" Value="#F3F4F6"/>
+                    <Style.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter Property="Background" Value="#F9FAFB"/>
+                        </Trigger>
+                        <Trigger Property="IsSelected" Value="True">
+                            <Setter Property="Background" Value="#EFF6FF"/>
+                            <Setter Property="Foreground" Value="#2563EB"/>
+                        </Trigger>
+                    </Style.Triggers>
+                </Style>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="ModernButtonStyle_AddVlan" TargetType="Button">
+        <Setter Property="Background" Value="#73A7D6"/>
+        <Setter Property="Foreground" Value="White"/>
+        <Setter Property="BorderBrush" Value="Transparent"/>
+        <Setter Property="BorderThickness" Value="0"/>
+        <Setter Property="Cursor" Value="Hand"/>
+
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+
+                    <Border x:Name="border"
+                        Background="{TemplateBinding Background}"
+                        BorderBrush="{TemplateBinding BorderBrush}"
+                        BorderThickness="{TemplateBinding BorderThickness}"
+                        CornerRadius="2"
+                        Padding="{TemplateBinding Padding}">
+
+                        <ContentPresenter HorizontalAlignment="Center"
+                                      VerticalAlignment="Center"/>
+                    </Border>
+
+                    <ControlTemplate.Triggers>
+
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="border"
+                                Property="Background"
+                                Value="#4A9CF5"/>
+                        </Trigger>
+
+                        <Trigger Property="IsPressed" Value="True">
+                            <Setter TargetName="border"
+                                Property="Background"
+                                Value="#1F6FD1"/>
+                        </Trigger>
+
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter TargetName="border"
+                                Property="Opacity"
+                                Value="0.5"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="ModernButtonStyle_RemoveVlan" TargetType="Button">
+        <Setter Property="Background" Value="#E2E9F0"/>
+        <Setter Property="Foreground" Value="#737373"/>
+        <Setter Property="BorderBrush" Value="Transparent"/>
+        <Setter Property="BorderThickness" Value="0"/>
+        <Setter Property="Cursor" Value="Hand"/>
+
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+
+                    <Border x:Name="border"
+                     Background="{TemplateBinding Background}"
+                     BorderBrush="{TemplateBinding BorderBrush}"
+                     BorderThickness="{TemplateBinding BorderThickness}"
+                     CornerRadius="2"
+                     Padding="{TemplateBinding Padding}">
+
+                        <ContentPresenter HorizontalAlignment="Center"
+                                   VerticalAlignment="Center"/>
+
+                    </Border>
+
+                    <ControlTemplate.Triggers>
+
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="border"
+                             Property="Background"
+                             Value="#ACACAC"/>
+                        </Trigger>
+
+                        <Trigger Property="IsPressed" Value="True">
+                            <Setter TargetName="border"
+                             Property="Background"
+                             Value="#C0C0C0"/>
+                        </Trigger>
+
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter TargetName="border"
+                             Property="Opacity"
+                             Value="0.5"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+    <Style x:Key="ModernExpanderStyle" TargetType="Expander">
+        <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Expander">
+
+                    <StackPanel>
+                        <ToggleButton x:Name="HeaderSite"
+                                  Background="Transparent"
+                                  BorderThickness="0"
+                                  Cursor="Hand"
+                                  IsChecked="{Binding IsExpanded, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay}">
+                            <ToggleButton.Template>
+                                <ControlTemplate TargetType="ToggleButton">
+                                    <Border Background="Transparent" BorderThickness="0,0,0,1" BorderBrush="#DBDBDB" >
+                                        <ContentPresenter/>
+                                    </Border>
+                                </ControlTemplate>
+                            </ToggleButton.Template>
+
+                            <Grid Height="32" Margin="5,0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+
+                                <ContentPresenter Grid.Column="0"
+                                              Content="{TemplateBinding Header}"
+                                              VerticalAlignment="Center"
+                                              Margin="10,0"/>
+
+                                <Path x:Name="Arrow"
+                                  Grid.Column="1"
+                                  Width="10"
+                                  Height="10"
+                                  Stroke="#333"
+                                  StrokeThickness="2"
+                                  Margin="10"
+                                  RenderTransformOrigin="0.5,0.5">
+                                    <Path.RenderTransform>
+                                        <RotateTransform Angle="0"/>
+                                    </Path.RenderTransform>
+
+                                    <Path.Data>
+                                        <PathGeometry>
+                                            <PathFigure StartPoint="0,3">
+                                                <LineSegment Point="5,8"/>
+                                                <LineSegment Point="10,3"/>
+                                            </PathFigure>
+                                        </PathGeometry>
+                                    </Path.Data>
+                                </Path>
+                            </Grid>
+
+                        </ToggleButton>
+
+                        <ContentPresenter x:Name="ExpandSite"
+                                          Content="{TemplateBinding Content}"
+                                          Margin="15,5,10,10"/>
+                    </StackPanel>
+
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsExpanded" Value="False">
+                            <Setter TargetName="ExpandSite"
+                                    Property="Visibility"
+                                     Value="Collapsed"/>
+                        </Trigger>
+
+                        <Trigger Property="IsExpanded" Value="True">
+                            <Trigger.EnterActions>
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <DoubleAnimation Storyboard.TargetName="Arrow"
+                                                     Storyboard.TargetProperty="(RenderTransform).(RotateTransform.Angle)"
+                                                     To="180"
+                                                     Duration="0:0:0.2"/>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </Trigger.EnterActions>
+
+                            <Trigger.ExitActions>
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <DoubleAnimation Storyboard.TargetName="Arrow"
+                                                     Storyboard.TargetProperty="(RenderTransform).(RotateTransform.Angle)"
+                                                     To="0"
+                                                     Duration="0:0:0.2"/>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </Trigger.ExitActions>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="ModernRadioButtonStyle" TargetType="RadioButton">
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="RadioButton">
+                    <StackPanel Orientation="Horizontal"
+                            Background="{TemplateBinding Background}">
+                        <Grid Width="16" Height="16" Margin="0,0,8,0">
+
+                            <Ellipse x:Name="OuterCircle"
+                                 StrokeThickness="3"
+                                 Stroke="#A0A0A0"
+                                 Fill="Transparent"/>
+
+                            <Ellipse x:Name="InnerCircle"
+                                 Width="6"
+                                 Height="6"
+                                 Fill="Transparent"
+                                 HorizontalAlignment="Center"
+                                 VerticalAlignment="Center"/>
+                        </Grid>
+                        <ContentPresenter VerticalAlignment="Center"/>
+                    </StackPanel>
+
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsChecked" Value="True">
+                            <Setter TargetName="OuterCircle" Property="Stroke" Value="#4F5DFF"/>
+                            <Setter TargetName="InnerCircle" Property="Fill" Value="White"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
 
     <Style x:Key="ModernTextBoxStyle" TargetType="TextBox">
         <Setter Property="Background" Value="White"/>
         <Setter Property="Foreground" Value="#333333"/>
         <Setter Property="BorderBrush" Value="#E0E0E0"/>
         <Setter Property="BorderThickness" Value="1"/>
-        
+
         <Setter Property="FontSize" Value="12"/>
         <Setter Property="SelectionBrush" Value="#B3E5FC"/>
         <Setter Property="Template">
@@ -48,8 +452,8 @@
         </Setter>
     </Style>
     <!-- ===================== Дата Темплейты ==================== -->
-    
-    
+
+
     <!--Дата темплейты физических свойств-->
     <DataTemplate x:Key="PcSpecsTemplate">
         <Grid Margin="20,10,20,10">
@@ -64,9 +468,200 @@
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
 
+                <Image Grid.Column="0" Source="{Binding Device.ImagePath}" 
+                       Width="60" Height="60"
+                       VerticalAlignment="Top" Margin="0,0,15,0">
+                    <Image.Effect>
+                        <DropShadowEffect ShadowDepth="5" Opacity="0.2" BlurRadius="5"/>
+                    </Image.Effect>
+                </Image>
+
+                <StackPanel Grid.Column="1" VerticalAlignment="Top">
+                    <TextBlock Text="{Binding Device.DeviceName}" 
+                          FontSize="20" FontWeight="DemiBold" Foreground="Black"/>
+                    <StackPanel Orientation="Horizontal">
+                        <Image Source="/Assets/Images/zavod.png" Width="18" Height="18" Margin="0,0,8,0" />
+                        <TextBlock Text="Производитель: " Foreground="Gray" FontSize="14"/>
+                        <TextBlock Text="{Binding Device.LogicDevice.Vendor}" Foreground="Black" FontSize="14"/>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
+                        <Image Source="/Assets/Images/model.png" Width="18" Height="18" Margin="0,0,8,0" />
+                        <TextBlock Text="Модель: " Foreground="Gray" FontSize="14"/>
+                        <TextBlock Text="{Binding Device.DeviceModel}" Foreground="Black" FontSize="14"/>
+                    </StackPanel>
+                </StackPanel>
+            </Grid>
+
+            <StackPanel Grid.Row="1">
+                <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                    <Image Source="/Assets/Images/settings.png" Width="20" Height="20" Margin="0,0,8,0"/>
+                    <TextBlock Text="Технические характеристики:" FontWeight="Medium" Foreground="Gray" FontSize="15"/>
+                </StackPanel>
+
+                <StackPanel Margin="20,0,0,0">
+                    <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
+                        <Image Source="/Assets/Images/processor.png" Width="18" Height="18"></Image>
+                        <TextBlock Text="{Binding Device.LogicDevice.HardwareSpecs.CpuModel, StringFormat='Процессор: {0}'}" Foreground="Black"/>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal"  Margin="0,5,0,0">
+                        <Image Source="/Assets/Images/ram.png" Width="18" Height="18"></Image>
+                        <TextBlock  Foreground="Black">
+                            <TextBlock.Text>
+                                <MultiBinding StringFormat="Оперативная память: {0}Gb {1}">
+                                    <Binding Path="Device.LogicDevice.HardwareSpecs.RamAmountGb" />
+                                    <Binding Path="Device.LogicDevice.HardwareSpecs.RamType" />
+                                </MultiBinding>
+                            </TextBlock.Text>
+                        </TextBlock>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
+                        <Image Source="/Assets/Images/ssd.png" Width="18" Height="18"></Image>
+                        <TextBlock Foreground="Black">
+                            <TextBlock.Text>
+                                <MultiBinding StringFormat="Накопитель: {0}Gb {1}">
+                                    <Binding Path="Device.LogicDevice.HardwareSpecs.StorageAmountGb" />
+                                    <Binding Path="Device.LogicDevice.HardwareSpecs.StorageType" />
+                                </MultiBinding>
+                            </TextBlock.Text>
+                        </TextBlock>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
+                        <Image Source="/Assets/Images/wifi.png" Width="18" Height="18"></Image>
+                        <TextBlock Foreground="Black" Text="{Binding Device.LogicDevice.WifiOptions.HasWiFi, StringFormat='Wifi: {0}'}"></TextBlock>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
+                        <Image Source="/Assets/Images/port.png" Width="18" Height="18"></Image>
+                        <TextBlock Text="Порты:" Foreground="Black"/>
+                    </StackPanel>
+                    <TextBlock Margin="20,0,0,0" Text="{Binding Device.LogicDevice.Ports, Converter={StaticResource PortsToStringConverter}}" Foreground="Black"></TextBlock>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
+                    <TextBlock Text="Средняя цена на рынке: " Foreground="Black"></TextBlock>
+                    <TextBlock Text="{Binding Device.LogicDevice.AveragePrice, StringFormat='{}{0:N0}'}" 
+                               Foreground="#228E3F" FontWeight="Bold"/>
+                    <TextBlock Text=" ₽" Foreground="Black"></TextBlock>
+                </StackPanel>
+            </StackPanel>
+        </Grid>
+    </DataTemplate>
+
+    <DataTemplate x:Key="SwitchSpecsTemplate">
+        <Grid Margin="20,10,20,10">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+            <Grid Grid.Row="0" Margin="0,0,0,20">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <Image Grid.Column="0" Source="{Binding Device.ImagePath}" 
+                       Width="60" Height="60"
+                       VerticalAlignment="Top" Margin="0,0,15,0">
+                    <Image.Effect>
+                        <DropShadowEffect ShadowDepth="5" Opacity="0.2" BlurRadius="5"/>
+                    </Image.Effect>
+                </Image>
+
+                <StackPanel Grid.Column="1" VerticalAlignment="Top">
+                    <TextBlock Text="{Binding Device.DeviceName}" 
+                               FontSize="20" FontWeight="DemiBold" Foreground="Black"/>
+                    <StackPanel Orientation="Horizontal">
+                        <Image Source="/Assets/Images/zavod.png" Width="18" Height="18" Margin="0,0,8,0" />
+                        <TextBlock Text="Производитель: " Foreground="Gray" FontSize="14"/>
+                        <TextBlock Text="{Binding Device.LogicDevice.Vendor}" Foreground="Black" FontSize="14"/>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
+                        <Image Source="/Assets/Images/model.png" Width="18" Height="18" Margin="0,0,8,0" />
+                        <TextBlock Text="Модель: " Foreground="Gray" FontSize="14"/>
+                        <TextBlock Text="{Binding Device.DeviceModel}" Foreground="Black" FontSize="14"/>
+                    </StackPanel>
+                </StackPanel>
+            </Grid>
+            <ScrollViewer behaviors:ScrollBarWheelDirectionBehavior.OrientationScroll="Vertical"
+                Grid.Row="4" Margin="0,0,0,5"
+                HorizontalScrollBarVisibility="Disabled"  
+                VerticalScrollBarVisibility="Auto">
+                <StackPanel Grid.Row="1">
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                        <Image Source="/Assets/Images/settings.png" Width="20" Height="20" Margin="0,0,8,0"/>
+                        <TextBlock Text="Технические характеристики:" FontWeight="Medium" Foreground="Gray" FontSize="15"/>
+                    </StackPanel>
+
+                    <StackPanel Margin="20,0,0,0">
+                        <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
+                            <Image Source="/Assets/Images/level.png" Width="18" Height="18"></Image>
+                            <TextBlock Text="{Binding Device.LogicDevice.Layer, StringFormat='Уровень: {0}'}" Foreground="Black"/>
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal"  Margin="0,5,0,0">
+                            <Image Source="/Assets/Images/lightning.png" Width="18" Height="18"></Image>
+                            <TextBlock Foreground="Black">
+                                <TextBlock.Text>
+                                    <MultiBinding StringFormat="Поддерживает Poe: {0}">
+                                        <Binding Path="Device.LogicDevice.PoeSpecs.SupportsPoe" />
+                                    </MultiBinding>
+                                </TextBlock.Text>
+                            </TextBlock>
+                        </StackPanel>
+                        <TextBlock Margin="20,0,0,0" Text="{Binding Device.LogicDevice.PoeSpecs.PoeBudgetW, StringFormat='Бюджет Poe W: {0}'}" Foreground="Black"></TextBlock>
+                        <StackPanel Orientation="Horizontal"  Margin="0,5,0,0">
+                            <Image Source="/Assets/Images/sppeed.png" Width="18" Height="18"></Image>
+                            <TextBlock Foreground="Black" Text="{Binding Device.LogicDevice.PerformanceSpecs.ThroughputGbps, StringFormat='Пропускная способность: {0} Gbps'}"></TextBlock>
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
+                            <Image Source="/Assets/Images/vlans.png" Width="18" Height="18"></Image>
+                            <TextBlock Foreground="Black" Text="{Binding Device.LogicDevice.PerformanceSpecs.MaxVlans, StringFormat='Максимально вланов: {0}'}"></TextBlock>
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
+                            <Image Source="/Assets/Images/datatable.png" Width="18" Height="18"/>
+                            <TextBlock Foreground="Black" Text="{Binding Device.LogicDevice.PerformanceSpecs.MacTableSize, StringFormat='Размерность таблицы MAC: {0}'}" ></TextBlock>
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
+                            <Image Source="/Assets/Images/protocols.png" Width="18" Height="18"></Image>
+                            <TextBlock Foreground="Black" Text="Протоколы:"></TextBlock>
+                        </StackPanel>
+                        <StackPanel Margin="20,0,0,0">
+                            <TextBlock  Text="{Binding Device.LogicDevice.ProtocolSupport.SupportsLag, StringFormat='Поддерживает LAG: {0}'}" Foreground="Black"></TextBlock>
+                            <TextBlock  Text="{Binding Device.LogicDevice.ProtocolSupport.SupportsLacp, StringFormat='Поддерживает LACP: {0}'}" Foreground="Black"></TextBlock>
+                            <TextBlock  Text="{Binding Device.LogicDevice.ProtocolSupport.SupportsLoopProtection, StringFormat='Поддерживает STP: {0}'}" Foreground="Black"></TextBlock>
+                        </StackPanel>
+
+                        <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
+                            <Image Source="/Assets/Images/port.png" Width="18" Height="18"></Image>
+                            <TextBlock Text="Порты:" Foreground="Black"/>
+                        </StackPanel>
+                        <TextBlock Margin="20,0,0,0" Text="{Binding Device.LogicDevice.Ports, Converter={StaticResource PortsToStringConverter}}" Foreground="Black"></TextBlock>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
+                        <TextBlock Text="Средняя цена на рынке: " Foreground="Black"></TextBlock>
+                        <TextBlock Text="{Binding Device.LogicDevice.AveragePrice, StringFormat='{}{0:N0}'}" 
+                               Foreground="#228E3F" FontWeight="Bold"/>
+                        <TextBlock Text=" ₽" Foreground="Black"></TextBlock>
+                    </StackPanel>
+                </StackPanel>
+            </ScrollViewer>
+        </Grid>
+    </DataTemplate>
+
+    <DataTemplate x:Key="RouterSpecsTemplate">
+        <Grid Margin="20,10,20,10">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+            <Grid Grid.Row="0" Margin="0,0,0,20">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
                 <Image Grid.Column="0" Source="{Binding ImagePath}" 
-                  Width="60" Height="60"
-                  VerticalAlignment="Top" Margin="0,0,15,0">
+                       Width="60" Height="60"
+                       VerticalAlignment="Top" Margin="0,0,15,0">
                     <Image.Effect>
                         <DropShadowEffect ShadowDepth="5" Opacity="0.2" BlurRadius="5"/>
                     </Image.Effect>
@@ -74,7 +669,7 @@
 
                 <StackPanel Grid.Column="1" VerticalAlignment="Top">
                     <TextBlock Text="{Binding DeviceName}" 
-                          FontSize="20" FontWeight="DemiBold" Foreground="Black"/>
+                        FontSize="20" FontWeight="DemiBold" Foreground="Black"/>
                     <StackPanel Orientation="Horizontal">
                         <Image Source="/Assets/Images/zavod.png" Width="18" Height="18" Margin="0,0,8,0" />
                         <TextBlock Text="Производитель: " Foreground="Gray" FontSize="14"/>
@@ -96,16 +691,15 @@
 
                 <StackPanel Margin="20,0,0,0">
                     <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
-                        <Image Source="/Assets/Images/processor.png" Width="18" Height="18"></Image>
-                        <TextBlock Text="{Binding LogicDevice.HardwareSpecs.CpuModel, StringFormat='Процессор: {0}'}" Foreground="Black"/>
+                        <Image Source="/Assets/Images/level.png" Width="18" Height="18"></Image>
+                        <TextBlock Text="{Binding LogicDevice.Layer, StringFormat='Уровень: {0}'}" Foreground="Black"/>
                     </StackPanel>
                     <StackPanel Orientation="Horizontal"  Margin="0,5,0,0">
-                        <Image Source="/Assets/Images/ram.png" Width="18" Height="18"></Image>
-                        <TextBlock  Foreground="Black">
+                        <Image Source="/Assets/Images/lightning.png" Width="18" Height="18"></Image>
+                        <TextBlock Foreground="Black">
                             <TextBlock.Text>
-                                <MultiBinding StringFormat="Оперативная память: {0}Gb {1}">
-                                    <Binding Path="LogicDevice.HardwareSpecs.RamAmountGb" />
-                                    <Binding Path="LogicDevice.HardwareSpecs.RamType" />
+                                <MultiBinding StringFormat="Поддерживает Poe: {0}">
+                                    <Binding Path="LogicDevice.SupportsPoe" />
                                 </MultiBinding>
                             </TextBlock.Text>
                         </TextBlock>
@@ -140,11 +734,10 @@
             </StackPanel>
         </Grid>
     </DataTemplate>
-    <DataTemplate x:Key="SwitchSpecsTemplate">
-        
-    </DataTemplate>
     <selectors:DeviceSpecsSelector x:Key="DeviceSpecsSelector"
-        PcTemplate="{StaticResource PcSpecsTemplate}"/>
+        PcTemplate="{StaticResource PcSpecsTemplate}"
+        SwitchTemplate="{StaticResource SwitchSpecsTemplate}"
+        RouterTemplate="{StaticResource RouterSpecsTemplate}"/>
     <!--Дата темплейты сетевых свойств-->
     <DataTemplate x:Key="PcNetSpecsTemplate">
         <Grid>
@@ -178,23 +771,18 @@
                         <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
 
-                    <StackPanel Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" Margin="0,0,0,15">
-                        <RadioButton x:Name="DhcpRadio" 
-                     Content="DHCP" 
-                     GroupName="IPMode" 
-                     IsChecked="{Binding LogicDevice.NetworkSettings.IsDhcp}"
-                     FontSize="14" Margin="0,0,0,5"/>
-                        <RadioButton x:Name="StaticRadio" 
-                     Content="Статически" 
-                     GroupName="IPMode" 
-                     IsChecked="{Binding LogicDevice.NetworkSettings.IsStatic}"
-                     FontSize="14"/>
+                    <StackPanel Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" Margin="0,0,0,5">
+                        <RadioButton Style="{StaticResource ModernRadioButtonStyle}" Cursor="Hand"
+                                     Content="DHCP" IsChecked="{Binding Device.LogicDevice.NetworkSettings.IsDhcp}"/>
+
+                        <RadioButton x:Name="StaticRadio" Style="{StaticResource ModernRadioButtonStyle}" Cursor="Hand"
+                                     Content="Статически" IsChecked="{Binding Device.LogicDevice.NetworkSettings.IsStatic}" Margin="0,5,0,0"/>
                     </StackPanel>
 
                     <TextBlock Grid.Row="1" Grid.Column="0" Text="IP-Адрес:" Foreground="#3A3A3A" FontSize="14" VerticalAlignment="Center"/>
                     <TextBox   Grid.Row="1" Grid.Column="1"
-                               Style="{StaticResource ModernTextBoxStyle}"  Text="{Binding LogicDevice.NetworkSettings.IpAddress}"
-                               IsEnabled="{Binding IsChecked, ElementName=StaticRadio}"  TextAlignment="Center" Margin="10,5">
+                               Style="{StaticResource ModernTextBoxStyle}"  Text="{Binding Device.LogicDevice.NetworkSettings.IpAddress}"
+                               IsEnabled="{Binding IsChecked, ElementName=StaticRadio}" TextAlignment="Center" Margin="10,5">
                         <i:Interaction.Behaviors>
                             <behaviors:TextBoxBehaviors Mode="NumbersAndDots"/>
                         </i:Interaction.Behaviors>
@@ -202,7 +790,7 @@
 
                     <TextBlock Grid.Row="2" Grid.Column="0" Text="Маска подсети:" Foreground="#3A3A3A" FontSize="14" VerticalAlignment="Center"/>
                     <TextBox   Grid.Row="2" Grid.Column="1" 
-                               Style="{StaticResource ModernTextBoxStyle}"  Text="{Binding LogicDevice.NetworkSettings.SubnetMask}"
+                               Style="{StaticResource ModernTextBoxStyle}"  Text="{Binding Device.LogicDevice.NetworkSettings.SubnetMask}"
                                IsEnabled="{Binding IsChecked, ElementName=StaticRadio}"
                                TextAlignment="Center" Margin="10,5">
                         <i:Interaction.Behaviors>
@@ -212,7 +800,7 @@
 
                     <TextBlock Grid.Row="3" Grid.Column="0" Text="Шлюз по умолчанию:" Foreground="#3A3A3A" FontSize="14" VerticalAlignment="Center"/>
                     <TextBox   Grid.Row="3" Grid.Column="1"
-                               Style="{StaticResource ModernTextBoxStyle}"  Text="{Binding LogicDevice.NetworkSettings.Gateway}"
+                               Style="{StaticResource ModernTextBoxStyle}"  Text="{Binding Device.LogicDevice.NetworkSettings.Gateway}"
                                IsEnabled="{Binding IsChecked, ElementName=StaticRadio}"
                                TextAlignment="Center" Margin="10,5">
                         <i:Interaction.Behaviors>
@@ -222,7 +810,7 @@
 
                     <TextBlock Grid.Row="4" Grid.Column="0" Text="Dns-Сервер:" Foreground="#3A3A3A" FontSize="14" VerticalAlignment="Center"/>
                     <TextBox   Grid.Row="4"  Grid.Column="1" 
-                               Style="{StaticResource ModernTextBoxStyle}" Text="{Binding LogicDevice.NetworkSettings.DNS}"
+                               Style="{StaticResource ModernTextBoxStyle}" Text="{Binding Device.LogicDevice.NetworkSettings.DNS}"
                                IsEnabled="{Binding IsChecked, ElementName=StaticRadio}"
                                TextAlignment="Center" Margin="10,5">
                         <i:Interaction.Behaviors>
@@ -233,6 +821,289 @@
             </Grid>
         </Grid>
     </DataTemplate>
+
+    <DataTemplate x:Key="SwitchNetSpecsTemplate">
+        <Grid HorizontalAlignment="Stretch">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <!--ИНТЕРФЕЙСЫ-->
+            <Expander Grid.Column="1" Grid.Row="0"
+                  Style="{StaticResource ModernExpanderStyle}"
+                  HorizontalAlignment="Stretch"
+                  Foreground="Black">
+                <Expander.Header>
+                    <StackPanel Orientation="Horizontal">
+                        <Image Source="/Assets/Images/interfaceabstract.png" Width="20" Height="18" Margin="0,0,5,0"></Image>
+                        <TextBlock  Text="Интерфейсы" Foreground="Black"></TextBlock>
+                    </StackPanel>
+                </Expander.Header>
+                <StackPanel Margin="10,0,0,0">
+                    <ScrollViewer behaviors:ScrollBarWheelDirectionBehavior.OrientationScroll="Vertical" Height="200" >
+                        <ItemsControl ItemsSource="{Binding Device.LogicDevice.NetworkConfig.Interfaces}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Border Background="#F9F9FC" BorderBrush="#CECECE"
+                                            BorderThickness="1" CornerRadius="5" Margin="0,5,0,0">
+
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                            </Grid.ColumnDefinitions>
+
+                                            <!-- Expander порта -->
+                                            <Expander Grid.Column="0" Style="{StaticResource ModernExpanderStyle}">
+                                                <Expander.Header>
+                                                    <TextBlock Text="{Binding Name}" Margin="10,0"/>
+                                                </Expander.Header>
+
+                                                <Grid Margin="0,10,0,0">
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="Auto"/>
+                                                        <ColumnDefinition Width="Auto"/>
+                                                    </Grid.ColumnDefinitions>
+
+                                                    <Grid.RowDefinitions>
+                                                        <RowDefinition Height="30"/>
+                                                        <RowDefinition Height="30"/>
+                                                        <RowDefinition Height="30"/>
+                                                    </Grid.RowDefinitions>
+
+                                                    <!-- Статус -->
+                                                    <TextBlock Grid.Row="0" Grid.Column="0"
+                                                               Text="Статус:" VerticalAlignment="Center"/>
+
+                                                    <ComboBox Grid.Row="0" Grid.Column="1"
+                                                               Margin="10,0,0,0" Width="120"
+                                                               VerticalAlignment="Center"
+                                                               Style="{StaticResource ModernComboBox}"
+                                                               SelectedIndex="{Binding IsEnabled, Converter={StaticResource BoolToIndexConverter}}">
+
+                                                        <ComboBoxItem>
+                                                            <StackPanel Orientation="Horizontal">
+                                                                <Ellipse Fill="#43C706" Width="10" Height="10" Margin="0,0,5,0"/>
+                                                                <TextBlock Text="Вкл"/>
+                                                            </StackPanel>
+                                                        </ComboBoxItem>
+
+                                                        <ComboBoxItem>
+                                                            <StackPanel Orientation="Horizontal">
+                                                                <Ellipse Fill="Red" Width="10" Height="10" Margin="0,0,5,0"/>
+                                                                <TextBlock Text="Выкл"/>
+                                                            </StackPanel>
+                                                        </ComboBoxItem>
+                                                    </ComboBox>
+                                                    <!--SwitchPortMode-->
+                                                    <TextBlock Grid.Row="1" Grid.Column="0" Text="Тип:"
+                                                               VerticalAlignment="Center" Margin="0,10,0,0"/>
+                                                    
+                                                    <ComboBox Grid.Row="1" Grid.Column="1"
+                                                              Margin="10,0,0,0" Width="120"
+                                                              VerticalAlignment="Center"
+                                                              Style="{StaticResource ModernComboBox}"
+                                                              SelectedIndex="{Binding SwitchPortMode, Converter={StaticResource SwitchPortModeToIndexConverter}}">
+
+                                                        <ComboBoxItem>
+                                                            <StackPanel Orientation="Horizontal">
+                                                                <TextBlock Text="Access"/>
+                                                            </StackPanel>
+                                                        </ComboBoxItem>
+
+                                                        <ComboBoxItem>
+                                                            <StackPanel Orientation="Horizontal">
+                                                                <TextBlock Text="Trunk"/>
+                                                            </StackPanel>
+                                                        </ComboBoxItem>
+                                                    </ComboBox>
+                                                  <!--Vlan/Vlans-->
+                                                    
+                                                    <!--Acces-->
+                                                    <TextBlock Grid.Row="2" Grid.Column="0" Text="VLAN:"
+                                                               VerticalAlignment="Center" Margin="0,10,0,0">
+                                                        <TextBlock.Visibility>
+                                                            <MultiBinding Converter="{StaticResource PortModeVisibilityConverter}">
+                                                                <Binding Path="SwitchPortMode"/>
+                                                                <Binding Source="Access"/>
+                                                            </MultiBinding>
+                                                        </TextBlock.Visibility>
+                                                    </TextBlock>
+
+                                                    <ComboBox Grid.Row="2" Grid.Column="1"
+                                                             Margin="10,10,0,0" Width="120"
+                                                             VerticalAlignment="Center" 
+                                                              Style="{StaticResource ModernComboBox}"
+                                                              ItemsSource="{Binding DataContext.Device.LogicDevice.NetworkConfig.Vlans, 
+                                                                          RelativeSource={RelativeSource AncestorType=ItemsControl}}">
+                                                        <ComboBox.Visibility>
+                                                            <MultiBinding Converter="{StaticResource PortModeVisibilityConverter}">
+                                                                <Binding Path="SwitchPortMode"/>
+                                                                <Binding Source="Access"/>
+                                                            </MultiBinding>
+                                                        </ComboBox.Visibility>
+                                                        <ComboBox.ItemTemplate>
+                                                            <DataTemplate>
+                                                                <StackPanel Orientation="Horizontal">
+                                                                    <TextBlock Text="{Binding Id}"/>
+                                                                    <TextBlock Text=" - " />
+                                                                    <TextBlock Text="{Binding Name}"/>
+                                                                </StackPanel>
+                                                            </DataTemplate>
+                                                        </ComboBox.ItemTemplate>
+                                                        
+                                                    </ComboBox>
+                                                    <!--Trunk-->
+                                                    <TextBlock Grid.Row="2" Grid.Column="0" Text="VLANs:"
+                                                               VerticalAlignment="Center" Margin="0,10,0,0">
+                                                        <TextBlock.Visibility>
+                                                            <MultiBinding Converter="{StaticResource PortModeVisibilityConverter}">
+                                                                <Binding Path="SwitchPortMode"/>
+                                                                <Binding Source="Trunk"/>
+                                                            </MultiBinding>
+                                                        </TextBlock.Visibility>
+                                                    </TextBlock>
+
+                                                    <ComboBox Grid.Row="2" Grid.Column="1"
+                                                              Margin="10,10,0,0" Width="120"
+                                                              VerticalAlignment="Center"                                    
+                                                              Style="{StaticResource ModernComboBox}"
+                                                              ItemsSource="{Binding DataContext.Device.LogicDevice.NetworkConfig.Vlans, 
+                                                              RelativeSource={RelativeSource AncestorType=ItemsControl}}">
+                                                        <ComboBox.Visibility>
+                                                            <MultiBinding Converter="{StaticResource PortModeVisibilityConverter}">
+                                                                <Binding Path="SwitchPortMode"/>
+                                                                <Binding Source="Trunk"/>
+                                                            </MultiBinding>
+                                                        </ComboBox.Visibility>
+                                                        <ComboBox.ItemTemplate>
+                                                            <DataTemplate>
+                                                                <StackPanel Orientation="Horizontal">
+                                                                    <CheckBox Style="{StaticResource ModernCheckBox}" Width="16" Height="16" Margin="0,0,10,0"></CheckBox>
+                                                                    <TextBlock Text="{Binding Id}"/>
+                                                                    <TextBlock Text=" - " />
+                                                                    <TextBlock Text="{Binding Name}"/>
+                                                                </StackPanel>
+                                                            </DataTemplate>
+                                                        </ComboBox.ItemTemplate>
+                                                    </ComboBox>
+                                                </Grid>
+                                            </Expander>
+                                        </Grid>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </ScrollViewer>
+                </StackPanel>
+            </Expander>
+            <!--ВЛАНЫ-->
+            <Expander Grid.Column="1" Grid.Row="1"
+                      Style="{StaticResource ModernExpanderStyle}"
+                      HorizontalAlignment="Stretch" Foreground="Black">
+                <Expander.Header>
+                    <StackPanel Orientation="Horizontal">
+                        <Image Source="/Assets/Images/listabstract.png" Width="20" Height="18" Margin="0,0,5,0"></Image>
+                        <TextBlock Text="Vlans" Foreground="Black"></TextBlock>
+                    </StackPanel>
+                </Expander.Header>
+                <Grid>
+
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <Border Background="White" CornerRadius="8" 
+                            BorderBrush="#E5E7EB" BorderThickness="1" 
+                            Margin="0,5" ClipToBounds="True">
+
+                        <DataGrid ItemsSource="{Binding Device.LogicDevice.NetworkConfig.Vlans}"
+                                  Style="{StaticResource ModernDataGridStyle}">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="VLAN ID" Binding="{Binding Id}" Width="100">
+                                    <DataGridTextColumn.ElementStyle>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="HorizontalAlignment" Value="Center"/>
+                                            <Setter Property="VerticalAlignment" Value="Center"/>
+                                        </Style>
+                                    </DataGridTextColumn.ElementStyle>
+                                </DataGridTextColumn>
+
+                                <DataGridTextColumn Header="NAME" Binding="{Binding Name}" Width="*">
+                                    <DataGridTextColumn.ElementStyle>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="HorizontalAlignment" Value="Center"/>
+                                            <Setter Property="VerticalAlignment" Value="Center"/>
+                                            <Setter Property="Margin" Value="15,0,0,0"/>
+                                        </Style>
+                                    </DataGridTextColumn.ElementStyle>
+                                </DataGridTextColumn>
+                            </DataGrid.Columns>
+
+                        </DataGrid>
+                    </Border>
+
+                    <Grid Grid.Row="1" Margin="0,10,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+
+                        <Button Grid.Column="0" Style="{StaticResource ModernButtonStyle_AddVlan}" Padding="10,0,10,0" 
+                                Command="{Binding OpenAddVlanCommand}">
+                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                <TextBlock Text="+" Margin="0,0,6,0"
+                                           FontSize="14" VerticalAlignment="Center"/>
+                                <TextBlock Text="Добавить" VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </Button>
+
+                        <Border Grid.Column="1"/>
+
+                        <Button Grid.Column="2" Style="{StaticResource ModernButtonStyle_RemoveVlan}" Padding="10,0,10,0">
+                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                <Image Source="/Assets/Images/trashbucket.png" Width="14" Height="14" Margin="0,0,5,0"></Image>
+                                <TextBlock Text="Удалить"  VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </Button>
+
+                    </Grid>
+                </Grid>
+            </Expander>
+            <!--ЛАГ-->
+            <Expander Grid.Column="1" Grid.Row="2"
+                      Style="{StaticResource ModernExpanderStyle}"
+                      HorizontalAlignment="Stretch" Foreground="Black">
+                <Expander.Header>
+                    <StackPanel Orientation="Horizontal">
+                        <Image Source="/Assets/Images/lag.png" Width="20" Height="18" Margin="0,0,5,0"></Image>
+                        <TextBlock Text="Lag" Foreground="Black"></TextBlock>
+                    </StackPanel>
+                </Expander.Header>
+                <StackPanel Margin="10,5,0,0">
+                    <ScrollViewer behaviors:ScrollBarWheelDirectionBehavior.OrientationScroll="Vertical">
+                        <Border Background="#F9F9FC" BorderBrush="#CECECE"
+                        BorderThickness="1" Height="30"
+                        CornerRadius="5">
+                            <StackPanel VerticalAlignment="Center">
+                                <TextBlock Text="FastEthernet0/0" Margin="10,0,0,0" ></TextBlock>
+                            </StackPanel>
+                        </Border>
+                    </ScrollViewer>
+                </StackPanel>
+            </Expander>
+        </Grid>
+    </DataTemplate>
+    
     <selectors:DeviceNetSpecsSelector x:Key="DeviceNetSpecsSelector"
-                                      PcTemplate="{StaticResource PcNetSpecsTemplate}"/>
+                                      PcTemplate="{StaticResource PcNetSpecsTemplate}"
+                                      SwitchTemplate="{StaticResource SwitchNetSpecsTemplate}"/>
 </ResourceDictionary>

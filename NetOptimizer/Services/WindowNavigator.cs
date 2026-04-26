@@ -71,6 +71,7 @@ namespace NetOptimizer.Services
                 window?.Close();
             }
         }
+
         public void Minimize(object viewModel)
         {
             var window = Application.Current.Windows

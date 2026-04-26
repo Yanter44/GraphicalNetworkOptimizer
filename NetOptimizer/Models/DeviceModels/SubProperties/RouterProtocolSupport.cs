@@ -4,7 +4,7 @@ using System.Text;
 
 namespace NetOptimizer.Models.DeviceModels.SubProperties
 {
-    public class ProtocolSupport
+    public class RouterProtocolSupport
     {
         public bool SupportsOspf { get; set; }
         public bool SupportsVrrp { get; set; }

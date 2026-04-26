@@ -112,7 +112,7 @@
                             </Path.Fill>
                         </Path>
                         <Border Background="#80FFFFFF" CornerRadius="10" Margin="0"/>
-                        <ContentControl Content="{Binding OpenedDevice}" ContentTemplateSelector="{StaticResource DeviceSpecsSelector}" Margin="15"/>
+                        <ContentControl Content="{Binding DeviceVm}" ContentTemplateSelector="{StaticResource DeviceSpecsSelector}" Margin="15"/>
                     </Grid>
                 </TabItem>
                 
@@ -138,7 +138,7 @@
                             </Path.Fill>
                         </Path>
                         <Border Background="#80FFFFFF" CornerRadius="10" Margin="0"/>
-                        <ContentControl Content="{Binding OpenedDevice}" ContentTemplateSelector="{StaticResource DeviceNetSpecsSelector}" Margin="15"/>
+                        <ContentControl Content="{Binding DeviceVm}"  ContentTemplateSelector="{StaticResource DeviceNetSpecsSelector}"  />
                     </Grid>
                 </TabItem>
             </TabControl>

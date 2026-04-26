@@ -8,8 +8,7 @@ namespace NetOptimizer.Behaviors
 {
     public class TextBoxBehaviors : Behavior<TextBox>
     {
-    
-
+   
         public static readonly DependencyProperty ModeProperty =
             DependencyProperty.Register(nameof(Mode), typeof(Models.Enums.InputType), typeof(TextBoxBehaviors),
                 new PropertyMetadata(Models.Enums.InputType.OnlyNumbers));
@@ -32,7 +31,6 @@ namespace NetOptimizer.Behaviors
             AssociatedObject.PreviewTextInput -= OnTextInput;
             AssociatedObject.PreviewKeyDown -= OnPreviewKeyDown;
         }
-
         private void OnTextInput(object sender, TextCompositionEventArgs e)
         {
             string pattern = Mode == Models.Enums.InputType.NumbersAndDots ? "[^0-9.]+" : "[^0-9]+";
