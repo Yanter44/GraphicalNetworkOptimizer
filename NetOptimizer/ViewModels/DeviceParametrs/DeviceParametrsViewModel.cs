@@ -19,7 +19,6 @@ namespace NetOptimizer.ViewModels.DeviceParametrs
     {
         public event Action RequestClose;
         public DeviceViewModelBase DeviceVm { get;  }
-
         public ICommand CloseCommand { get; }
         private readonly IWindowNavigator _windowNavigator;
         public DeviceParametrsViewModel(DeviceViewModelFactory factory,
@@ -29,7 +28,8 @@ namespace NetOptimizer.ViewModels.DeviceParametrs
             DeviceVm = factory.Create(device);
             CloseCommand = new RelayCommand(w =>
             {
-                RequestClose.Invoke();
+                (DeviceVm as IApplyChangesVm)?.ApplyChanges();
+                RequestClose?.Invoke();
             });
         }
         public event PropertyChangedEventHandler PropertyChanged;

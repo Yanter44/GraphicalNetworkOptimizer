@@ -1,5 +1,7 @@
-﻿using NetOptimizer.Common;
+﻿using MediatR;
+using NetOptimizer.Common;
 using NetOptimizer.Enums;
+using NetOptimizer.MediatR.Commands;
 using NetOptimizer.Models.DeviceModels.DeviceSettings;
 using NetOptimizer.Models.Dtos;
 using NetOptimizer.Services;
@@ -24,14 +26,16 @@ namespace NetOptimizer.ViewModels.CreateDeviceWindoww
             set { _deviceSettings = value; OnPropertyChanged(); }
         }
         private readonly DeviceCatalogService _catalogService;
+        private readonly IMediator _mediator;
         public ICommand CloseCommand { get; }
         public ICommand ValidateDeviceAndAddToCanvasCommand { get; }
-        public CreateDeviceWindowViewModel(DeviceToAddDto device, DeviceCatalogService catalogService)
+        public CreateDeviceWindowViewModel(DeviceToAddDto device, DeviceCatalogService catalogService, IMediator mediator)
         {
             _catalogService = catalogService;
             CreatableDevice = device;
+            _mediator = mediator;
             CloseCommand = new RelayCommand(obj => { if (obj is Window window) { window.Close(); } });
-            ValidateDeviceAndAddToCanvasCommand = new RelayCommand(ValidateDeviceAndAddToCanvas);
+            ValidateDeviceAndAddToCanvasCommand = new AsyncRelayCommand(ValidateDeviceAndAddToCanvas);
             InitializeDeviceSettings();
         }
         private void InitializeDeviceSettings()
@@ -46,13 +50,17 @@ namespace NetOptimizer.ViewModels.CreateDeviceWindoww
                 _ => null
             };
         }
-        private void ValidateDeviceAndAddToCanvas()
+        private async Task ValidateDeviceAndAddToCanvas()
         {
-            if (CreatableDevice == null || DeviceSettings == null) return;
+            if (CreatableDevice == null || DeviceSettings == null)
+                return;
 
-            EventAggregator.Instance.PublishDeviceCreated(CreatableDevice, DeviceSettings);
+            await _mediator.Send(new CreateDeviceCommand
+            {
+                Device = CreatableDevice,
+                Settings = DeviceSettings
+            });
             RequestClose?.Invoke();
-
         }
 
         public event PropertyChangedEventHandler PropertyChanged;

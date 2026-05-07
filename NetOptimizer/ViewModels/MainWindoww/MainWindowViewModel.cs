@@ -35,6 +35,7 @@ namespace NetOptimizer.ViewModels.MainWindow
         public EditorViewModel editorViewModel { get; }
         public SandboxViewModel sandboxViewModel { get; }
         public CanvasViewModel CanvasVM { get; }
+        public SimmulationViewModel simmulationViewModel { get; }
         public ICommand ApplyAndBuildYamlFileCommand { get; }
         public ICommand OpenFinderFileDialogCommand { get; }
         
@@ -44,7 +45,7 @@ namespace NetOptimizer.ViewModels.MainWindow
         private readonly DeviceCatalogService _deviceCatalogService;
         public MainWindowViewModel(IWindowNavigator windowNavigator, IYamlManager yamlManager,
                                    IFileService fileservice, EditorViewModel editorVM,
-                                   SandboxViewModel sandboxVM, CanvasViewModel canvasVM, DeviceCatalogService deviceCatalogService)
+                                   SandboxViewModel sandboxVM, CanvasViewModel canvasVM, SimmulationViewModel simmulationVM, DeviceCatalogService deviceCatalogService)
         {
             _deviceCatalogService = deviceCatalogService;
             _windowNavigator = windowNavigator;
@@ -57,7 +58,8 @@ namespace NetOptimizer.ViewModels.MainWindow
 
             editorViewModel = editorVM;
             sandboxViewModel = sandboxVM;
-       
+            simmulationViewModel = simmulationVM;
+
             ApplyAndBuildYamlFileCommand = new AsyncRelayCommand(ApplyAndBuildNetwork);
             OpenFinderFileDialogCommand = new RelayCommand(OpenFinderFileFileDialog);
             InitializeNewProject();

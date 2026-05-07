@@ -11,6 +11,9 @@ namespace NetOptimizer.Models.UIElements
     public class DeviceConnection : INotifyPropertyChanged
     {
         public int ConnectionIndex { get; set; }
+        public ConnectionPoint StartPoint { get; set; } = new ConnectionPoint();
+        public ConnectionPoint EndPoint { get; set; } = new ConnectionPoint();
+        public double ArrowAngle { get; set; }
         public double X1 { get; set; }
         public double Y1 { get; set; }
         public double X2 { get; set; }
@@ -64,8 +67,14 @@ namespace NetOptimizer.Models.UIElements
         {
             if (Source == null || Target == null) return;
 
-            double dx = Target.X - Source.X;
-            double dy = Target.Y - Source.Y;
+            double ax = Source.X + 32;
+            double ay = Source.Y + 32;
+
+            double bx = Target.X + 32;
+            double by = Target.Y + 32;
+
+            double dx = bx - ax;
+            double dy = by - ay;
 
             double len = Math.Sqrt(dx * dx + dy * dy);
             if (len == 0) return;
@@ -74,36 +83,41 @@ namespace NetOptimizer.Models.UIElements
             double ny = dx / len;
 
             double spacing = 7;
-            double offset = 0;
-            if (ConnectionIndex < 3)
-            {
-                offset = (ConnectionIndex - 0.2) * spacing;
-            }
-            else
-            {
+            double offset;
 
+            if (ConnectionIndex < 3)
+                offset = (ConnectionIndex - 0.2) * spacing;
+            else
                 offset = -(ConnectionIndex - 2) * spacing;
-            }
 
             double ox = nx * offset;
             double oy = ny * offset;
 
-            double cx1 = Source.X + 32 + ox;
-            double cy1 = Source.Y + 32 + oy;
+            double x1 = ax + ox;
+            double y1 = ay + oy;
 
-            double cx2 = Target.X + 32 + ox;
-            double cy2 = Target.Y + 32 + oy;
+            double x2 = bx + ox;
+            double y2 = by + oy;
 
-            X1 = cx1;
-            Y1 = cy1;
-            X2 = cx2;
-            Y2 = cy2;
+            X1 = x1;
+            Y1 = y1;
+            X2 = x2;
+            Y2 = y2;
 
+            double tStart = 0.2;
+            double tEnd = 0.8;
+
+            StartPoint.Position = new Point(x1 + tStart * (x2 - x1), y1 + tStart * (y2 - y1));
+            EndPoint.Position = new Point(x1 + tEnd * (x2 - x1),y1 + tEnd * (y2 - y1));
+            ArrowAngle = Math.Atan2(Y2 - Y1, X2 - X1) * 180 / Math.PI;
+
+            OnPropertyChanged(nameof(ArrowAngle));
+            OnPropertyChanged(nameof(StartPoint));
+            OnPropertyChanged(nameof(EndPoint));
             OnPropertyChanged(nameof(X1));
             OnPropertyChanged(nameof(Y1));
             OnPropertyChanged(nameof(X2));
             OnPropertyChanged(nameof(Y2));
-
         }
 
         public event PropertyChangedEventHandler PropertyChanged;

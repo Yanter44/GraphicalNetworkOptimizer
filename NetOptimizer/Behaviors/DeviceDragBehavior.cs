@@ -1,5 +1,7 @@
 ﻿using Microsoft.Xaml.Behaviors;
+using NetOptimizer.Events;
 using NetOptimizer.Models;
+using NetOptimizer.Models.Enums;
 using NetOptimizer.Models.UIElements;
 using NetOptimizer.ViewModels.MainWindow;
 using NetOptimizer.ViewModels.MainWindoww;
@@ -25,6 +27,33 @@ namespace NetOptimizer.Behaviors
         private FrameworkElement _activeElement;
         private Point _lastMousePosition;
         private CanvasViewModel сanvasVM { get { var vm = GetMainVM(); return vm?.CanvasVM; } }
+        public ICommand DeviceMouseDownCommand
+        {
+            get => (ICommand)GetValue(DeviceMouseDownCommandProperty);
+            set => SetValue(DeviceMouseDownCommandProperty, value);
+        }
+
+        public static readonly DependencyProperty DeviceMouseDownCommandProperty = DependencyProperty.Register(nameof(DeviceMouseDownCommand),
+                                                                                                               typeof(ICommand),
+                                                                                                               typeof(DeviceDragBehavior));
+        public ICommand MoveDeviceCommand
+        {
+            get => (ICommand)GetValue(MoveDeviceCommandProperty);
+            set => SetValue(MoveDeviceCommandProperty, value);
+        }
+
+        public static readonly DependencyProperty MoveDeviceCommandProperty =
+            DependencyProperty.Register(
+                nameof(MoveDeviceCommand),
+                typeof(ICommand),
+                typeof(DeviceDragBehavior));
+        public double CanvasScale { get => (double)GetValue(CanvasScaleProperty); set => SetValue(CanvasScaleProperty, value); }
+
+        public static readonly DependencyProperty CanvasScaleProperty = DependencyProperty.Register(nameof(CanvasScale), 
+                                                                                                    typeof(double), typeof(DeviceDragBehavior));
+        public ICommand DeviceMouseOverCommand { get => (ICommand)GetValue(DeviceMouseOverProperty); set => SetValue(DeviceMouseOverProperty, value); }
+        public static readonly DependencyProperty DeviceMouseOverProperty = DependencyProperty.Register(nameof(DeviceMouseOverCommand),
+                                                                                                        typeof(ICommand), typeof(DeviceDragBehavior));
         protected override void OnAttached()
         {
             AssociatedObject.MouseDown += OnMouseDown;
@@ -50,72 +79,79 @@ namespace NetOptimizer.Behaviors
         private void OnMouseEnter(object sender, MouseEventArgs e)
         {
             var device = AssociatedObject.DataContext as DeviceOnCanvas;
-            if (device != null)
+            if (device == null) return;
+
+            DeviceMouseOverCommand?.Execute(new DeviceMouseEventArgs
             {
-                сanvasVM.SelectDevice(device, true);
-            }
+                Device = device,
+                Action = DeviceMouseAction.MouseEnter
+            });
         }
 
         private void OnMouseLeave(object sender, MouseEventArgs e)
         {
             var device = AssociatedObject.DataContext as DeviceOnCanvas;
-            if (device != null && сanvasVM.IsSelecting == false)
+            if (device == null) return;
+
+            DeviceMouseOverCommand?.Execute(new DeviceMouseEventArgs
             {
-                сanvasVM.SelectDevice(device, false);
-            }
-
+                Device = device,
+                Action = DeviceMouseAction.MouseLeave
+            });
         }
-
         private void OnMouseDown(object sender, MouseButtonEventArgs e)
         {
-            if(e.ClickCount == 2)
+            var element = sender as FrameworkElement;
+            var device = element?.DataContext as DeviceOnCanvas;
+
+            if (device == null) return;
+
+            if (e.ClickCount == 2)
             {
-                var element = sender as FrameworkElement;
-                var device = element?.DataContext as DeviceOnCanvas;
-                if (device == null) return;
-                сanvasVM.ShowDeviceParametrsWindow(device);
-            } 
+                DeviceMouseDownCommand?.Execute(new DeviceMouseEventArgs
+                {
+                    Device = device,
+                    Action = DeviceMouseAction.DoubleClick
+                });
+                return;
+            }
+
             if (e.LeftButton == MouseButtonState.Pressed)
             {
                 _isDragging = true;
-                _activeElement = sender as FrameworkElement;
+                _activeElement = element;
                 _lastMousePosition = e.GetPosition(_activeElement.Parent as Canvas);
                 _activeElement.CaptureMouse();
-                e.Handled = true;
+
+                DeviceMouseDownCommand?.Execute(new DeviceMouseEventArgs
+                {
+                    Device = device,
+                    Action = DeviceMouseAction.SingleClick,
+                    Position = e.GetPosition(null)
+                });
             }
         }
-      
+
         private void OnMouseMove(object sender, MouseEventArgs e)
         {
             if (!_isDragging || _activeElement == null) return;
 
             var device = _activeElement.DataContext as DeviceOnCanvas;
-            var vm = GetMainVM();
-            if (device == null || vm == null) return;
+            if (device == null) return;
 
             Point currentMouse = e.GetPosition(_activeElement.Parent as Canvas);
-
             double dx = currentMouse.X - _lastMousePosition.X;
             double dy = currentMouse.Y - _lastMousePosition.Y;
 
-            double adjustedDx = dx / vm.CanvasVM.CanvasScale;
-            double adjustedDy = dy / vm.CanvasVM.CanvasScale;
-
-            var selectedDevices = vm.CanvasVM.Devices
-                .Where(x => x.IsSelected)
-                .ToList();
-
-            if (selectedDevices.Count > 1)
+            double adjustedDx = dx / CanvasScale;
+            double adjustedDy = dy / CanvasScale;
+            
+            MoveDeviceCommand?.Execute(new DeviceMoveEventArgs
             {
-                foreach (var dev in selectedDevices)
-                {
-                    vm.CanvasVM.MoveDevice(dev, adjustedDx, adjustedDy);
-                }
-            }
-            else
-            {
-                vm.CanvasVM.MoveDevice(device, adjustedDx, adjustedDy);
-            }
+                Device = device,
+                Dx = adjustedDx,
+                Dy = adjustedDy
+            });
             _lastMousePosition = currentMouse;
         }
 

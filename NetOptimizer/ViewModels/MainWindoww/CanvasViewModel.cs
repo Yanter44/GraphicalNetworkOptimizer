@@ -1,10 +1,14 @@
-﻿using NetOptimizer.Common;
+﻿using MediatR;
+using NetOptimizer.Common;
 using NetOptimizer.Enums;
+using NetOptimizer.Events;
 using NetOptimizer.Interfaces;
+using NetOptimizer.MediatR.Commands;
 using NetOptimizer.Models;
 using NetOptimizer.Models.DeviceModels;
 using NetOptimizer.Models.DeviceModels.DeviceSettings;
 using NetOptimizer.Models.Dtos;
+using NetOptimizer.Models.Enums;
 using NetOptimizer.Models.UIElements;
 using NetOptimizer.Services;
 using NetOptimizer.ViewModels.DeviceParametrs;
@@ -14,6 +18,7 @@ using NetOptimizer.Views;
 using NetOptimizer.Views.DopViews;
 using Newtonsoft.Json.Bson;
 using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Windows;
@@ -22,6 +27,8 @@ using System.Windows.Forms;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Shapes;
+using Cursor = System.Windows.Input.Cursor;
+using Cursors = System.Windows.Input.Cursors;
 
 namespace NetOptimizer.ViewModels.MainWindoww
 {
@@ -42,6 +49,7 @@ namespace NetOptimizer.ViewModels.MainWindoww
         private bool _isDrawing;
         private bool _isTryingToConnect;
         private TempLine _tempConnectionLine;
+        private bool _isTryingToSendPacket;
 
         private DeviceOnCanvas _sourceDevice;
         private Port _sourcePort;
@@ -53,12 +61,16 @@ namespace NetOptimizer.ViewModels.MainWindoww
         public bool IsDrawingSelection { get => _isDrawSelection; set { _isDrawSelection = value; OnPropertyChanged(); } }
         public bool IsSelecting { get => _isSelecting; set { _isSelecting = value; OnPropertyChanged(); } }
         public UIToolElementToAddDto CurrentTool { get => _currentTool; set { _currentTool = value;  OnPropertyChanged(); }}
-        public bool IsDrawing { get => _isDrawing; set { _isDrawing = value; OnPropertyChanged(); } }
-        public bool IsTryingToConnect { get => _isTryingToConnect; set { _isTryingToConnect = value; OnPropertyChanged(); } }
+        public bool IsDrawing { get => _isDrawing; set { _isDrawing = value; OnPropertyChanged(); UpdateCanvasCursor(); } }
+        public bool IsTryingToSendPacket { get => _isTryingToSendPacket; set { _isTryingToSendPacket = value; OnPropertyChanged(); UpdateCanvasCursor(); }  }
+        public bool IsTryingToConnect { get => _isTryingToConnect; set { _isTryingToConnect = value; OnPropertyChanged(); UpdateCanvasCursor(); } }
         public TempLine TempConnectionLine { get => _tempConnectionLine; set { _tempConnectionLine = value; OnPropertyChanged(); } }
+        public CanvasCursorMode CanvasCursor => ResolveCursor();
         public ObservableCollection<DeviceConnection> Connections { get; } = new ObservableCollection<DeviceConnection>();
         public ObservableCollection<DeviceOnCanvas> Devices { get; set; }  = new ObservableCollection<DeviceOnCanvas>();
         public ObservableCollection<UIElementBase> UIObjects { get; set; } = new();
+        public ObservableCollection<PacketViewModel> UIPackets { get; set; } = new();
+        public ObservableCollection<PacketTrailDotViewModel> UIPacketTrails { get; set; } = new();
 
         private CanvasClipBoard _clipboard = new();
 
@@ -69,16 +81,87 @@ namespace NetOptimizer.ViewModels.MainWindoww
         public event Action<DeviceOnCanvas, DeviceOnCanvas> ConnectionRequested;
 
         private readonly IWindowNavigator _windowNavigator;
+        private readonly IMediator _mediator;
+        private readonly ISimulationEngine _engine;
+        private readonly IDeviceRegistry _deviceRegistry;
         public ICommand DeleteDeviceCommand { get; }
         public ICommand SelectDevicePortCommand { get; }
-        public CanvasViewModel(IWindowNavigator windowNavigator)
+        public ICommand MoveDeviceCommand { get; }
+        public ICommand DeviceMouseDownCommand { get; }
+        public ICommand DeviceMouseOverCommand { get; }
+        public ICommand StartTryToSendPacketCommand { get; }
+        public CanvasViewModel(IWindowNavigator windowNavigator, IMediator mediator, ISimulationEngine engine, IDeviceRegistry deviceRegistry)
         {
             DeleteDeviceCommand = new RelayCommand(obj => DeleteDevice(obj));
             SelectDevicePortCommand = new RelayCommand(obj => SelectDevicePort(obj));
-            EventAggregator.Instance.DeviceCreated += (dto, settings) => OnDeviceCreated(dto, settings);
+            StartTryToSendPacketCommand = new RelayCommand(obj => StartTryToSendPacket(obj));
+            DeviceMouseDownCommand = new AsyncRelayCommand(obj => OnDeviceMouseDown(obj));
+            DeviceMouseOverCommand = new RelayCommand(obj => OnDeviceMouseOver(obj));
+            MoveDeviceCommand = new RelayCommand(obj => OnMoveDevice(obj));
             _windowNavigator = windowNavigator;
+            _mediator = mediator;
+            _engine = engine;
+            _deviceRegistry = deviceRegistry;
+            _engine.EventChain.CollectionChanged += OnSimulationEvent;
         }
-        private void OnDeviceCreated(DeviceToAddDto dto, DeviceSettingsBase settings, double x = 500, double y = 500)
+        private void OnSimulationEvent(object sender, NotifyCollectionChangedEventArgs e)
+        {
+            if (e.NewItems == null)
+                return;
+
+            foreach (SimmulationEvent ev in e.NewItems)
+            {
+                var from = Devices.FirstOrDefault(d => d.LogicDevice.Id == ev.FromDeviceId);
+                var to = Devices.FirstOrDefault(d => d.LogicDevice.Id == ev.ToDeviceId);
+
+                if (from == null || to == null)
+                    continue;
+
+                var packet = new PacketViewModel
+                {
+                    PacketId = ev.PacketId,
+                    FromDeviceId = ev.FromDeviceId,
+                    ToDeviceId = ev.ToDeviceId,
+                    FromDevice = from,
+                    ToDevice = to,
+                    Progress = 0
+                };
+
+                UIPackets.Add(packet);
+                _ = AnimatePacket(packet);
+            }
+        }
+        private async Task AnimatePacket(PacketViewModel packet)
+        {
+            int steps = 20;
+
+            for (int i = 0; i <= steps; i++)
+            {
+                packet.Progress = i / (double)steps;
+
+                UIPacketTrails.Add(new PacketTrailDotViewModel
+                {
+                    PacketId = packet.PacketId,
+                    X = packet.X,
+                    Y = packet.Y,
+                });
+                await Task.Delay(50);
+            }
+            UIPackets.Remove(packet);
+            var toRemove = UIPacketTrails.Where(t => t.PacketId == packet.PacketId)
+                                         .ToList();
+
+            foreach (var dot in toRemove)
+                UIPacketTrails.Remove(dot);
+        }
+
+        private DeviceConnection FindConnection(string fromId, string toId)
+        {
+            return Connections.FirstOrDefault(c =>
+                (c.Source.LogicDevice.Id == fromId && c.Target.LogicDevice.Id == toId) ||
+                (c.Source.LogicDevice.Id == toId && c.Target.LogicDevice.Id == fromId));
+        }
+        public void OnDeviceCreated(DeviceToAddDto dto, DeviceSettingsBase settings, double x = 500, double y = 500)
         {
             Device logicDevice = (dto.Type, settings) switch
             {
@@ -90,8 +173,101 @@ namespace NetOptimizer.ViewModels.MainWindoww
             if (logicDevice == null) return;
             var deviceOnCanvas = new DeviceOnCanvas(logicDevice, x, y);
             Devices.Add(deviceOnCanvas);
+            _deviceRegistry.Register(deviceOnCanvas);
             // UpdateYamlFromCanvas();
         }
+        private void OnDeviceMouseOver(object obj)
+        {
+            var args = obj as DeviceMouseEventArgs;
+            if (args?.Device == null) return;
+
+            switch (args.Action)
+            {
+                case DeviceMouseAction.MouseEnter:
+                    args.Device.IsSelected = true;
+                    break;
+
+                case DeviceMouseAction.MouseLeave:
+                    if (!IsSelecting) 
+                        args.Device.IsSelected = false;
+                    break;
+            }
+        }
+        private void OnMoveDevice(object obj)
+        {
+            if (obj is not DeviceMoveEventArgs args)
+                return;
+
+            var selectedDevices = Devices
+                .Where(x => x.IsSelected)
+                .ToList();
+
+            if (selectedDevices.Count > 1)
+            {
+                foreach (var dev in selectedDevices)
+                {
+                    MoveDevice(dev, args.Dx, args.Dy);
+                }
+            }
+            else
+            {
+                MoveDevice(args.Device, args.Dx, args.Dy);
+            }
+        }
+        private async Task OnDeviceMouseDown(object obj)
+        {
+            var args = obj as DeviceMouseEventArgs;
+
+            switch (args.Action)
+            {
+                case DeviceMouseAction.DoubleClick:
+                    ShowDeviceParametrsWindow(args.Device);
+                    break;
+
+                case DeviceMouseAction.SingleClick:
+                    if (IsTryingToSendPacket && _sourceDevice != null)
+                    {
+                        var target = args.Device;
+                        if (target == _sourceDevice) return;
+                        await _mediator.Send(new SendPacketCommand()
+                        {
+                            SourceId = _sourceDevice.LogicDevice.Id,
+                            TargetId = target.LogicDevice.Id
+                        });
+                        _sourceDevice = null;
+                        IsTryingToSendPacket = false;
+                    }
+                    break;
+            }
+        }
+        private void UpdateCanvasCursor()
+        {
+            OnPropertyChanged(nameof(CanvasCursor));
+        }
+
+        public CanvasCursorMode ResolveCursor()
+        { 
+            if (IsTryingToSendPacket)
+                 return CanvasCursorMode.SendPacket;
+
+            if (IsTryingToConnect)
+                 return CanvasCursorMode.Connect;
+
+            if (IsDrawing)
+                 return CanvasCursorMode.Draw;
+
+           return CanvasCursorMode.Default;
+        }
+
+        private void StartTryToSendPacket(object obj)
+        {
+            if (obj is not DeviceOnCanvas device)
+                return;
+            _sourceDevice = device;
+            IsTryingToSendPacket = true;
+        }
+
+
         public void SelectDevicePort(object obj)
         {
             var port = obj as Port;
@@ -125,6 +301,7 @@ namespace NetOptimizer.ViewModels.MainWindoww
             if (TempConnectionLine == null) return;
             IsTryingToConnect = false;
             TempConnectionLine = null;
+            _sourceDevice = null;
         }
         public void CopySelected()
         {
@@ -261,7 +438,6 @@ namespace NetOptimizer.ViewModels.MainWindoww
             try
             {
                 sourcePort.LinkTo(targetPort);
-
                 var conn = new DeviceConnection
                 {
                     Source = sourceDevice,

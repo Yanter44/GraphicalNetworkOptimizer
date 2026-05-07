@@ -19,11 +19,13 @@
             <conv:DeviceTypeToIconConverter x:Key="DeviceTypeToIconConverter"/>
             <conv:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
             <conv:ToolTypeToShapeConverter x:Key="ToolTypeToShapeConverter"/>
-            <conv:CanvasCursorIsDrawingConverter x:Key="CanvasCursorIsDrawingConverter"/>
+            <conv:CanvasCursorModeToCursorConverter x:Key="CanvasCursorModeToCursorConverter"/>
             <conv:SelectionToEffectConverter x:Key="SelectionToEffectConverter"/>
             <conv:PortHeaderConverter x:Key="PortHeaderConverter"/>
             <conv:PortColorConverter x:Key="PortColorConverter"/>
             <conv:NullToVisibilityConverter x:Key="NullToVisibilityConverter"/>
+            <conv:ConnectionStateToBrushConverter x:Key="ConnectionStateToBrushConverter"/>
+            <conv:PacketTypeToBrushConverter x:Key="PacketTypeToBrushConverter"/>
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="/Views/ResourcesDictionary/MainWindowResources.xaml"/>
             </ResourceDictionary.MergedDictionaries>
@@ -56,7 +58,7 @@
 
         <Grid>
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="240" MinWidth="240" MaxWidth="450"/>
+                <ColumnDefinition Width="350" MinWidth="350" MaxWidth="450"/>
                 <ColumnDefinition Width="4"/>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="4"/>
@@ -97,8 +99,8 @@
                             <Setter Property="Padding" Value="10,8"/>
                         </Style>
                     </TabControl.Resources>
-
-                    <!--<TabItem Style="{StaticResource ModernTabItemStyle}">
+                    <!--РЕЖИМ РЕДАКТОРА-->
+                    <TabItem Style="{StaticResource ModernTabItemStyle}">
                         <TabItem.Header>
                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                                 <Image Source="/Assets/Images/redact.png" Width="18" Height="18" Margin="0,0,8,0"/>
@@ -157,7 +159,8 @@
 
 
                                 <StackPanel Grid.Row="5" VerticalAlignment="Bottom" >
-                                    <Button Content="Создать" Command="{Binding editorViewModel.CreateNetworkByUserPropertiesCommand}"  Height="30" Width="150" Foreground="White" FontWeight="SemiBold" Cursor="Hand">
+                                    <Button Content="Создать" Command="{Binding editorViewModel.CreateNetworkByUserPropertiesCommand}"
+                                            Height="30" Width="150" Foreground="White" FontWeight="SemiBold" Cursor="Hand">
                                         <Button.Template>
                                             <ControlTemplate TargetType="{x:Type Button}">
                                                 <Border x:Name="border" Background="#4A89F3" CornerRadius="10">
@@ -179,8 +182,8 @@
 
                             </Grid>
                         </ScrollViewer>
-                    </TabItem>-->
-                    
+                    </TabItem>
+                    <!--РЕЖИМ ПЕСОЧНИЦЫ-->
                     <TabItem Style="{StaticResource ModernTabItemStyle}">
                         <TabItem.Header>
                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
@@ -393,6 +396,172 @@
                             </ScrollViewer>
                         </Grid>
                     </TabItem>
+                    <TabItem Style="{StaticResource ModernTabItemStyle}">
+                        <TabItem.Header>
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                <Image Source="/Assets/Images/labcolba.png" Width="20" Height="20" Margin="0,0,5,0"/>
+                                <TextBlock Text="Симмуляция" VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </TabItem.Header>
+
+                        <Grid Margin="20">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*"/>
+                                <RowDefinition Height="30"/>
+                                <RowDefinition Height="*"/>
+                                <RowDefinition Height="90"/>
+                            </Grid.RowDefinitions>
+
+                            <!-- Заголовок -->
+                            <TextBlock Text="Сценарий" Grid.Row="0"
+                                       FontSize="18" FontWeight="SemiBold"
+                                       HorizontalAlignment="Center"  Foreground="#444"
+                                       Margin="0,0,0,10"/>
+
+                            <ComboBox Style="{StaticResource ScenarioComboBox}" Grid.Row="1"
+                                      Width="250" Height="35"
+                                      HorizontalAlignment="Center"
+                                      Margin="0,0,0,15"
+                                      ItemsSource="{Binding simmulationViewModel.ScenarioList}"
+                                      SelectedItem="{Binding simmulationViewModel.SelectedScenario}"
+                                      DisplayMemberPath="Name"
+                                      HorizontalContentAlignment="Center"
+                                      VerticalContentAlignment="Center"
+                                      ItemContainerStyle="{StaticResource ScenarioComboBoxItem}">
+                            </ComboBox>
+
+                            <Grid Grid.Row="2" Margin="0,0,0,20">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="50"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+
+                                <Button Height="35" Grid.Column="1" Style="{StaticResource SimpleButtonStyle}" Command="{Binding simmulationViewModel.AddNewScenarioCommand}" Width="100">
+                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                        <TextBlock Text="+" FontSize="18" Margin="0,-3,8,0"/>
+                                        <TextBlock Text="Создать" FontSize="14" />
+                                    </StackPanel>
+                                </Button>
+                                <Button Height="35" Grid.Column="3" Style="{StaticResource SimpleButtonStyle}" Command="{Binding simmulationViewModel.RemoveScenarioCommand}" Width="100">
+                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                        <Image Source="/Assets/Images/trashbucket.png" Width="20" Height="20" Margin="0,0,5,0"></Image>
+                                        <TextBlock Text="Удалить"/>
+                                    </StackPanel>
+                                </Button>
+                            </Grid>
+                            <!-- Таблица сценариев -->
+                            <Border Grid.Row="3"
+                                    Background="White"
+                                    CornerRadius="8"
+                                    BorderBrush="#DDD"
+                                    BorderThickness="1"
+                                    Margin="0,0,0,10">
+
+                                <DataGrid Style="{StaticResource ScenarioDataGrid}" ItemsSource="{Binding simmulationViewModel.ActionsView}"
+                                          AutoGenerateColumns="False"
+                                          HeadersVisibility="Column"
+                                          GridLinesVisibility="None"
+                                          RowBackground="White"
+                                          AlternatingRowBackground="#F7F9FC"
+                                          BorderThickness="0"
+                                          IsReadOnly="True">
+
+                                    <DataGrid.Columns>
+                                        <DataGridTextColumn Header="Источник"  Binding="{Binding SourceDevice.LogicDevice.Name}" Width="*" />
+                                        <DataGridTextColumn Header="Цель" Binding="{Binding TargetDevice.LogicDevice.Name}" Width="*"/>
+                                        <DataGridTextColumn Header="Тип" Binding="{Binding PacketType}" Width="*"/>
+                                        <DataGridTemplateColumn Header="Цвет">
+                                            <DataGridTemplateColumn.CellTemplate>
+                                                <DataTemplate>
+                                                    <Border Width="16" Height="16"
+                                                             CornerRadius="3" Background="{Binding PacketType, Converter={StaticResource PacketTypeToBrushConverter}}"/>
+                                                </DataTemplate>
+                                            </DataGridTemplateColumn.CellTemplate>
+                                        </DataGridTemplateColumn>
+                                        <DataGridTemplateColumn Header="Действие" Width="*">
+                                            <DataGridTemplateColumn.CellTemplate>
+                                                <DataTemplate>
+                                                    <Button Content="Редактировать"
+                                                            Command="{Binding DataContext.RedactCommand,
+                                                                      RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                                           CommandParameter="{Binding}"
+                                                           Visibility="{Binding IsValid, Converter={StaticResource BoolToVisibilityConverter}}"/>
+                                                </DataTemplate>
+                                            </DataGridTemplateColumn.CellTemplate>
+                                        </DataGridTemplateColumn>
+                                    </DataGrid.Columns>
+                                </DataGrid>
+                            </Border>
+                            <TextBlock Grid.Row="4" Text="Цепочка событий"
+                                       FontSize="16"  HorizontalAlignment="Center"
+                                       FontWeight="SemiBold" Margin="0,0,0,10" Foreground="#444"/>
+                            <!-- Цепочка событий -->
+                            <Border Grid.Row="5"
+                                    Background="White"
+                                    CornerRadius="8"
+                                    BorderBrush="#DDD"
+                                    BorderThickness="1">
+
+                      
+                                    <ScrollViewer behaviors:ScrollBarWheelDirectionBehavior.OrientationScroll="Vertical">
+                                        <DataGrid ItemsSource="{Binding simmulationViewModel.Events}"
+            AutoGenerateColumns="False"
+            HeadersVisibility="Column"
+            GridLinesVisibility="None"
+            RowBackground="White"
+            AlternatingRowBackground="#F7F9FC"
+            BorderThickness="0">
+
+                                            <DataGrid.Columns>
+                                                <DataGridTextColumn Header="От устройства" Binding="{Binding From}" Width="*"/>
+                                                <DataGridTextColumn Header="К устройству" Binding="{Binding To}" Width="*"/>
+                                                <DataGridTextColumn Header="Тип пакета" Binding="{Binding Type}" Width="*"/>
+                                            </DataGrid.Columns>
+                                        </DataGrid>
+                                    </ScrollViewer>
+
+                                  
+                            </Border>
+
+                            <!-- Кнопка -->
+                            <Button Grid.Row="6"
+                                    Content="Начать симуляцию"
+                                    Height="35" Width="150"
+                                    HorizontalAlignment="Center"
+                                    Foreground="White" FontWeight="SemiBold"
+                                    Cursor="Hand" Background="#4A89F3"
+                                    BorderThickness="0"
+                                    Command="{Binding simmulationViewModel.StartSimmulationCommand}">
+
+                                <Button.Template>
+                                    <ControlTemplate TargetType="Button">
+                                        <Border x:Name="border" Background="{TemplateBinding Background}"
+                                                CornerRadius="5">
+                                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                        </Border>
+                                        <ControlTemplate.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter TargetName="border"
+                                                         Property="Background"
+                                                         Value="#5B9AFF"/>
+                                            </Trigger>
+                                            <Trigger Property="IsPressed" Value="True">
+                                                <Setter TargetName="border"
+                                                        Property="Background"
+                                                        Value="#3A79E3"/>
+                                            </Trigger>
+                                        </ControlTemplate.Triggers>
+                                    </ControlTemplate>
+                                </Button.Template>
+                            </Button>
+                        </Grid>
+                    </TabItem>
                 </TabControl>
             </Grid>
 
@@ -404,7 +573,7 @@
                     <RowDefinition Height="39*"/>
                     <RowDefinition Height="554*"/>
                 </Grid.RowDefinitions>
-                <Canvas x:Name="MainCanvas" Cursor="{Binding IsDrawing, Converter={StaticResource CanvasCursorIsDrawingConverter}}"
+                <Canvas x:Name="MainCanvas" Cursor="{Binding CanvasCursor, Converter={StaticResource CanvasCursorModeToCursorConverter}}"
                         DataContext="{Binding CanvasVM}" Width="{Binding CanvasWidth}"
                         Height="{Binding CanvasHeight}" Grid.RowSpan="2" Focusable="True" >
 
@@ -457,12 +626,11 @@
                                              Visibility="{Binding IsSelected, Converter={StaticResource BoolToVisibilityConverter}}"
                                              IsHitTestVisible="False"/>
 
-                                    <StackPanel x:Name="DevicePanel" Cursor="Hand" Background="Transparent" ToolTipService.InitialShowDelay="2000">
-                                        
+                                    <StackPanel x:Name="DevicePanel"  Background="Transparent" ToolTipService.InitialShowDelay="2000">
+
                                         <StackPanel.ToolTip>
                                             <ToolTip Style="{StaticResource DeviceToolTipStyle}" Content="{Binding}" ContentTemplate="{StaticResource DeviceTooltipTemplate}" />
                                         </StackPanel.ToolTip>
-
                                         <StackPanel.ContextMenu >
                                             <ContextMenu>
                                                 <MenuItem Header="Подключить"
@@ -489,6 +657,13 @@
                                                     </MenuItem.ItemContainerStyle>
                                                 </MenuItem>
                                                 <Separator/>
+                                                <MenuItem  Header="Отправить пакет" Command="{Binding DataContext.StartTryToSendPacketCommand, Source={x:Reference DevicesList}}"
+                                                           CommandParameter="{Binding Data, Source={StaticResource DeviceProxy}}">
+                                                    <MenuItem.Icon>
+                                                        <Image Source="/Assets/Images/envelope.png" Width="20" Height="20"/>
+                                                    </MenuItem.Icon>
+                                                </MenuItem>
+                                                <Separator/>
                                                 <MenuItem Header="Удалить" Command="{Binding DataContext.DeleteDeviceCommand, Source={x:Reference DevicesList}}"
                                                           CommandParameter="{Binding Data, Source={StaticResource DeviceProxy}}" >
                                                     <MenuItem.Icon>
@@ -498,7 +673,10 @@
                                             </ContextMenu>
                                         </StackPanel.ContextMenu>
                                         <i:Interaction.Behaviors>
-                                            <behaviors:DeviceDragBehavior/>
+                                            <behaviors:DeviceDragBehavior DeviceMouseOverCommand="{Binding DataContext.DeviceMouseOverCommand, ElementName=MainCanvas}"
+                                                                          DeviceMouseDownCommand="{Binding DataContext.DeviceMouseDownCommand, ElementName=MainCanvas}"
+                                                                          MoveDeviceCommand="{Binding DataContext.MoveDeviceCommand, ElementName=MainCanvas}"
+                                                                          CanvasScale="{Binding DataContext.CanvasScale, ElementName=MainCanvas}"/>
                                         </i:Interaction.Behaviors>
                                         <Image Width="48" Height="48" Source="{Binding ImageSource}" />
                                         <TextBlock Text="{Binding DeviceName}" HorizontalAlignment="Center" FontSize="10"/>
@@ -516,8 +694,36 @@
                             </ItemsPanelTemplate>
                         </ItemsControl.ItemsPanel>
                         <ItemsControl.ItemTemplate>
-                            <DataTemplate>              
-                                <Line X1="{Binding X1}" Y1="{Binding Y1}" X2="{Binding X2}" Y2="{Binding Y2}" Stroke="Gray" StrokeDashArray="4 2" StrokeThickness="2" />
+                            <DataTemplate>
+                                <Canvas>
+                                    <!-- Линия -->
+                                    <Line X1="{Binding X1}" Y1="{Binding Y1}"
+                                          X2="{Binding X2}" Y2="{Binding Y2}"
+                                          Stroke="Gray" StrokeDashArray="4 2"
+                                          StrokeThickness="2"/>
+
+                                    <Polygon Points="0,4 4,-5 8,4"
+                                             Fill="{Binding StartPoint.State, Converter={StaticResource ConnectionStateToBrushConverter}}"
+                                             Canvas.Left="{Binding StartPoint.Position.X}" Canvas.Top="{Binding StartPoint.Position.Y}">
+                                        <Polygon.RenderTransform>
+                                            <TransformGroup>
+                                                <ScaleTransform ScaleX="1.5" ScaleY="1.2"/>
+                                                <RotateTransform Angle="{Binding ArrowAngle}"/>
+                                            </TransformGroup>
+                                        </Polygon.RenderTransform>
+                                    </Polygon>
+
+                                    <Polygon Points="0,4 4,-5 8,4"
+                                             Fill="{Binding EndPoint.State, Converter={StaticResource ConnectionStateToBrushConverter}}"
+                                             Canvas.Left="{Binding EndPoint.Position.X}" Canvas.Top="{Binding EndPoint.Position.Y}">
+                                        <Polygon.RenderTransform>
+                                            <TransformGroup>
+                                                <ScaleTransform ScaleX="1.5" ScaleY="1.2"/>
+                                                <RotateTransform Angle="{Binding ArrowAngle}"/>
+                                            </TransformGroup>
+                                        </Polygon.RenderTransform>
+                                    </Polygon>
+                                </Canvas>
                             </DataTemplate>
                         </ItemsControl.ItemTemplate>
                     </ItemsControl>
@@ -540,7 +746,65 @@
                             <StaticResource ResourceKey="UISelector"/>
                         </ItemsControl.ItemTemplateSelector>
                     </ItemsControl>
-                    
+                    <!-- ПАКЕТЫ -->
+                    <ItemsControl ItemsSource="{Binding UIPackets}" Panel.ZIndex="5">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <Canvas/>
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+
+                        <ItemsControl.ItemContainerStyle>
+                            <Style>
+                                <Setter Property="Canvas.Left" Value="{Binding X}" />
+                                <Setter Property="Canvas.Top" Value="{Binding Y}" />
+                            </Style>
+                        </ItemsControl.ItemContainerStyle>
+
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Path Data="M 0 0 L 6 0 L 6 4 L 0 4 L 0 0 L 3 2 M 6 0 L 3 2"
+                                      Fill="Blue"
+                                      Stroke="Black"
+                                      StrokeThickness="1.5"
+                                      Stretch="Uniform"
+                                      Width="30" Height="30"
+                                      RenderTransformOrigin="0.5,0.5">      
+                                    <Path.RenderTransform>
+                                        <ScaleTransform ScaleX="0.8" ScaleY="0.8"/>
+                                    </Path.RenderTransform>
+                                </Path>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                    <!--Точки позади пакета-->
+                    <ItemsControl ItemsSource="{Binding UIPacketTrails}" Panel.ZIndex="4">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <Canvas/>
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+
+                        <ItemsControl.ItemContainerStyle>
+                            <Style>
+                                <Setter Property="Canvas.Left" Value="{Binding X}" />
+                                <Setter Property="Canvas.Top" Value="{Binding Y}" />
+                            </Style>
+                        </ItemsControl.ItemContainerStyle>
+
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Ellipse Width="4"
+                                         Height="4"
+                                         Fill="DodgerBlue"
+                                         Opacity="{Binding Opacity}">
+                                    <Ellipse.RenderTransform>
+                                        <ScaleTransform ScaleX="1.5" ScaleY="1.5"></ScaleTransform>
+                                    </Ellipse.RenderTransform>
+                                </Ellipse>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
                     <!--Рамка выделения-->
                     <Rectangle Stroke="DodgerBlue"
                                StrokeThickness="1"

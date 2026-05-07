@@ -29,11 +29,15 @@ namespace NetOptimizer
                  {
                      c.BaseAddress = new Uri("https://localhost:7244/");
                  });
+                 services.AddMediatR(cfg =>cfg.RegisterServicesFromAssembly(typeof(MainWindowViewModel).Assembly));
+
                  services.AddSingleton<INetOptimizerApiService, NetOptimizerApiService>();
                  services.AddSingleton<DeviceCatalogService>();
                  services.AddSingleton<IWindowNavigator, WindowNavigator>();
                  services.AddTransient<IYamlManager, YamlNetworkManager>();
                  services.AddTransient<IFileService, FileService>();
+                 services.AddSingleton<ISimulationEngine, SimulationEngine>();
+                 services.AddSingleton<IDeviceRegistry, DeviceRegistry>();
 
                  services.AddTransient<MainWindow>();
                  services.AddTransient<CreateDeviceWindow>();
@@ -45,13 +49,15 @@ namespace NetOptimizer
                  services.AddTransient<CreateVlanOnDeviceWindow>();
 
                  services.AddSingleton<DeviceViewModelFactory>();
+                 services.AddSingleton<CanvasViewModel>();
+
                  services.AddTransient<CreateVlanOnDeviceViewModel>();
                  services.AddTransient<DeviceParametrsViewModel>();
                  services.AddTransient<AddNewGroupWindowViewModel>();
                  services.AddTransient<ConnectToGroupWindowViewModel>();
                  services.AddTransient<EditorViewModel>();
+                 services.AddSingleton<SimmulationViewModel>();
                  services.AddTransient<SandboxViewModel>();
-                 services.AddTransient<CanvasViewModel>();
                  services.AddTransient<MainWindowViewModel>();
                  services.AddTransient<ErrorWindowViewModel>();
                  services.AddTransient<InfoWindowViewModel>();

@@ -287,7 +287,6 @@
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="Expander">
-
                     <StackPanel>
                         <ToggleButton x:Name="HeaderSite"
                                   Background="Transparent"
@@ -741,84 +740,134 @@
     <!--Дата темплейты сетевых свойств-->
     <DataTemplate x:Key="PcNetSpecsTemplate">
         <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
-            <Grid Grid.Row="0" Margin="0,0,0,20">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="Auto"/>
-                    <ColumnDefinition Width="*"/>
-                </Grid.ColumnDefinitions>
-
-                <Image Grid.Column="0" Source="/Assets/Images/internet3.png"
-                       Width="100" Height="100"
-                       VerticalAlignment="Top" Margin="20,25,15,0" 
-                       SnapsToDevicePixels="True" RenderOptions.BitmapScalingMode="Fant">
-                </Image>
-
-                <Grid Grid.Column="1" VerticalAlignment="Top" Margin="0,20,0,0">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="160" SharedSizeGroup="LabelGroup"/>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="Auto"/>
-                    </Grid.ColumnDefinitions>
-
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                    </Grid.RowDefinitions>
-
-                    <StackPanel Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" Margin="0,0,0,5">
-                        <RadioButton Style="{StaticResource ModernRadioButtonStyle}" Cursor="Hand"
-                                     Content="DHCP" IsChecked="{Binding Device.LogicDevice.NetworkSettings.IsDhcp}"/>
-
-                        <RadioButton x:Name="StaticRadio" Style="{StaticResource ModernRadioButtonStyle}" Cursor="Hand"
-                                     Content="Статически" IsChecked="{Binding Device.LogicDevice.NetworkSettings.IsStatic}" Margin="0,5,0,0"/>
+            <Expander Grid.Column="1" Grid.Row="0"
+                      Style="{StaticResource ModernExpanderStyle}"
+                      HorizontalAlignment="Stretch"
+                      Foreground="Black">
+                <Expander.Header>
+                    <StackPanel Orientation="Horizontal">
+                        <Image Source="/Assets/Images/interfaceabstract.png" Width="20" Height="18" Margin="0,0,5,0"></Image>
+                        <TextBlock  Text="Интерфейсы" Foreground="Black"></TextBlock>
                     </StackPanel>
+                </Expander.Header>
+                <StackPanel Margin="10,0,0,0">
+                    <ScrollViewer behaviors:ScrollBarWheelDirectionBehavior.OrientationScroll="Vertical" Height="300" >
+                        <ItemsControl ItemsSource="{Binding PcInterfaceViewModel}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Border Background="#F9F9FC" BorderBrush="#CECECE"
+                                            BorderThickness="1" CornerRadius="5" Margin="0,5,0,0">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                            </Grid.ColumnDefinitions>
 
-                    <TextBlock Grid.Row="1" Grid.Column="0" Text="IP-Адрес:" Foreground="#3A3A3A" FontSize="14" VerticalAlignment="Center"/>
-                    <TextBox   Grid.Row="1" Grid.Column="1"
-                               Style="{StaticResource ModernTextBoxStyle}"  Text="{Binding Device.LogicDevice.NetworkSettings.IpAddress}"
-                               IsEnabled="{Binding IsChecked, ElementName=StaticRadio}" TextAlignment="Center" Margin="10,5">
-                        <i:Interaction.Behaviors>
-                            <behaviors:TextBoxBehaviors Mode="NumbersAndDots"/>
-                        </i:Interaction.Behaviors>
-                    </TextBox>
+                                            <!-- Expander порта -->
+                                            <Expander Grid.Column="0" Style="{StaticResource ModernExpanderStyle}">
+                                                <Expander.Header>
+                                                    <TextBlock Text="{Binding Name}" Margin="10,0"/>
+                                                </Expander.Header>
+                                                <Grid Margin="0,10,0,0">
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="Auto"/>
+                                                        <ColumnDefinition Width="Auto"/>
+                                                    </Grid.ColumnDefinitions>
 
-                    <TextBlock Grid.Row="2" Grid.Column="0" Text="Маска подсети:" Foreground="#3A3A3A" FontSize="14" VerticalAlignment="Center"/>
-                    <TextBox   Grid.Row="2" Grid.Column="1" 
-                               Style="{StaticResource ModernTextBoxStyle}"  Text="{Binding Device.LogicDevice.NetworkSettings.SubnetMask}"
-                               IsEnabled="{Binding IsChecked, ElementName=StaticRadio}"
-                               TextAlignment="Center" Margin="10,5">
-                        <i:Interaction.Behaviors>
-                            <behaviors:TextBoxBehaviors Mode="NumbersAndDots"/>
-                        </i:Interaction.Behaviors>
-                    </TextBox>
+                                                    <Grid.RowDefinitions>
+                                                        <RowDefinition Height="30"/>
+                                                        <RowDefinition Height="30"/>
+                                                        <RowDefinition Height="30"/>
+                                                        <RowDefinition Height="30"/>
+                                                        <RowDefinition Height="30"/>
+                                                        <RowDefinition Height="30"/>
+                                                        <RowDefinition Height="30"/>
+                                                    </Grid.RowDefinitions>
 
-                    <TextBlock Grid.Row="3" Grid.Column="0" Text="Шлюз по умолчанию:" Foreground="#3A3A3A" FontSize="14" VerticalAlignment="Center"/>
-                    <TextBox   Grid.Row="3" Grid.Column="1"
-                               Style="{StaticResource ModernTextBoxStyle}"  Text="{Binding Device.LogicDevice.NetworkSettings.Gateway}"
-                               IsEnabled="{Binding IsChecked, ElementName=StaticRadio}"
-                               TextAlignment="Center" Margin="10,5">
-                        <i:Interaction.Behaviors>
-                            <behaviors:TextBoxBehaviors Mode="NumbersAndDots"/>
-                        </i:Interaction.Behaviors>
-                    </TextBox>
+                                                    <!-- Статус -->
+                                                    <TextBlock Grid.Row="0" Grid.Column="0" Text="Статус:" VerticalAlignment="Center"/>
 
-                    <TextBlock Grid.Row="4" Grid.Column="0" Text="Dns-Сервер:" Foreground="#3A3A3A" FontSize="14" VerticalAlignment="Center"/>
-                    <TextBox   Grid.Row="4"  Grid.Column="1" 
-                               Style="{StaticResource ModernTextBoxStyle}" Text="{Binding Device.LogicDevice.NetworkSettings.DNS}"
-                               IsEnabled="{Binding IsChecked, ElementName=StaticRadio}"
-                               TextAlignment="Center" Margin="10,5">
-                        <i:Interaction.Behaviors>
-                            <behaviors:TextBoxBehaviors Mode="NumbersAndDots"/>
-                        </i:Interaction.Behaviors>
-                    </TextBox>
-                </Grid>
-            </Grid>
+                                                    <ComboBox Grid.Row="0" Grid.Column="1"
+                                                               Margin="10,0,0,0" Width="120"
+                                                               VerticalAlignment="Center"
+                                                               Style="{StaticResource ModernComboBox}"
+                                                               SelectedIndex="{Binding IsEnabled, Converter={StaticResource BoolToIndexConverter}}">
+
+                                                        <ComboBoxItem>
+                                                            <StackPanel Orientation="Horizontal">
+                                                                <Ellipse Fill="#43C706" Width="10" Height="10" Margin="0,0,5,0"/>
+                                                                <TextBlock Text="Вкл"/>
+                                                            </StackPanel>
+                                                        </ComboBoxItem>
+
+                                                        <ComboBoxItem>
+                                                            <StackPanel Orientation="Horizontal">
+                                                                <Ellipse Fill="Red" Width="10" Height="10" Margin="0,0,5,0"/>
+                                                                <TextBlock Text="Выкл"/>
+                                                            </StackPanel>
+                                                        </ComboBoxItem>
+                                                    </ComboBox>
+                                                    <TextBlock Grid.Row="1" Grid.Column="0" Text="Mac-Adress:" VerticalAlignment="Center"  />
+                                                    <TextBox   Grid.Row="1" Grid.Column="1" 
+                                                               Style="{StaticResource ModernTextBoxStyle}" Text="{Binding MacAddress}"
+                                                               IsEnabled="False"
+                                                               TextAlignment="Center" Margin="10,5" >
+                                                        <i:Interaction.Behaviors>
+                                                            <behaviors:TextBoxBehaviors Mode="NumbersAndDots"/>
+                                                        </i:Interaction.Behaviors>
+                                                    </TextBox>
+                                                    <TextBlock Grid.Row="2" Grid.Column="0" Text="IpV4-Address:"  VerticalAlignment="Center"/>
+                                                    <TextBox   Grid.Row="2" Grid.Column="1" 
+                                                               Style="{StaticResource ModernTextBoxStyle}" Text="{Binding IpV4Address}"                                                        
+                                                               TextAlignment="Center" Margin="10,5" >
+                                                        <i:Interaction.Behaviors>
+                                                            <behaviors:TextBoxBehaviors Mode="NumbersAndDots"/>
+                                                        </i:Interaction.Behaviors>
+                                                    </TextBox>
+                                                    <TextBlock Grid.Row="3" Grid.Column="0" Text="Subnet-Mask:" VerticalAlignment="Center"/>
+                                                    <TextBox   Grid.Row="3" Grid.Column="1" 
+                                                               Style="{StaticResource ModernTextBoxStyle}" Text="{Binding SubnetMask}"                                                        
+                                                               TextAlignment="Center" Margin="10,5" >
+                                                        <i:Interaction.Behaviors>
+                                                            <behaviors:TextBoxBehaviors Mode="NumbersAndDots"/>
+                                                        </i:Interaction.Behaviors>
+                                                    </TextBox>
+                                                    <TextBlock Grid.Row="4" Grid.Column="0" Text="Default-Gateway:" VerticalAlignment="Center"/>
+                                                    <TextBox   Grid.Row="4" Grid.Column="1" 
+                                                               Style="{StaticResource ModernTextBoxStyle}" Text="{Binding DefaultGateway}"                                                        
+                                                               TextAlignment="Center" Margin="10,5" >
+                                                        <i:Interaction.Behaviors>
+                                                            <behaviors:TextBoxBehaviors Mode="NumbersAndDots"/>
+                                                        </i:Interaction.Behaviors>
+                                                    </TextBox>
+                                                    <TextBlock Grid.Row="5" Grid.Column="0" Text="Dns-Server:" VerticalAlignment="Center"></TextBlock>
+                                                    <TextBox   Grid.Row="5" Grid.Column="1" 
+                                                               Style="{StaticResource ModernTextBoxStyle}" Text="{Binding DNS}"                                                        
+                                                               TextAlignment="Center" Margin="10,5">
+                                                        <i:Interaction.Behaviors>
+                                                            <behaviors:TextBoxBehaviors Mode="NumbersAndDots"/>
+                                                        </i:Interaction.Behaviors>
+                                                    </TextBox>
+                                                </Grid>
+                                            </Expander>
+                                        </Grid>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </ScrollViewer>
+                </StackPanel>
+            </Expander>
         </Grid>
     </DataTemplate>
 
@@ -829,6 +878,7 @@
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
             <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
@@ -847,7 +897,7 @@
                 </Expander.Header>
                 <StackPanel Margin="10,0,0,0">
                     <ScrollViewer behaviors:ScrollBarWheelDirectionBehavior.OrientationScroll="Vertical" Height="200" >
-                        <ItemsControl ItemsSource="{Binding Device.LogicDevice.NetworkConfig.Interfaces}">
+                        <ItemsControl ItemsSource="{Binding SwitchInterfaceViewModel}">
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate>
                                     <Border Background="#F9F9FC" BorderBrush="#CECECE"
@@ -923,72 +973,60 @@
                                                             </StackPanel>
                                                         </ComboBoxItem>
                                                     </ComboBox>
-                                                  <!--Vlan/Vlans-->
                                                     
+                                                  <!--Vlan/Vlans-->     
                                                     <!--Acces-->
                                                     <TextBlock Grid.Row="2" Grid.Column="0" Text="VLAN:"
-                                                               VerticalAlignment="Center" Margin="0,10,0,0">
-                                                        <TextBlock.Visibility>
-                                                            <MultiBinding Converter="{StaticResource PortModeVisibilityConverter}">
-                                                                <Binding Path="SwitchPortMode"/>
-                                                                <Binding Source="Access"/>
-                                                            </MultiBinding>
-                                                        </TextBlock.Visibility>
+                                                               VerticalAlignment="Center" Margin="0,10,0,0" 
+                                                               Visibility="{Binding SwitchPortMode, Converter={StaticResource PortModeVisibilityConverter}, 
+                                                                                                    ConverterParameter=Access}">
+                                                      
                                                     </TextBlock>
 
                                                     <ComboBox Grid.Row="2" Grid.Column="1"
                                                              Margin="10,10,0,0" Width="120"
                                                              VerticalAlignment="Center" 
-                                                              Style="{StaticResource ModernComboBox}"
-                                                              ItemsSource="{Binding DataContext.Device.LogicDevice.NetworkConfig.Vlans, 
-                                                                          RelativeSource={RelativeSource AncestorType=ItemsControl}}">
-                                                        <ComboBox.Visibility>
-                                                            <MultiBinding Converter="{StaticResource PortModeVisibilityConverter}">
-                                                                <Binding Path="SwitchPortMode"/>
-                                                                <Binding Source="Access"/>
-                                                            </MultiBinding>
-                                                        </ComboBox.Visibility>
+                                                             Style="{StaticResource ModernComboBox}"
+                                                             Visibility="{Binding SwitchPortMode, Converter={StaticResource PortModeVisibilityConverter}, 
+                                                                                                  ConverterParameter=Access}"
+                                                             ItemsSource="{Binding DataContext.VlansViewModel, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                                             SelectedValue="{Binding AccessVlan, Mode=TwoWay}"
+                                                             SelectedValuePath="VlanId">
+                                                      
                                                         <ComboBox.ItemTemplate>
                                                             <DataTemplate>
                                                                 <StackPanel Orientation="Horizontal">
-                                                                    <TextBlock Text="{Binding Id}"/>
+                                                                    <TextBlock Text="{Binding VlanId}"/>
                                                                     <TextBlock Text=" - " />
-                                                                    <TextBlock Text="{Binding Name}"/>
+                                                                    <TextBlock Text="{Binding VlanName}"/>
                                                                 </StackPanel>
                                                             </DataTemplate>
                                                         </ComboBox.ItemTemplate>
-                                                        
                                                     </ComboBox>
                                                     <!--Trunk-->
                                                     <TextBlock Grid.Row="2" Grid.Column="0" Text="VLANs:"
-                                                               VerticalAlignment="Center" Margin="0,10,0,0">
-                                                        <TextBlock.Visibility>
-                                                            <MultiBinding Converter="{StaticResource PortModeVisibilityConverter}">
-                                                                <Binding Path="SwitchPortMode"/>
-                                                                <Binding Source="Trunk"/>
-                                                            </MultiBinding>
-                                                        </TextBlock.Visibility>
+                                                               VerticalAlignment="Center" Margin="0,10,0,0"
+                                                               Visibility="{Binding SwitchPortMode, Converter={StaticResource PortModeVisibilityConverter}, 
+                                                                                                    ConverterParameter=Trunk}">
                                                     </TextBlock>
 
                                                     <ComboBox Grid.Row="2" Grid.Column="1"
                                                               Margin="10,10,0,0" Width="120"
                                                               VerticalAlignment="Center"                                    
                                                               Style="{StaticResource ModernComboBox}"
-                                                              ItemsSource="{Binding DataContext.Device.LogicDevice.NetworkConfig.Vlans, 
-                                                              RelativeSource={RelativeSource AncestorType=ItemsControl}}">
-                                                        <ComboBox.Visibility>
-                                                            <MultiBinding Converter="{StaticResource PortModeVisibilityConverter}">
-                                                                <Binding Path="SwitchPortMode"/>
-                                                                <Binding Source="Trunk"/>
-                                                            </MultiBinding>
-                                                        </ComboBox.Visibility>
+                                                              Visibility="{Binding SwitchPortMode, Converter={StaticResource PortModeVisibilityConverter}, 
+                                                                                                   ConverterParameter=Trunk}"
+                                                              ItemsSource="{Binding DataContext.VlansViewModel, RelativeSource={RelativeSource AncestorType=ItemsControl}}">
                                                         <ComboBox.ItemTemplate>
                                                             <DataTemplate>
                                                                 <StackPanel Orientation="Horizontal">
-                                                                    <CheckBox Style="{StaticResource ModernCheckBox}" Width="16" Height="16" Margin="0,0,10,0"></CheckBox>
-                                                                    <TextBlock Text="{Binding Id}"/>
+                                                                    <CheckBox Style="{StaticResource ModernCheckBox}"
+                                                                              Width="16" Height="16" Margin="0,0,10,0"
+                                                                              IsChecked="{Binding IsSelected}"></CheckBox>
+                                                                    
+                                                                    <TextBlock Text="{Binding VlanId}"/>
                                                                     <TextBlock Text=" - " />
-                                                                    <TextBlock Text="{Binding Name}"/>
+                                                                    <TextBlock Text="{Binding VlanName}"/>
                                                                 </StackPanel>
                                                             </DataTemplate>
                                                         </ComboBox.ItemTemplate>
@@ -1024,10 +1062,10 @@
                             BorderBrush="#E5E7EB" BorderThickness="1" 
                             Margin="0,5" ClipToBounds="True">
 
-                        <DataGrid ItemsSource="{Binding Device.LogicDevice.NetworkConfig.Vlans}"
+                        <DataGrid ItemsSource="{Binding VlansViewModel}"
                                   Style="{StaticResource ModernDataGridStyle}">
                             <DataGrid.Columns>
-                                <DataGridTextColumn Header="VLAN ID" Binding="{Binding Id}" Width="100">
+                                <DataGridTextColumn Header="VLAN ID" Binding="{Binding VlanId}" Width="100">
                                     <DataGridTextColumn.ElementStyle>
                                         <Style TargetType="TextBlock">
                                             <Setter Property="HorizontalAlignment" Value="Center"/>
@@ -1036,7 +1074,7 @@
                                     </DataGridTextColumn.ElementStyle>
                                 </DataGridTextColumn>
 
-                                <DataGridTextColumn Header="NAME" Binding="{Binding Name}" Width="*">
+                                <DataGridTextColumn Header="NAME" Binding="{Binding VlanName}" Width="*">
                                     <DataGridTextColumn.ElementStyle>
                                         <Style TargetType="TextBlock">
                                             <Setter Property="HorizontalAlignment" Value="Center"/>
@@ -1088,17 +1126,99 @@
                         <TextBlock Text="Lag" Foreground="Black"></TextBlock>
                     </StackPanel>
                 </Expander.Header>
-                <StackPanel Margin="10,5,0,0">
-                    <ScrollViewer behaviors:ScrollBarWheelDirectionBehavior.OrientationScroll="Vertical">
-                        <Border Background="#F9F9FC" BorderBrush="#CECECE"
-                        BorderThickness="1" Height="30"
-                        CornerRadius="5">
-                            <StackPanel VerticalAlignment="Center">
-                                <TextBlock Text="FastEthernet0/0" Margin="10,0,0,0" ></TextBlock>
-                            </StackPanel>
-                        </Border>
-                    </ScrollViewer>
-                </StackPanel>
+                <Border Background="White" CornerRadius="8" BorderBrush="#E5E7EB" BorderThickness="1" 
+                        Margin="0,5" ClipToBounds="True">
+
+                    <DataGrid ItemsSource="{Binding VlansViewModel}" Style="{StaticResource ModernDataGridStyle}">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Name" Binding="{Binding VlanId}" Width="100">
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="HorizontalAlignment" Value="Center"/>
+                                        <Setter Property="VerticalAlignment" Value="Center"/>
+                                    </Style>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
+                            <DataGridTextColumn Header="Type" Binding="{Binding VlanName}" Width="*">
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="HorizontalAlignment" Value="Center"/>
+                                        <Setter Property="VerticalAlignment" Value="Center"/>
+                                        <Setter Property="Margin" Value="15,0,0,0"/>
+                                    </Style>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
+                            
+                            <DataGridTextColumn Header="Интерфейсы" Binding="{Binding VlanName}" Width="*">
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="HorizontalAlignment" Value="Center"/>
+                                        <Setter Property="VerticalAlignment" Value="Center"/>
+                                        <Setter Property="Margin" Value="15,0,0,0"/>
+                                    </Style>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
+                        </DataGrid.Columns>
+
+                    </DataGrid>
+                </Border>
+            </Expander>
+
+            <Expander Grid.Column="1" Grid.Row="3"
+            Style="{StaticResource ModernExpanderStyle}"
+            HorizontalAlignment="Stretch" Foreground="Black">
+                <Expander.Header>
+                    <StackPanel Orientation="Horizontal">
+                        <Image Source="/Assets/Images/table.png" Width="20" Height="18" Margin="0,0,5,0"></Image>
+                        <TextBlock Text="Mac-Table" Foreground="Black"></TextBlock>
+                    </StackPanel>
+                </Expander.Header>
+                <Border Background="White" CornerRadius="8"
+                        BorderBrush="#E5E7EB" BorderThickness="1" 
+                        Margin="0,5" ClipToBounds="True">
+
+                    <DataGrid ItemsSource="{Binding MacTableViewModel}" Style="{StaticResource ModernDataGridStyle}">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Vlan" Binding="{Binding VlanId}" Width="100">
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="HorizontalAlignment" Value="Center"/>
+                                        <Setter Property="VerticalAlignment" Value="Center"/>
+                                    </Style>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
+                            <DataGridTextColumn Header="Mac-Адрес" Binding="{Binding MacAdress}" Width="*">
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="HorizontalAlignment" Value="Center"/>
+                                        <Setter Property="VerticalAlignment" Value="Center"/>
+                                        <Setter Property="Margin" Value="15,0,0,0"/>
+                                    </Style>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
+                            
+                            <DataGridTextColumn Header="Тип" Binding="{Binding Type}" Width="*">
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="HorizontalAlignment" Value="Center"/>
+                                        <Setter Property="VerticalAlignment" Value="Center"/>
+                                        <Setter Property="Margin" Value="15,0,0,0"/>
+                                    </Style>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
+
+                            <DataGridTextColumn Header="Интерфейсы" Binding="{Binding InterfaceName}" Width="*">
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="HorizontalAlignment" Value="Center"/>
+                                        <Setter Property="VerticalAlignment" Value="Center"/>
+                                        <Setter Property="Margin" Value="15,0,0,0"/>
+                                    </Style>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </Border>
             </Expander>
         </Grid>
     </DataTemplate>

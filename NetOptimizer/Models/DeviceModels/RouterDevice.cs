@@ -1,7 +1,9 @@
 ﻿using NetOptimizer.Enums;
+using NetOptimizer.Events;
 using NetOptimizer.Models.DeviceModels.DeviceSettings;
 using NetOptimizer.Models.DeviceModels.SubProperties;
 using NetOptimizer.Models.Dtos;
+using NetOptimizer.Models.Enums;
 
 namespace NetOptimizer.Models.DeviceModels
 {
@@ -52,6 +54,11 @@ namespace NetOptimizer.Models.DeviceModels
                     });
                 }
             }
+        }
+
+        public override IEnumerable<SimmulationEvent> ProcessPacket(Packet packet)
+        {
+            throw new NotImplementedException();
         }
     }
 }

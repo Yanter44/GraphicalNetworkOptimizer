@@ -10,6 +10,158 @@
     <converters:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
     <converters:DeviceTypeToAbstractNameConverter x:Key="DeviceTypeToAbstractNameConverter"/>
     <!-- ===================== Стили ==================== -->
+
+    <Style x:Key="ScenarioComboBox" TargetType="ComboBox">
+        <Setter Property="Background" Value="White"/>
+        <Setter Property="BorderBrush" Value="#D1D5DB"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="Cursor" Value="Hand"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="ComboBox">
+                    <Border x:Name="Border"
+                        Background="{TemplateBinding Background}"
+                        BorderBrush="{TemplateBinding BorderBrush}"
+                        BorderThickness="{TemplateBinding BorderThickness}"
+                        CornerRadius="5">
+
+                        <Grid>
+                            <ToggleButton IsChecked="{Binding IsDropDownOpen, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay}"
+                                      Background="Transparent"
+                                      BorderThickness="0"/>
+                            <ContentPresenter Margin="10,0,30,0"
+                                              VerticalAlignment="Center"
+                                              Content="{Binding SelectedItem.Name, RelativeSource={RelativeSource TemplatedParent}}" 
+                                              HorizontalAlignment="Center"/>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition />
+                                    <ColumnDefinition Width="30"/>
+                                </Grid.ColumnDefinitions>
+
+                                <ContentPresenter Grid.Column="0"
+                                                  Margin="10,0,0,0"
+                                                  VerticalAlignment="Center" HorizontalAlignment="Center"
+                                                  Content="{Binding SelectedItem.Name, RelativeSource={RelativeSource TemplatedParent}}" />
+
+                                <Path Grid.Column="1"
+                                      Data="M 0 0 L 4 4 L 8 0"
+                                      Stroke="#6B7280"
+                                      StrokeThickness="1.5"
+                                      HorizontalAlignment="Center"
+                                      VerticalAlignment="Center"
+                                      RenderTransformOrigin="0.5,0.5"/>
+                            </Grid>
+
+                            <Popup IsOpen="{TemplateBinding IsDropDownOpen}"
+                                   Placement="Bottom" PlacementTarget="{Binding RelativeSource={RelativeSource TemplatedParent}}"
+                                   AllowsTransparency="True">
+
+                                <Border Width="{Binding ActualWidth, RelativeSource={RelativeSource TemplatedParent}}"
+                                         Background="White" BorderBrush="#DDD" BorderThickness="1"
+                                         CornerRadius="2" Margin="0,5,0,0">
+
+                                    <ScrollViewer MaxHeight="220" HorizontalScrollBarVisibility="Disabled">
+                                        <ItemsPresenter/>
+                                    </ScrollViewer>
+                                </Border>
+                            </Popup>
+                            
+                        </Grid>
+                    </Border>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+    
+    <Style x:Key="ScenarioComboBoxItem" TargetType="ComboBoxItem">
+        <Setter Property="HorizontalContentAlignment" Value="Center"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="ComboBoxItem">
+                    <Border x:Name="Bg"
+                        Background="Transparent"
+                        CornerRadius="1">
+
+                        <ContentPresenter HorizontalAlignment="Center"
+                                      VerticalAlignment="Center"/>
+
+                    </Border>
+
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="Bg" Property="Background" Value="#F3F4F6"/>
+                        </Trigger>
+
+                        <Trigger Property="IsSelected" Value="True">
+                            <Setter TargetName="Bg" Property="Background" Value="#E0F2FE"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+    <Style x:Key="ScenarioDataGrid" TargetType="DataGrid">
+        <Setter Property="Background" Value="White"/>
+        <Setter Property="BorderThickness" Value="0"/>
+        <Setter Property="GridLinesVisibility" Value="None"/>
+        <Setter Property="RowHeight" Value="40"/>
+        <Setter Property="HeadersVisibility" Value="Column"/>
+        <Setter Property="CanUserResizeRows" Value="False"/>
+        <Setter Property="SelectionMode" Value="Single"/>
+        <Setter Property="SelectionUnit" Value="FullRow"/>
+    </Style>
+   
+    <Style TargetType="DataGridColumnHeader">
+        <Setter Property="Background" Value="#F9FAFB"/>
+        <Setter Property="Foreground" Value="#374151"/>
+        <Setter Property="FontWeight" Value="SemiBold"/>
+        <Setter Property="Padding" Value="10,8"/>
+        <Setter Property="BorderBrush" Value="#E5E7EB"/>
+        <Setter Property="BorderThickness" Value="0,0,0,1"/>
+    </Style>
+    
+    <Style x:Key="SimpleButtonStyle" TargetType="Button">
+        <Setter Property="Background" Value="White"/>
+        <Setter Property="BorderBrush" Value="#D8D8D8"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="Height" Value="40"/>
+        <Setter Property="Cursor" Value="Hand"/>
+        <Setter Property="FontSize" Value="14"/>
+        <Setter Property="Foreground" Value="#333"/>
+
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Border x:Name="border"
+                        Background="{TemplateBinding Background}"
+                        BorderBrush="{TemplateBinding BorderBrush}"
+                        BorderThickness="{TemplateBinding BorderThickness}"
+                        CornerRadius="5">
+                        
+                        <ContentPresenter
+                                       Content="{TemplateBinding Content}"
+                                       ContentTemplate="{TemplateBinding ContentTemplate}"
+                                       HorizontalAlignment="Center"
+                                       VerticalAlignment="Center"/>
+                    </Border>
+
+                    <ControlTemplate.Triggers>
+
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="border" Property="Background" Value="#ECECEC"/>
+                            <Setter TargetName="border" Property="BorderBrush" Value="#BFC5CC"/>
+                        </Trigger>
+
+                        <Trigger Property="IsPressed" Value="True">
+                            <Setter TargetName="border" Property="Background" Value="#E2E2E2"/>
+                        </Trigger>
+
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
     <Style TargetType="Menu">
         <Setter Property="Background" Value="#EFEFEF"/>
         <Setter Property="Foreground" Value="#333"/>

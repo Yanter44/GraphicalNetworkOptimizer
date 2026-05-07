@@ -7,9 +7,8 @@ namespace NetOptimizer.Models.DeviceModels.SubProperties
 {
     public class SwitchNetworkConfiguration
     {
-        public ObservableCollection<Vlan> Vlans { get; set; } = new();
-
-        public ObservableCollection<NetworkInterface> Interfaces { get; set; } = new();
+        public List<Vlan> Vlans { get; set; } = new();
+        public List<SwitchNetworkInterface> Interfaces { get; set; } = new();
         public string Hostname { get; set; }
     }
 }

@@ -60,6 +60,17 @@ namespace NetOptimizer.Services
             newWindow.DataContext = viewModel;
             newWindow.ShowDialog();
         }
+        public TViewModel ShowModalViewReturnViewModel<TView, TViewModel>()
+          where TView : Window
+          where TViewModel : class
+        {
+            var viewModel = _serviceProvider.GetRequiredService<TViewModel>();
+            var newWindow = _serviceProvider.GetRequiredService<TView>();
+
+            newWindow.DataContext = viewModel;
+            newWindow.Show();
+            return viewModel;
+        }
         public void Close(object viewModel)
         {
             var window = Application.Current.Windows

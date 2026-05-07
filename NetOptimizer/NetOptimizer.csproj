@@ -24,6 +24,7 @@
     <None Remove="Assets\Images\devices.png" />
     <None Remove="Assets\Images\disconnectGroup.png" />
     <None Remove="Assets\Images\edit.png" />
+    <None Remove="Assets\Images\envelope.png" />
     <None Remove="Assets\Images\error.png" />
     <None Remove="Assets\Images\file.png" />
     <None Remove="Assets\Images\gno_logo.png" />
@@ -33,6 +34,7 @@
     <None Remove="Assets\Images\internet.png" />
     <None Remove="Assets\Images\internet2.png" />
     <None Remove="Assets\Images\internet3.png" />
+    <None Remove="Assets\Images\labcolba.png" />
     <None Remove="Assets\Images\lag.png" />
     <None Remove="Assets\Images\level.png" />
     <None Remove="Assets\Images\lightning.png" />
@@ -60,6 +62,7 @@
     <None Remove="Assets\Images\sppeed.png" />
     <None Remove="Assets\Images\ssd.png" />
     <None Remove="Assets\Images\switch.png" />
+    <None Remove="Assets\Images\table.png" />
     <None Remove="Assets\Images\topology.png" />
     <None Remove="Assets\Images\trashbucket.png" />
     <None Remove="Assets\Images\videocam.png" />
@@ -89,6 +92,7 @@
 
   <ItemGroup>
     <PackageReference Include="AvalonEdit" Version="6.3.1.120" />
+    <PackageReference Include="MediatR" Version="14.1.0" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.2" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.2" />
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="10.0.2" />
@@ -137,6 +141,9 @@
     <Resource Include="Assets\Images\edit.png">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Resource>
+    <Resource Include="Assets\Images\envelope.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
     <Resource Include="Assets\Images\error.png">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Resource>
@@ -162,6 +169,9 @@
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Resource>
     <Resource Include="Assets\Images\internet3.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Assets\Images\labcolba.png">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Resource>
     <Resource Include="Assets\Images\lag.png">
@@ -243,6 +253,9 @@
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Resource>
     <Resource Include="Assets\Images\switch.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Assets\Images\table.png">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Resource>
     <Resource Include="Assets\Images\topology.png">

@@ -8,20 +8,23 @@ using System.Windows.Data;
 
 namespace NetOptimizer.Convertors
 {
-    public class PortModeVisibilityConverter : IMultiValueConverter 
-    { 
-        public object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
-        { 
-            if (values.Length < 2)
-                return Visibility.Collapsed;
+    public class PortModeVisibilityConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            if (value is SwitchPortMode currentMode && parameter is string targetMode)
+            {
+                return currentMode.ToString() == targetMode
+                    ? Visibility.Visible
+                    : Visibility.Collapsed;
+            }
 
-            if (values[0] is SwitchPortMode currentMode && values[1] is string targetMode) 
-            { 
-                return currentMode.ToString() == targetMode ? Visibility.Visible : Visibility.Collapsed;
-            } 
+            return Visibility.Collapsed;
+        }
 
-            return Visibility.Collapsed; 
-        } 
-        
-        public object[] ConvertBack(object value, Type[] targetTypes, object parameter, CultureInfo culture) => throw new NotImplementedException(); }
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+    }
 }

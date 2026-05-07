@@ -1,4 +1,5 @@
 ﻿using NetOptimizer.Enums;
+using NetOptimizer.Models.DeviceModels;
 using NetOptimizer.Models.DeviceModels.DeviceSettings;
 using NetOptimizer.Models.Dtos;
 using System.ComponentModel;
@@ -81,7 +82,7 @@ namespace NetOptimizer.ViewModels.DeviceSettingss
                 SwitchRoleType = SelectedModelFromCatalog.SwitchRoleType,
                 AveragePrice = SelectedModelFromCatalog.AveragePrice,
                 DeviceLayer = SelectedModelFromCatalog.Layer switch { 3 => DeviceLayer.L3, _ => DeviceLayer.L2 },
-                Ports = SelectedModelFromCatalog?.Ports ?? new List<PortDto>()
+                Ports = SelectedModelFromCatalog?.Ports ?? new List<PortDto>(),
             };
         }
 

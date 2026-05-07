@@ -36,6 +36,7 @@ namespace NetOptimizer.Behaviors
             AssociatedObject.MouseUp += OnMouseUp;
             AssociatedObject.KeyDown += OnKeyDown;
         }
+
         private void OnKeyDown(object sender, KeyEventArgs e)
         {
             if (e.Key == Key.Delete)
