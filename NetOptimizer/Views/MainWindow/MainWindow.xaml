@@ -25,7 +25,7 @@
             <conv:PortColorConverter x:Key="PortColorConverter"/>
             <conv:NullToVisibilityConverter x:Key="NullToVisibilityConverter"/>
             <conv:ConnectionStateToBrushConverter x:Key="ConnectionStateToBrushConverter"/>
-            <conv:PacketTypeToBrushConverter x:Key="PacketTypeToBrushConverter"/>
+            <conv:PacketTypeToBrushConverter  x:Key="PacketTypeToBrushConverter"/>
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="/Views/ResourcesDictionary/MainWindowResources.xaml"/>
             </ResourceDictionary.MergedDictionaries>
@@ -100,7 +100,7 @@
                         </Style>
                     </TabControl.Resources>
                     <!--РЕЖИМ РЕДАКТОРА-->
-                    <TabItem Style="{StaticResource ModernTabItemStyle}">
+                    <!--<TabItem Style="{StaticResource ModernTabItemStyle}">
                         <TabItem.Header>
                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                                 <Image Source="/Assets/Images/redact.png" Width="18" Height="18" Margin="0,0,8,0"/>
@@ -182,7 +182,7 @@
 
                             </Grid>
                         </ScrollViewer>
-                    </TabItem>
+                    </TabItem>-->
                     <!--РЕЖИМ ПЕСОЧНИЦЫ-->
                     <TabItem Style="{StaticResource ModernTabItemStyle}">
                         <TabItem.Header>
@@ -473,13 +473,13 @@
                                           IsReadOnly="True">
 
                                     <DataGrid.Columns>
-                                        <DataGridTextColumn Header="Источник"  Binding="{Binding SourceDevice.LogicDevice.Name}" Width="*" />
-                                        <DataGridTextColumn Header="Цель" Binding="{Binding TargetDevice.LogicDevice.Name}" Width="*"/>
-                                        <DataGridTextColumn Header="Тип" Binding="{Binding PacketType}" Width="*"/>
-                                        <DataGridTemplateColumn Header="Цвет">
+                                        <DataGridTextColumn Header="Источник"  Binding="{Binding SourceDevice.LogicDevice.Name}" Width="80" />
+                                        <DataGridTextColumn Header="Цель" Binding="{Binding TargetDevice.LogicDevice.Name}" Width="60"/>
+                                        <DataGridTextColumn Header="Тип" Binding="{Binding PacketType}" Width="50"/>
+                                        <DataGridTemplateColumn Header="Цвет" Width="50">
                                             <DataGridTemplateColumn.CellTemplate>
                                                 <DataTemplate>
-                                                    <Border Width="16" Height="16"
+                                                    <Border  Width="20" Height="20" BorderBrush="Gray" BorderThickness="1.5"
                                                              CornerRadius="3" Background="{Binding PacketType, Converter={StaticResource PacketTypeToBrushConverter}}"/>
                                                 </DataTemplate>
                                             </DataGridTemplateColumn.CellTemplate>
@@ -487,11 +487,21 @@
                                         <DataGridTemplateColumn Header="Действие" Width="*">
                                             <DataGridTemplateColumn.CellTemplate>
                                                 <DataTemplate>
-                                                    <Button Content="Редактировать"
-                                                            Command="{Binding DataContext.RedactCommand,
-                                                                      RelativeSource={RelativeSource AncestorType=DataGrid}}"
-                                                           CommandParameter="{Binding}"
-                                                           Visibility="{Binding IsValid, Converter={StaticResource BoolToVisibilityConverter}}"/>
+                                                    <StackPanel Orientation="Horizontal">
+                                                        <Button Width="70" Height="30" Style="{StaticResource ScenarioItemRedactButton}" Content="Изменить"
+                                                                Command="{Binding DataContext.RedactCommand,
+                                                                           RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                                                CommandParameter="{Binding}"
+                                                                Visibility="{Binding IsValid, Converter={StaticResource BoolToVisibilityConverter}}"/>
+
+                                                        <Button Width="70" Height="30" 
+                                                                Style="{StaticResource ScenarioItemDeleteButton}"
+                                                                Content="Удалить"
+                                                                Command="{Binding DataContext.RedactCommand,
+                                                                           RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                                                 CommandParameter="{Binding}" Margin="5,0,0,0"/>
+                                                    </StackPanel>
+                                                   
                                                 </DataTemplate>
                                             </DataGridTemplateColumn.CellTemplate>
                                         </DataGridTemplateColumn>
@@ -510,15 +520,15 @@
 
                       
                                     <ScrollViewer behaviors:ScrollBarWheelDirectionBehavior.OrientationScroll="Vertical">
-                                        <DataGrid ItemsSource="{Binding simmulationViewModel.Events}"
-            AutoGenerateColumns="False"
-            HeadersVisibility="Column"
-            GridLinesVisibility="None"
-            RowBackground="White"
-            AlternatingRowBackground="#F7F9FC"
-            BorderThickness="0">
-
-                                            <DataGrid.Columns>
+                                    <DataGrid ItemsSource="{Binding simmulationViewModel.Events}"
+                                              AutoGenerateColumns="False"
+                                              HeadersVisibility="Column"
+                                              GridLinesVisibility="None"
+                                              RowBackground="White"
+                                              Background="White"
+                                              AlternatingRowBackground="#F7F9FC"
+                                              BorderThickness="0">
+                                        <DataGrid.Columns>
                                                 <DataGridTextColumn Header="От устройства" Binding="{Binding From}" Width="*"/>
                                                 <DataGridTextColumn Header="К устройству" Binding="{Binding To}" Width="*"/>
                                                 <DataGridTextColumn Header="Тип пакета" Binding="{Binding Type}" Width="*"/>
@@ -764,7 +774,7 @@
                         <ItemsControl.ItemTemplate>
                             <DataTemplate>
                                 <Path Data="M 0 0 L 6 0 L 6 4 L 0 4 L 0 0 L 3 2 M 6 0 L 3 2"
-                                      Fill="Blue"
+                                      Fill="{Binding PacketType, Converter={StaticResource PacketTypeToBrushConverter}}"
                                       Stroke="Black"
                                       StrokeThickness="1.5"
                                       Stretch="Uniform"
@@ -796,7 +806,7 @@
                             <DataTemplate>
                                 <Ellipse Width="4"
                                          Height="4"
-                                         Fill="DodgerBlue"
+                                         Fill="{Binding PacketType, Converter={StaticResource PacketTypeToBrushConverter}}"
                                          Opacity="{Binding Opacity}">
                                     <Ellipse.RenderTransform>
                                         <ScaleTransform ScaleX="1.5" ScaleY="1.5"></ScaleTransform>

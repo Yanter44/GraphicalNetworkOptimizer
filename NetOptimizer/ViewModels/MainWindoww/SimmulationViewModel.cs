@@ -63,11 +63,15 @@ namespace NetOptimizer.ViewModels.MainWindoww
                     {
                         From = fromDevice?.LogicDevice.Name ?? e.FromDeviceId,
                         To = toDevice?.LogicDevice.Name ?? e.ToDeviceId,
-                        Type = e.PacketType.ToString()
+                        Type = e.Packet switch
+                        {
+                            IcmpPacket icmp => $"ICMP ",
+                            ArpPacket arp => $"ARP",
+                            _ => e.Packet.GetType().Name
+                        }
                     };
                 })
             );
-
             OnPropertyChanged(nameof(Events));
         }
         private void AttachScenario(Scenario scenario)

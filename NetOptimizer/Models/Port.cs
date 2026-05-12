@@ -7,6 +7,7 @@ namespace NetOptimizer.Models
 {
     public class Port : INotifyPropertyChanged
     {
+        public string Id { get; set; } = Guid.NewGuid().ToString();
         public string PortName { get; set; }
         public string PortNumber { get; set; }
         public PortType Type { get; set; }

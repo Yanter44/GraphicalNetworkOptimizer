@@ -27,6 +27,7 @@
                 <RowDefinition Height="200"/>
                 <RowDefinition/>
             </Grid.RowDefinitions>
+            
             <Border Grid.Row="0" Background="#FCFBFE" MouseLeftButtonDown="NavBar_MouseLeftButtonDown" 
                     BorderBrush="#EDEEF4" BorderThickness="0,0,0,1"
                     HorizontalAlignment="Stretch" VerticalAlignment="Stretch">

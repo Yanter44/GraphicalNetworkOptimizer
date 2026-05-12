@@ -2,6 +2,7 @@
 using NetOptimizer.Interfaces;
 using NetOptimizer.Models;
 using NetOptimizer.Models.DeviceModels;
+using NetOptimizer.Models.Enums;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -13,13 +14,12 @@ namespace NetOptimizer.Services
     {
         private Scenario _currentScenario;
 
-        private readonly Queue<(SimmulationEvent ev, Packet packet)> _queue = new();
+        private readonly Queue<SimmulationEvent> _queue = new();
         public ObservableCollection<SimmulationEvent> EventChain { get; } = new();
 
         private readonly IDeviceRegistry _deviceRegistry;
 
         private readonly HashSet<string> _visited = new();
-
         public SimulationEngine(IDeviceRegistry deviceRegistry)
         {
             _deviceRegistry = deviceRegistry;
@@ -29,7 +29,10 @@ namespace NetOptimizer.Services
         {
             _currentScenario = scenario;
         }
-
+        public void AddAction(ScenarioAction action)
+        {
+            _currentScenario.Actions.Add(action);
+        }
         public void StartSimmulation()
         {
             EventChain.Clear();
@@ -41,70 +44,94 @@ namespace NetOptimizer.Services
                 var source = _deviceRegistry.GetById(action.SourceDeviceId);
                 var target = _deviceRegistry.GetById(action.TargetDeviceId);
 
-                var device = target.LogicDevice as PcDevice;
+                var sourceDevice = source.LogicDevice;
+                var targetDevice = target.LogicDevice;
 
-                var packet = new Packet
+                var sourceL3 = sourceDevice.GetInterfaces()
+                    .OfType<ILayer3Interface>()
+                    .FirstOrDefault();
+
+                var targetL3 = targetDevice.GetInterfaces()
+                    .OfType<ILayer3Interface>()
+                    .FirstOrDefault();
+
+                if (sourceL3 == null || targetL3 == null)
+                    continue;
+
+                Packet packet = action.PacketType switch
                 {
-                    Id = Guid.NewGuid().ToString(),
-                    SourceDeviceId = source.LogicDevice.Id,
-                    DestinationIp = device.NetworkConfig.Interfaces[0].IpV4Address,
-                    Type = action.PacketType,
-                    TTL = 20
+                    PacketType.ICMP => new IcmpPacket
+                    {
+                        Id = Guid.NewGuid().ToString(),
+                        SourceIp = sourceL3.IpV4Address,
+                        DestinationIp = targetL3.IpV4Address,
+                        TTL = 20,
+                        IcmpType = IcmpType.EchoRequest,
+                        Sequence = 1
+                    },
+
+                    _ => throw new NotSupportedException()
                 };
 
-                var events = source.LogicDevice.ProcessPacket(packet);
+                var entryEvents = sourceDevice.ProcessPacket(packet, null);
 
-                foreach (var ev in events)
-                    _queue.Enqueue((ev, packet));
+                foreach (var ev in entryEvents)
+                    _queue.Enqueue(ev);
             }
-
             Task.Run(ProcessQueue);
         }
-        public void AddAction(ScenarioAction action)
-        {
-            _currentScenario.Actions.Add(action);
-        }
+
         private async Task ProcessQueue()
         {
             while (_queue.Count > 0)
             {
-                var (ev, packet) = _queue.Dequeue();
+                var currentBatch = new List<SimmulationEvent>();
 
-                if (packet.TTL <= 0)
-                    continue;
-
-                packet.TTL--;
-
-                var key = $"{ev.PacketId}-{ev.ToDeviceId}";
-
-                if (!_visited.Add(key))
-                    continue; 
-
-                App.Current.Dispatcher.Invoke(() =>
+                while (_queue.Count > 0)
                 {
-                    EventChain.Add(ev);
-                });
+                    currentBatch.Add(_queue.Dequeue());
+                }
 
-                var nextDevice = _deviceRegistry.GetById(ev.ToDeviceId);
+                var animationTasks = new List<Task>();
 
-                if (nextDevice == null)
-                    continue;
-
-                var newPacket = new Packet
+                foreach (var ev in currentBatch)
                 {
-                    Id = ev.PacketId,
-                    SourceDeviceId = ev.FromDeviceId,
-                    DestinationIp = packet.DestinationIp,
-                    Type = ev.PacketType,
-                    TTL = packet.TTL
-                };
+                    if (ev.Packet == null)
+                        continue;
 
-                var newEvents = nextDevice.LogicDevice.ProcessPacket(newPacket);
+                    var key = $"{ev.Packet.Id}-{ev.ToDeviceId}-{ev.ToPortId}";
 
-                foreach (var newEv in newEvents)
-                    _queue.Enqueue((newEv, newPacket));
+                    if (!_visited.Add(key))
+                        continue;
 
-                await Task.Delay(1); 
+                    await App.Current.Dispatcher.InvokeAsync(() =>
+                    {
+                        EventChain.Add(ev);
+                    });
+
+                    animationTasks.Add(ev.AnimationCompleted.Task);
+                }
+
+                await Task.WhenAll(animationTasks);
+
+                foreach (var ev in currentBatch)
+                {
+                    var nextDevice = _deviceRegistry.GetById(ev.ToDeviceId);
+
+                    if (nextDevice == null)
+                        continue;
+
+                    var newEvents = nextDevice.LogicDevice.ProcessPacket(
+                        ev.Packet,
+                        ev.ToPortId
+                    );
+
+                    foreach (var newEv in newEvents)
+                    {
+                        newEv.InPortId = newEv.FromPortId;
+                        _queue.Enqueue(newEv);
+                    }
+                }
             }
         }
     }

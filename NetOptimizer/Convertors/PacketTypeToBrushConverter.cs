@@ -14,9 +14,8 @@ namespace NetOptimizer.Convertors
         {
             return value switch
             {
-                PacketType.ICMP => Brushes.DarkBlue,
+                PacketType.ICMP => Brushes.Blue,
                 PacketType.ARP => Brushes.LightGreen,
-                PacketType.STP => Brushes.Pink,
                 _ => Brushes.Gray
             };
         }

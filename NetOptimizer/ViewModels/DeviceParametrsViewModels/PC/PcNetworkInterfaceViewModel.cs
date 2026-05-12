@@ -1,4 +1,7 @@
-﻿using NetOptimizer.Models;
+﻿
+using MediatR;
+using NetOptimizer.MediatR.Notifications;
+using NetOptimizer.Models;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -10,6 +13,12 @@ namespace NetOptimizer.ViewModels.DeviceParametrsViewModels.PC
     public class PcNetworkInterfaceViewModel : INotifyPropertyChanged
     {
         private readonly PcNetworkInterface _model;
+        private readonly IMediator _mediator;
+        public PcNetworkInterfaceViewModel(PcNetworkInterface model, IMediator mediator)
+        {
+            _model = model;
+            _mediator = mediator;
+        }
         public bool IsEnabled
         {
             get => _model.IsEnabled;
@@ -18,6 +27,12 @@ namespace NetOptimizer.ViewModels.DeviceParametrsViewModels.PC
                 if (_model.IsEnabled == value) return;
                 _model.IsEnabled = value;
                 OnPropertyChanged();
+                _ = _mediator.Publish(new InterfaceStateChangedNotification
+                {
+                    Port = _model.PhysicalPort,
+                    IsUp = value
+                });
+
             }
         }
 
@@ -83,10 +98,7 @@ namespace NetOptimizer.ViewModels.DeviceParametrsViewModels.PC
             } 
         }
 
-        public PcNetworkInterfaceViewModel(PcNetworkInterface model)
-        {
-            _model = model;
-        }
+ 
   
         public event PropertyChangedEventHandler? PropertyChanged;
         protected void OnPropertyChanged([CallerMemberName] string name = null)

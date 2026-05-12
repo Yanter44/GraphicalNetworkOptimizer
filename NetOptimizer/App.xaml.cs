@@ -5,6 +5,7 @@ using NetOptimizer.Interfaces;
 using NetOptimizer.Services;
 using NetOptimizer.ViewModels;
 using NetOptimizer.ViewModels.AddNewGroupWindoww;
+using NetOptimizer.ViewModels.AddRouteEntryToRoutingTableWindoww;
 using NetOptimizer.ViewModels.ConnectToGroupWindoww;
 using NetOptimizer.ViewModels.CreateVlanOnDeviceWindoww;
 using NetOptimizer.ViewModels.DeviceParametrs;
@@ -12,6 +13,7 @@ using NetOptimizer.ViewModels.DeviceParametrsViewModels;
 using NetOptimizer.ViewModels.MainWindow;
 using NetOptimizer.ViewModels.MainWindoww;
 using NetOptimizer.Views;
+using NetOptimizer.Views.AddNewEntryToRoutingTableWindow;
 using NetOptimizer.Views.DopViews;
 using NetOptimizer.Views.MainWindow;
 using System.Windows;
@@ -47,10 +49,12 @@ namespace NetOptimizer
                  services.AddTransient<ConnectToGroupWindow>();
                  services.AddTransient<DeviceParametrsWindow>();
                  services.AddTransient<CreateVlanOnDeviceWindow>();
+                 services.AddTransient<AddEntryToRoutingTableWindow>();
 
                  services.AddSingleton<DeviceViewModelFactory>();
                  services.AddSingleton<CanvasViewModel>();
 
+                 services.AddTransient<AddEntryToRoutingTableViewModel>();
                  services.AddTransient<CreateVlanOnDeviceViewModel>();
                  services.AddTransient<DeviceParametrsViewModel>();
                  services.AddTransient<AddNewGroupWindowViewModel>();

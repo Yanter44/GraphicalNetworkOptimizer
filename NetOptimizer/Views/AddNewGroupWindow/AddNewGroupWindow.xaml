@@ -17,7 +17,7 @@
     </shell:WindowChrome.WindowChrome>
 
     <Border Background="#FCFBFE" CornerRadius="16"
-          BorderThickness="1"    BorderBrush="#EDEDED" SnapsToDevicePixels="True">
+            BorderThickness="1" BorderBrush="#EDEDED" SnapsToDevicePixels="True">
 
         <Grid Background="White">
             <Grid.RowDefinitions>
@@ -40,10 +40,10 @@
 
                     <TextBlock Grid.Column="1" FontSize="14" FontWeight="ExtraLight" VerticalAlignment="Center" HorizontalAlignment="Center" Text="Добавить группу устройств"/>
                     <Button  Command="{Binding CloseCommand}" CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Window}}"
-                 Grid.Column="2" Content="✕" Width="28" Height="28"
-                 HorizontalAlignment="Right" Background="Transparent"
-                 BorderThickness="0" FontSize="14"
-               Cursor="Hand">
+                             Grid.Column="2" Content="✕" Width="28" Height="28"
+                             HorizontalAlignment="Right" Background="Transparent"
+                             BorderThickness="0" FontSize="14"
+                             Cursor="Hand">
                         <Button.Template>
                             <ControlTemplate TargetType="Button">
                                 <Border x:Name="border" Background="#F0F3FC" CornerRadius="10">
@@ -62,16 +62,16 @@
                             </ControlTemplate>
                         </Button.Template>
                     </Button>
-                    
                 </Grid>
             </Border>
+            
             <Border Grid.Row="1" Margin="14,20,14,10" CornerRadius="12"  Padding="15">
                 <StackPanel VerticalAlignment="Center" HorizontalAlignment="Stretch">
                     <TextBlock Text="Название группы:" 
-                   Foreground="#6B7280" 
-                   FontSize="12" 
-                   Margin="0,0,0,8" 
-                   HorizontalAlignment="Center"/>
+                               Foreground="#6B7280" 
+                               FontSize="12" 
+                               Margin="0,0,0,8" 
+                               HorizontalAlignment="Center"/>
 
                     <Border CornerRadius="8" Background="#F3F6FA" BorderBrush="#EDEEF4" BorderThickness="1">
                         <TextBox Text="{Binding GroupName, Mode=TwoWay}" TextAlignment="Center" FontSize="14" Foreground="#111827" Height="36" 

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using NetOptimizer.Models.Enums;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
@@ -9,12 +10,10 @@ namespace NetOptimizer.Models.UIElements
     public class PacketViewModel : INotifyPropertyChanged
     {
         public string PacketId { get; set; }
+        public PacketType PacketType { get; set; }
 
-        public string FromDeviceId { get; set; }
-        public string ToDeviceId { get; set; }
-
-        public double X { get; set; }
-        public double Y { get; set; }
+        public DeviceConnection Connection { get; set; }
+        public bool Reversed { get; set; }
 
         private double _progress;
         public double Progress
@@ -28,16 +27,22 @@ namespace NetOptimizer.Models.UIElements
             }
         }
 
-        public DeviceOnCanvas FromDevice { get; set; }
-        public DeviceOnCanvas ToDevice { get; set; }
+        public double X { get; set; }
+        public double Y { get; set; }
 
         private void UpdatePosition()
         {
-            if (FromDevice == null || ToDevice == null)
+            if (Connection == null)
                 return;
 
-            X = FromDevice.X + (ToDevice.X - FromDevice.X) * Progress;
-            Y = FromDevice.Y + (ToDevice.Y - FromDevice.Y) * Progress;
+            var x1 = Reversed ? Connection.X2 : Connection.X1;
+            var y1 = Reversed ? Connection.Y2 : Connection.Y1;
+
+            var x2 = Reversed ? Connection.X1 : Connection.X2;
+            var y2 = Reversed ? Connection.Y1 : Connection.Y2;
+
+            X = x1 + (x2 - x1) * Progress;
+            Y = y1 + (y2 - y1) * Progress;
 
             OnPropertyChanged(nameof(X));
             OnPropertyChanged(nameof(Y));

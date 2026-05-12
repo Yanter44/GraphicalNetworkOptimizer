@@ -1,4 +1,5 @@
-﻿using System;
+﻿using NetOptimizer.Models.Enums;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
@@ -9,6 +10,8 @@ namespace NetOptimizer.Models.UIElements
     public class PacketTrailDotViewModel : INotifyPropertyChanged
     {
         public string PacketId { get; set; }
+        public PacketType PacketType { get; set; }  
+
         private double _x;
         public double X
         {

@@ -4,6 +4,7 @@ using NetOptimizer.Enums;
 using NetOptimizer.Events;
 using NetOptimizer.Interfaces;
 using NetOptimizer.MediatR.Commands;
+using NetOptimizer.MediatR.Notifications;
 using NetOptimizer.Models;
 using NetOptimizer.Models.DeviceModels;
 using NetOptimizer.Models.DeviceModels.DeviceSettings;
@@ -20,6 +21,7 @@ using Newtonsoft.Json.Bson;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Controls;
@@ -108,30 +110,43 @@ namespace NetOptimizer.ViewModels.MainWindoww
         {
             if (e.NewItems == null)
                 return;
-
+            foreach(var con in Connections)
+            {
+                Debug.Write($"Соединие между {con.SourcePort.Id} и {con.TargetPort.Id} существует");
+            }
             foreach (SimmulationEvent ev in e.NewItems)
             {
-                var from = Devices.FirstOrDefault(d => d.LogicDevice.Id == ev.FromDeviceId);
-                var to = Devices.FirstOrDefault(d => d.LogicDevice.Id == ev.ToDeviceId);
-
-                if (from == null || to == null)
+                
+                var connection = FindConnection(ev.FromPortId, ev.ToPortId);
+                if (connection == null)
+                {
+                    Debug.Write($"Соединеие между {ev.FromPortId} и {ev.ToPortId} не найдены");
                     continue;
+                }
+                    
+
+                bool reversed = ev.FromPortId == connection.TargetPort.Id &&
+                                ev.ToPortId == connection.SourcePort.Id;
 
                 var packet = new PacketViewModel
                 {
-                    PacketId = ev.PacketId,
-                    FromDeviceId = ev.FromDeviceId,
-                    ToDeviceId = ev.ToDeviceId,
-                    FromDevice = from,
-                    ToDevice = to,
-                    Progress = 0
+                    PacketId = ev.Packet.Id,
+                    PacketType = ev.Packet switch
+                    {
+                        IcmpPacket => PacketType.ICMP,
+                        ArpPacket => PacketType.ARP,
+                        _ => throw new NotSupportedException()
+                    },
+
+                    Connection = connection,
+                    Reversed = reversed
                 };
 
                 UIPackets.Add(packet);
-                _ = AnimatePacket(packet);
+                _ = AnimatePacket(packet, ev);
             }
         }
-        private async Task AnimatePacket(PacketViewModel packet)
+        private async Task AnimatePacket(PacketViewModel packet, SimmulationEvent ev)
         {
             int steps = 20;
 
@@ -142,24 +157,33 @@ namespace NetOptimizer.ViewModels.MainWindoww
                 UIPacketTrails.Add(new PacketTrailDotViewModel
                 {
                     PacketId = packet.PacketId,
+                    PacketType = ev.Packet switch
+                    {
+                        IcmpPacket => PacketType.ICMP,
+                        ArpPacket => PacketType.ARP,
+                        _ => throw new NotSupportedException()
+                    },
                     X = packet.X,
                     Y = packet.Y,
                 });
                 await Task.Delay(50);
             }
             UIPackets.Remove(packet);
-            var toRemove = UIPacketTrails.Where(t => t.PacketId == packet.PacketId)
-                                         .ToList();
+            var toRemove = UIPacketTrails
+                .Where(t => t.PacketId == packet.PacketId)
+                .ToList();
 
             foreach (var dot in toRemove)
                 UIPacketTrails.Remove(dot);
-        }
 
-        private DeviceConnection FindConnection(string fromId, string toId)
+            ev.AnimationCompleted.TrySetResult(true);
+        }
+        private DeviceConnection FindConnection(string fromPortId, string toPortId)
         {
             return Connections.FirstOrDefault(c =>
-                (c.Source.LogicDevice.Id == fromId && c.Target.LogicDevice.Id == toId) ||
-                (c.Source.LogicDevice.Id == toId && c.Target.LogicDevice.Id == fromId));
+                (c.SourcePort.Id == fromPortId && c.TargetPort.Id == toPortId) ||
+                (c.SourcePort.Id == toPortId && c.TargetPort.Id == fromPortId)
+            );
         }
         public void OnDeviceCreated(DeviceToAddDto dto, DeviceSettingsBase settings, double x = 500, double y = 500)
         {
@@ -219,7 +243,7 @@ namespace NetOptimizer.ViewModels.MainWindoww
             var args = obj as DeviceMouseEventArgs;
 
             switch (args.Action)
-            {
+            { 
                 case DeviceMouseAction.DoubleClick:
                     ShowDeviceParametrsWindow(args.Device);
                     break;
@@ -231,6 +255,7 @@ namespace NetOptimizer.ViewModels.MainWindoww
                         if (target == _sourceDevice) return;
                         await _mediator.Send(new SendPacketCommand()
                         {
+                            PacketType = PacketType.ICMP,   // В БУДУЩЕМ ДОБАВИТЬ МЕНЮ ГДЕ БУДЕТ ВЫБОР ПАКЕТА
                             SourceId = _sourceDevice.LogicDevice.Id,
                             TargetId = target.LogicDevice.Id
                         });
@@ -438,6 +463,11 @@ namespace NetOptimizer.ViewModels.MainWindoww
             try
             {
                 sourcePort.LinkTo(targetPort);
+                var sourceIface = sourceDevice.LogicDevice.GetInterfaces()
+                                                          .FirstOrDefault(i => i.PhysicalPort == sourcePort);
+
+                var targetIface = targetDevice.LogicDevice.GetInterfaces()
+                                                          .FirstOrDefault(i => i.PhysicalPort == targetPort);
                 var conn = new DeviceConnection
                 {
                     Source = sourceDevice,
@@ -445,16 +475,15 @@ namespace NetOptimizer.ViewModels.MainWindoww
                     SourcePort = sourcePort,
                     TargetPort = targetPort
                 };
+                conn.StartPoint.State = ResolveState(sourceIface);
+                conn.EndPoint.State = ResolveState(targetIface);
 
                 Connections.Add(conn);
-
                 var group = GetConnectionsBetween(sourceDevice, targetDevice);
-
                 for (int i = 0; i < group.Count; i++)
                 {
                     group[i].ConnectionIndex = i;
                 }
-
                 foreach (var c in group)
                 {
                     if (c.ConnectionIndex < MaxConnectionsBetweenDevices)
@@ -471,6 +500,14 @@ namespace NetOptimizer.ViewModels.MainWindoww
                 _windowNavigator.ShowModalView<ErrorWindow, ErrorWindowViewModel>(message);
                 return false;
             }
+        }
+        private PointConnectionState ResolveState(INetworkInterface iface)
+        {
+            if (iface == null)
+                return PointConnectionState.Disconnected;
+
+            return iface.IsEnabled ? PointConnectionState.Connected 
+                                   : PointConnectionState.Disconnected;
         }
         public List<DeviceConnection> GetConnectionsBetween(DeviceOnCanvas a, DeviceOnCanvas b)
         {

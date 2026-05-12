@@ -1,11 +1,14 @@
-﻿using System;
+﻿using NetOptimizer.Helpers;
+using NetOptimizer.Interfaces;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
 namespace NetOptimizer.Models
 {
-    public class PcNetworkInterface
+    public class PcNetworkInterface : ILayer3Interface
     {
+        public string Id { get; set; } = Guid.NewGuid().ToString();
         public string Name { get; set; }
         public bool IsEnabled { get; set; }
         public Port? PhysicalPort { get; set; }
@@ -21,14 +24,8 @@ namespace NetOptimizer.Models
             DefaultGateway = "0.0.0.0";
             DNS = "0.0.0.0";
 
-            MacAddress = GenerateMac(); 
+            MacAddress = IpUtils.GenerateMac(); 
             IsEnabled = false;
-        }
-        private string GenerateMac()
-        {
-            var rand = new Random();
-            return string.Join(":", Enumerable.Range(0, 6)
-                .Select(_ => rand.Next(0, 256).ToString("X2")));
         }
     }
 }

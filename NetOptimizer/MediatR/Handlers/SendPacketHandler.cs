@@ -17,12 +17,11 @@ namespace NetOptimizer.MediatR.Handlers
         {
             _simVM = simVM;
         }
-
         public Task Handle(SendPacketCommand request, CancellationToken cancellationToken)
         {
             _simVM.AddActionToSelectedScenario(new ScenarioAction
             {
-                PacketType = PacketType.ICMP,
+                PacketType     = request.PacketType,
                 SourceDeviceId = request.SourceId,
                 TargetDeviceId = request.TargetId
             });

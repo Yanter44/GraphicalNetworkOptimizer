@@ -19,25 +19,29 @@ namespace NetOptimizer.ViewModels.DeviceParametrsViewModels
     public class SwitchDeviceViewModel : DeviceViewModelBase, IApplyChangesVm
     {
         private readonly IWindowNavigator _windownavigator;
-        public ICommand OpenAddVlanCommand { get; }
         private SwitchDevice SwitchDevice;
         public ObservableCollection<NetworkInterfaceViewModel> SwitchInterfaceViewModel { get; set; }
         public ObservableCollection<SelectableVlan> VlansViewModel { get; set; }
         public ObservableCollection<MacTableEntry> MacTableViewModel { get; set; } = new ObservableCollection<MacTableEntry>();
-
+        public ICommand OpenAddVlanCommand { get; }
         public SwitchDeviceViewModel(DeviceOnCanvas device, IWindowNavigator windownavigator) : base(device)
         {
             _windownavigator = windownavigator;
             SwitchDevice = device.LogicDevice as SwitchDevice;
-            MacTableViewModel.CollectionChanged += (s, e) =>
-            {
-                SwitchDevice.RuntimeState.MacTable = MacTableViewModel.ToList();
-            };
+            MacTableViewModel = new ObservableCollection<MacTableEntry>(
+                   SwitchDevice.RuntimeState.MacTable.Select(i => new MacTableEntry()
+                   {
+                       VlanId = i.VlanId,
+                       MacAddress = i.MacAddress,
+                       Type = i.Type,
+                       InterfaceName = i.InterfaceName,
+                   })
+            );
             VlansViewModel = new ObservableCollection<SelectableVlan>(
                  SwitchDevice.NetworkConfig.Vlans.Select(v => new SelectableVlan
                  {
-                  VlanId = v.Id,
-                  VlanName = v.Name
+                     VlanId = v.Id,
+                     VlanName = v.Name
                  })
             );
             foreach (var iface in SwitchDevice.NetworkConfig.Interfaces)

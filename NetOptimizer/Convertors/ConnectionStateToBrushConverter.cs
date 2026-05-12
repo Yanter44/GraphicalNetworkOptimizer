@@ -17,7 +17,8 @@ namespace NetOptimizer.Convertors
             {
                 PointConnectionState.Connected => Brushes.LimeGreen,
                 PointConnectionState.Negotiating => Brushes.Gold,
-                PointConnectionState.Error => Brushes.Red,
+                PointConnectionState.Error => Brushes.DarkRed,
+                PointConnectionState.Disconnected => Brushes.Red,
                 _ => Brushes.Gray
             };
         }

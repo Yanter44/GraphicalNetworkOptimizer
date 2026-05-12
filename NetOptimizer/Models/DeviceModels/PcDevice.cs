@@ -1,6 +1,7 @@
 ﻿using NetOptimizer.Enums;
 using NetOptimizer.Events;
 using NetOptimizer.Helpers;
+using NetOptimizer.Interfaces;
 using NetOptimizer.Models.DeviceModels.DeviceSettings;
 using NetOptimizer.Models.DeviceModels.NetworkSettings;
 using NetOptimizer.Models.DeviceModels.SubProperties;
@@ -18,6 +19,7 @@ namespace NetOptimizer.Models.DeviceModels
         public PcHardwareSpecs HardwareSpecs { get; set; }
         public PcWifiOptions WifiOptions { get; set; }
         public PcNetworkConfiguration NetworkConfig { get; set; }
+        public PcRuntimeState RuntimeState { get; set; }
         public decimal AveragePrice { get; set; }
         public PcDevice(string name, PcSettings settings) : base(name)
         {
@@ -27,6 +29,7 @@ namespace NetOptimizer.Models.DeviceModels
             this.HardwareSpecs = settings.HardwareSpecs;
             this.WifiOptions = settings.WifiOptions;
             this.AveragePrice = settings.AveragePrice;
+            this.RuntimeState = new PcRuntimeState();
             this.NetworkConfig = new PcNetworkConfiguration
             {
                 Hostname = name,
@@ -74,7 +77,7 @@ namespace NetOptimizer.Models.DeviceModels
         {
             foreach (var interfacee in NetworkConfig.Interfaces)
             {
-                interfacee.IsEnabled = true;
+                interfacee.IsEnabled = false;
             }
         }
         private string GetInterfacePrefix(string speed, PortType type)
@@ -89,9 +92,17 @@ namespace NetOptimizer.Models.DeviceModels
             };
         }
 
-        public override IEnumerable<SimmulationEvent> ProcessPacket(Packet packet)
+        public override IEnumerable<SimmulationEvent> ProcessPacket(Packet packet, string InPortId)
         {
-            var iface = NetworkConfig.Interfaces[0];
+            PcNetworkInterface iface;
+            if (string.IsNullOrEmpty(InPortId))
+            {
+                iface = NetworkConfig.Interfaces.FirstOrDefault(i => i.IsEnabled);
+            }
+            else
+            {
+                iface = NetworkConfig.Interfaces.FirstOrDefault(i => i.PhysicalPort.Id == InPortId);
+            }
 
             if (iface == null || !iface.IsEnabled)
                 yield break;
@@ -99,77 +110,204 @@ namespace NetOptimizer.Models.DeviceModels
             if (iface.PhysicalPort?.ConnectedTo == null)
                 yield break;
 
-            if (iface.IpV4Address == "0.0.0.0")
+            if (packet.TTL <= 0)
                 yield break;
 
-            // 🧠 1. ПАКЕТ ДЛЯ МЕНЯ
-            if (packet.DestinationIp == iface.IpV4Address)
+            if (packet is ArpPacket arp)
             {
-                    if (packet.Type == PacketType.ICMP)
-                    {
-                        var replyPacket = new Packet
-                        {
-                            Id = Guid.NewGuid().ToString(),
-                            SourceDeviceId = this.Id,
-                            SourceIp = iface.IpV4Address,
-                            DestinationIp = packet.SourceIp,
-                            Type = PacketType.ICMP,
-                            TTL = 20
-                        };
+                foreach (var ev in HandleArp(arp, iface))
+                    yield return ev;
 
-                        var nexttDevice = iface.PhysicalPort.ConnectedTo.Owner;
-
-                        if (nexttDevice == null)
-                            yield break;
-
-                        yield return new SimmulationEvent
-                        {
-                            PacketId = replyPacket.Id,
-                            FromDeviceId = this.Id,
-                            ToDeviceId = nexttDevice.Id,
-                            FromInterfaceId = iface.Name,
-                            PacketType = PacketType.ICMP
-                        };
-                    }
-                    yield break;              
+                yield break;
             }
 
-            // 🧠 2. ПАКЕТ НЕ ДЛЯ МЕНЯ → forward
+            if (packet is IcmpPacket icmp)
+            {
+                foreach (var ev in HandleIcmp(icmp, iface))
+                    yield return ev;
+
+                yield break;
+            }
+
+            foreach (var ev in HandleForward(packet, iface))
+                yield return ev;
+        }
+        private IEnumerable<SimmulationEvent> HandleArp(ArpPacket arp, PcNetworkInterface iface)
+        {
             var nextDevice = iface.PhysicalPort.ConnectedTo.Owner;
 
             if (nextDevice == null)
                 yield break;
 
-            bool sameSubnet = IpUtils.IsSameSubnet(
-                iface.IpV4Address,
-                packet.DestinationIp,
-                iface.SubnetMask
-            );
-
-            string nextHopIp;
-
-            if (sameSubnet)
+            if (arp.ArpType == ArpType.Request)
             {
-                nextHopIp = packet.DestinationIp;
-            }
-            else
-            {
-                if (iface.DefaultGateway == "0.0.0.0")
+                if (arp.DestinationIp != iface.IpV4Address)
                     yield break;
 
-                nextHopIp = iface.DefaultGateway;
+                var reply = new ArpPacket
+                {
+                    SourceMac = iface.MacAddress,
+                    DestinationMac = arp.SourceMac,
+                    ArpType = ArpType.Response,
+                    SourceIp = iface.IpV4Address,
+                    DestinationIp = arp.SourceIp
+                };
+                RuntimeState.ArpTable.Add(new ArpTableEntry
+                {
+                    IpAddress = arp.SourceIp,
+                    MacAddress = arp.SourceMac
+                });
+
+                yield return new SimmulationEvent
+                {
+                    Packet = reply,
+                    FromDeviceId = this.Id,
+                    ToDeviceId = nextDevice.Id,
+
+                    FromPortId = iface.PhysicalPort.Id,
+                    ToPortId = iface.PhysicalPort.ConnectedTo.Id
+                };
+
+                yield break;
             }
+            if (arp.ArpType == ArpType.Response)
+            {
+                RuntimeState.ArpTable.Add(new ArpTableEntry
+                {
+                    IpAddress = arp.SourceIp,
+                    MacAddress = arp.SourceMac
+                });
+
+                RuntimeState.PendingArpRequests.Remove(arp.SourceIp);
+
+                var pending = RuntimeState.PendingPackets.ToList();
+                RuntimeState.PendingPackets.Clear();
+
+                foreach (var p in pending)
+                {
+                    var macEntry = RuntimeState.ArpTable
+                        .FirstOrDefault(x => x.IpAddress == p.DestinationIp);
+
+                    if (macEntry != null)
+                    {
+                        p.SourceMac = arp.DestinationMac;
+                        p.DestinationMac = macEntry.MacAddress;
+                    }
+
+                    yield return new SimmulationEvent
+                    {
+                        Packet = p,
+                        FromDeviceId = this.Id,
+                        ToDeviceId = iface.PhysicalPort.ConnectedTo.Owner.Id,
+
+                        FromPortId = iface.PhysicalPort.Id,
+                        ToPortId = iface.PhysicalPort.ConnectedTo.Id
+                    };
+                }
+
+                yield break;
+            }
+        }
+        private IEnumerable<SimmulationEvent> HandleIcmp(IcmpPacket icmp, PcNetworkInterface iface)
+        {
+            var nextDevice = iface.PhysicalPort.ConnectedTo.Owner;
+
+            if (icmp.DestinationIp == iface.IpV4Address)
+            {
+                if (icmp.IcmpType == IcmpType.EchoRequest)
+                {
+                    var reply = new IcmpPacket
+                    {
+                        SourceIp = iface.IpV4Address,
+                        DestinationIp = icmp.SourceIp,
+                        IcmpType = IcmpType.EchoReply,
+                        Sequence = icmp.Sequence
+                    };
+                    var arpEntry = RuntimeState.ArpTable.FirstOrDefault(x => x.IpAddress == icmp.SourceIp);
+
+                    if (arpEntry != null)
+                    {
+                        reply.SourceMac = iface.MacAddress;
+                        reply.DestinationMac = arpEntry.MacAddress;
+                    }
+
+                    yield return new SimmulationEvent
+                    {
+                        Packet = reply,
+                        FromDeviceId = this.Id,
+                        ToDeviceId = nextDevice.Id,
+
+                        FromPortId = iface.PhysicalPort.Id,
+                        ToPortId = iface.PhysicalPort.ConnectedTo.Id
+                    };
+                }
+
+                yield break;
+            }
+
+            var nextHopIp = IpUtils.IsSameSubnet(iface.IpV4Address, icmp.DestinationIp, iface.SubnetMask) ? icmp.DestinationIp : iface.DefaultGateway;
+
+            var arp = RuntimeState.ArpTable.FirstOrDefault(x => x.IpAddress == nextHopIp);
+            if (arp == null)
+            {
+                if (RuntimeState.PendingArpRequests.Add(nextHopIp))
+                {
+                    var arpRequest = new ArpPacket
+                    {
+                        SourceMac = iface.MacAddress,
+                        DestinationMac = "FF:FF:FF:FF:FF:FF",
+                        ArpType = ArpType.Request,
+                        SourceIp = iface.IpV4Address,
+                        DestinationIp = nextHopIp
+                    };
+
+                    yield return new SimmulationEvent
+                    {
+                        Packet = arpRequest,
+                        FromDeviceId = this.Id,
+                        ToDeviceId = nextDevice.Id,
+
+                        FromPortId = iface.PhysicalPort.Id,
+                        ToPortId = iface.PhysicalPort.ConnectedTo.Id
+                    };
+                }
+                RuntimeState.PendingPackets.Enqueue(icmp);
+                yield break;
+            }
+            icmp.SourceMac = iface.MacAddress;
+            icmp.DestinationMac = arp.MacAddress;
+            yield return new SimmulationEvent
+            {
+                Packet = icmp,
+                FromDeviceId = this.Id,
+                ToDeviceId = nextDevice.Id,
+
+                FromPortId = iface.PhysicalPort.Id,
+                ToPortId = iface.PhysicalPort.ConnectedTo.Id
+            };
+        }
+        private IEnumerable<SimmulationEvent> HandleForward(Packet packet, PcNetworkInterface iface)
+        {
+            var nextDevice = iface.PhysicalPort.ConnectedTo.Owner;
+
+            if (nextDevice == null)
+                yield break;
+
+            packet.TTL--;
 
             yield return new SimmulationEvent
             {
-                PacketId = packet.Id,
+                Packet = packet,
                 FromDeviceId = this.Id,
                 ToDeviceId = nextDevice.Id,
-                FromInterfaceId = iface.Name,
-                PacketType = packet.Type
+
+                FromPortId = iface.PhysicalPort.Id,
+                ToPortId = iface.PhysicalPort.ConnectedTo.Id
             };
         }
-            
 
+        public override IEnumerable<INetworkInterface> GetInterfaces() => NetworkConfig.Interfaces;
+
+        public override IEnumerable<Port> GetPorts() => Ports;
     }
 }

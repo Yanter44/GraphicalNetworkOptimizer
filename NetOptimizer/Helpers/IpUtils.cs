@@ -14,6 +14,12 @@ namespace NetOptimizer.Helpers
 
             return (a & m) == (b & m);
         }
+        public static string GenerateMac()
+        {
+            var rand = new Random();
+            return string.Join(":", Enumerable.Range(0, 6)
+                .Select(_ => rand.Next(0, 256).ToString("X2")));
+        }
 
         private static uint ToInt(string ip)
         {
