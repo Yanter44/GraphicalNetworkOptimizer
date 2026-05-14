@@ -6,7 +6,7 @@ using System.Text;
 
 namespace NetOptimizer.ViewModels.DeviceParametrsViewModels.Router
 {
-    public class RoutingNetworkTableEntryViewModel : INotifyPropertyChanged
+    public class StaticRoutingNetworkTableEntryViewModel : INotifyPropertyChanged
     {
         private string _destinationNetwork;
         public string DestinationNetwork
@@ -43,11 +43,19 @@ namespace NetOptimizer.ViewModels.DeviceParametrsViewModels.Router
                 OnPropertyChanged();
             }
         }
-
-
+        private string _interfaceName;
+        public string InterfaceName
+        {
+            get => _interfaceName;
+            set
+            {
+                if(_interfaceName == value) return;
+                _interfaceName = value;
+                OnPropertyChanged();
+            }
+        }
 
         public event PropertyChangedEventHandler? PropertyChanged;
-
         protected void OnPropertyChanged([CallerMemberName] string name = null)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));

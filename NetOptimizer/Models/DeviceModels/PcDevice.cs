@@ -183,20 +183,21 @@ namespace NetOptimizer.Models.DeviceModels
                 var pending = RuntimeState.PendingPackets.ToList();
                 RuntimeState.PendingPackets.Clear();
 
-                foreach (var p in pending)
+                foreach (var pendingPacket in pending)
                 {
                     var macEntry = RuntimeState.ArpTable
-                        .FirstOrDefault(x => x.IpAddress == p.DestinationIp);
+                        .FirstOrDefault(x => x.IpAddress == pendingPacket.NextHopIp);
 
-                    if (macEntry != null)
-                    {
-                        p.SourceMac = arp.DestinationMac;
-                        p.DestinationMac = macEntry.MacAddress;
-                    }
+                    if (macEntry == null)
+                        continue;
+
+                    pendingPacket.Packet.SourceMac = iface.MacAddress;
+                    pendingPacket.Packet.DestinationMac = macEntry.MacAddress;
 
                     yield return new SimmulationEvent
                     {
-                        Packet = p,
+                        Packet = pendingPacket.Packet,
+
                         FromDeviceId = this.Id,
                         ToDeviceId = iface.PhysicalPort.ConnectedTo.Owner.Id,
 
@@ -204,7 +205,6 @@ namespace NetOptimizer.Models.DeviceModels
                         ToPortId = iface.PhysicalPort.ConnectedTo.Id
                     };
                 }
-
                 yield break;
             }
         }
@@ -230,7 +230,8 @@ namespace NetOptimizer.Models.DeviceModels
                         reply.SourceMac = iface.MacAddress;
                         reply.DestinationMac = arpEntry.MacAddress;
                     }
-
+                    reply.SourceMac = iface.MacAddress;
+                    reply.DestinationMac = icmp.SourceMac;
                     yield return new SimmulationEvent
                     {
                         Packet = reply,
@@ -271,7 +272,11 @@ namespace NetOptimizer.Models.DeviceModels
                         ToPortId = iface.PhysicalPort.ConnectedTo.Id
                     };
                 }
-                RuntimeState.PendingPackets.Enqueue(icmp);
+                RuntimeState.PendingPackets.Enqueue(new PendingPacket
+                {
+                    Packet = icmp,
+                    NextHopIp = nextHopIp,
+                });
                 yield break;
             }
             icmp.SourceMac = iface.MacAddress;

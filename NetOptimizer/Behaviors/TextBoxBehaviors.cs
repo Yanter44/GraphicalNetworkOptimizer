@@ -31,10 +31,48 @@ namespace NetOptimizer.Behaviors
             AssociatedObject.PreviewTextInput -= OnTextInput;
             AssociatedObject.PreviewKeyDown -= OnPreviewKeyDown;
         }
+
         private void OnTextInput(object sender, TextCompositionEventArgs e)
         {
-            string pattern = Mode == Models.Enums.InputType.NumbersAndDots ? "[^0-9.]+" : "[^0-9]+";
-            e.Handled = new Regex(pattern).IsMatch(e.Text);
+            if (AssociatedObject == null)
+                return;
+
+            if (Mode == Models.Enums.InputType.OnlyNumbers)
+            {
+                e.Handled = Regex.IsMatch(e.Text, "[^0-9]");
+                return;
+            }
+
+            if (Mode == Models.Enums.InputType.NumbersAndDots)
+            {
+                if (Regex.IsMatch(e.Text, "[^0-9.]"))
+                {
+                    e.Handled = true;
+                    return;
+                }
+
+                string currentText = AssociatedObject.Text;
+
+                int caretIndex = AssociatedObject.CaretIndex;
+
+                string newText = currentText.Insert(caretIndex, e.Text);
+
+                if (newText.Contains(".."))
+                {
+                    e.Handled = true;
+                    return;
+                }
+                if (newText.Count(c => c == '.') > 3)
+                {
+                    e.Handled = true;
+                    return;
+                }
+                if (newText.StartsWith("."))
+                {
+                    e.Handled = true;
+                    return;
+                }
+            }
         }
 
         private void OnPreviewKeyDown(object sender, KeyEventArgs e)

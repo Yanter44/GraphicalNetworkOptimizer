@@ -6,7 +6,7 @@ namespace NetOptimizer.Models.Enums
 {
     public enum ArpType
     {
-        Request,
-        Response
+        Request, 
+        Response 
     }
 }

@@ -489,7 +489,7 @@
                                                 <DataTemplate>
                                                     <StackPanel Orientation="Horizontal">
                                                         <Button Width="70" Height="30" Style="{StaticResource ScenarioItemRedactButton}" Content="Изменить"
-                                                                Command="{Binding DataContext.RedactCommand,
+                                                                Command="{Binding DataContext.RedactScenarioCommand,
                                                                            RelativeSource={RelativeSource AncestorType=DataGrid}}"
                                                                 CommandParameter="{Binding}"
                                                                 Visibility="{Binding IsValid, Converter={StaticResource BoolToVisibilityConverter}}"/>
@@ -497,11 +497,10 @@
                                                         <Button Width="70" Height="30" 
                                                                 Style="{StaticResource ScenarioItemDeleteButton}"
                                                                 Content="Удалить"
-                                                                Command="{Binding DataContext.RedactCommand,
+                                                                Command="{Binding DataContext.simmulationViewModel.DeleteScenarioActionCommand,
                                                                            RelativeSource={RelativeSource AncestorType=DataGrid}}"
                                                                  CommandParameter="{Binding}" Margin="5,0,0,0"/>
                                                     </StackPanel>
-                                                   
                                                 </DataTemplate>
                                             </DataGridTemplateColumn.CellTemplate>
                                         </DataGridTemplateColumn>

@@ -16,7 +16,6 @@ namespace NetOptimizer.ViewModels.DeviceParametrsViewModels.Switch
         {
             _model = model;
         }
-
         public string Name
         {
             get => _model.Name;
@@ -27,7 +26,6 @@ namespace NetOptimizer.ViewModels.DeviceParametrsViewModels.Switch
                 OnPropertyChanged();
             }
         }
-
         public bool IsEnabled
         {
             get => _model.IsEnabled;
@@ -38,7 +36,6 @@ namespace NetOptimizer.ViewModels.DeviceParametrsViewModels.Switch
                 OnPropertyChanged();
             }
         }
-
         public SwitchPortMode SwitchPortMode
         {
             get => _model.SwitchPortMode;
@@ -62,7 +59,6 @@ namespace NetOptimizer.ViewModels.DeviceParametrsViewModels.Switch
                 OnPropertyChanged(nameof(AllowedVlans));
             }
         }
-
         public int? AccessVlan
         {
             get => _model.AccessVlan;
@@ -73,7 +69,6 @@ namespace NetOptimizer.ViewModels.DeviceParametrsViewModels.Switch
                 OnPropertyChanged();
             }
         }
-
         public ObservableCollection<int>? AllowedVlans
         {
             get => _model.AllowedVlans == null
@@ -88,7 +83,6 @@ namespace NetOptimizer.ViewModels.DeviceParametrsViewModels.Switch
         }
 
         public event PropertyChangedEventHandler? PropertyChanged;
-
         protected void OnPropertyChanged([CallerMemberName] string name = null)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));

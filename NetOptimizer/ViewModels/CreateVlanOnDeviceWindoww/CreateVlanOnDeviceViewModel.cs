@@ -30,7 +30,6 @@ namespace NetOptimizer.ViewModels.CreateVlanOnDeviceWindoww
         {
             VlanConfirmed?.Invoke(VlanId, VlanName);
         }
-
         private void CloseWindow() => RequestClose?.Invoke();
 
         public event PropertyChangedEventHandler PropertyChanged;

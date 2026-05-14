@@ -36,8 +36,8 @@ namespace NetOptimizer.ViewModels.MainWindoww
         private readonly ISimulationEngine _engine;
         public ICommand AddNewScenarioCommand { get; }
         public ICommand RemoveScenarioCommand { get; }
-        public ICommand StartSimmulationCommand { get; }
-
+        public ICommand StartSimmulationCommand { get; } 
+        public ICommand DeleteScenarioActionCommand { get; }
         public SimmulationViewModel(ISimulationEngine engine, IDeviceRegistry devicesService)
         {
             _engine = engine;
@@ -49,6 +49,7 @@ namespace NetOptimizer.ViewModels.MainWindoww
             AddNewScenarioCommand = new RelayCommand(AddNewScenario);
             RemoveScenarioCommand = new RelayCommand(RemoveScenario);
             StartSimmulationCommand = new RelayCommand(StartSimulation);
+            DeleteScenarioActionCommand = new RelayCommand(action => DeleteScenarioAction((ScenarioActionViewModel)action));
             Initialize();
         }
         private void RebuildEventsView()
@@ -118,6 +119,20 @@ namespace NetOptimizer.ViewModels.MainWindoww
                 return;
 
             ScenarioList.Remove(SelectedScenario);
+        }
+        private void DeleteScenarioAction(ScenarioActionViewModel action)
+        {
+            var toRemove = SelectedScenario.Actions
+                .Where(x =>
+                    x.SourceDeviceId == action.SourceDevice.LogicDevice.Id &&
+                    x.TargetDeviceId == action.TargetDevice.LogicDevice.Id &&
+                    x.PacketType == action.PacketType)
+                .ToList();
+
+            foreach (var item in toRemove)
+            {
+                SelectedScenario.Actions.Remove(item);
+            }
         }
         public void AddActionToSelectedScenario(ScenarioAction action)
         {

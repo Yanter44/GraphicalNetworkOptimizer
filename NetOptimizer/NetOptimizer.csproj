@@ -63,6 +63,7 @@
     <None Remove="Assets\Images\settings.png" />
     <None Remove="Assets\Images\sppeed.png" />
     <None Remove="Assets\Images\ssd.png" />
+    <None Remove="Assets\Images\staticroute.png" />
     <None Remove="Assets\Images\switch.png" />
     <None Remove="Assets\Images\table.png" />
     <None Remove="Assets\Images\topology.png" />
@@ -259,6 +260,9 @@
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Resource>
     <Resource Include="Assets\Images\ssd.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Assets\Images\staticroute.png">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Resource>
     <Resource Include="Assets\Images\switch.png">

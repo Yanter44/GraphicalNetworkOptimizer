@@ -34,7 +34,6 @@ namespace NetOptimizer.ViewModels.DeviceParametrsViewModels.Router
 
             }
         }
-
         public string Name
         {
             get => _model.Name;
