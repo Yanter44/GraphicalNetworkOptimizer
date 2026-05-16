@@ -39,12 +39,47 @@ namespace NetOptimizer.Behaviors
 
         private void OnKeyDown(object sender, KeyEventArgs e)
         {
+            if (VM == null)
+                return;
+
+            if (Keyboard.Modifiers == ModifierKeys.Control)
+            {
+                switch (e.Key)
+                {
+                    case Key.C:
+                        VM.CopySelected();
+                        e.Handled = true;
+                        return;
+
+                    case Key.V:
+                        VM.PasteSelected();
+                        e.Handled = true;
+                        return;
+
+                    case Key.X:
+                        VM.CopySelected();
+                        VM.DeleteSelected();
+                        e.Handled = true;
+                        return;
+
+                    case Key.A:
+                        foreach (var device in VM.Devices)
+                            device.IsSelected = true;
+
+                        foreach (var ui in VM.UIObjects)
+                            ui.IsSelected = true;
+
+                        e.Handled = true;
+                        return;
+                }
+            }
+
             if (e.Key == Key.Delete)
             {
-                VM?.DeleteSelected();
+                VM.DeleteSelected();
+                e.Handled = true;
             }
         }
-
         private void OnWheel(object sendesr, MouseWheelEventArgs e)
         {
             if (VM == null) return;

@@ -7,6 +7,7 @@ namespace NetOptimizer.Models
 {
     public class ScenarioAction
     {
+        public string Id = Guid.NewGuid().ToString();
         public string SourceDeviceId { get; set; }
         public string TargetDeviceId { get; set; }  
         public PacketType PacketType { get; set; }

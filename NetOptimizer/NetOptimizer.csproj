@@ -44,8 +44,11 @@
     <None Remove="Assets\Images\minus.png" />
     <None Remove="Assets\Images\model.png" />
     <None Remove="Assets\Images\new_project.png" />
+    <None Remove="Assets\Images\next.png" />
     <None Remove="Assets\Images\open_flesh.png" />
     <None Remove="Assets\Images\pc.png" />
+    <None Remove="Assets\Images\pen.png" />
+    <None Remove="Assets\Images\play.png" />
     <None Remove="Assets\Images\plus.png" />
     <None Remove="Assets\Images\port.png" />
     <None Remove="Assets\Images\printer.png" />
@@ -64,10 +67,13 @@
     <None Remove="Assets\Images\sppeed.png" />
     <None Remove="Assets\Images\ssd.png" />
     <None Remove="Assets\Images\staticroute.png" />
+    <None Remove="Assets\Images\stop.png" />
     <None Remove="Assets\Images\switch.png" />
     <None Remove="Assets\Images\table.png" />
     <None Remove="Assets\Images\topology.png" />
+    <None Remove="Assets\Images\trashbuckerlightred.png" />
     <None Remove="Assets\Images\trashbucket.png" />
+    <None Remove="Assets\Images\trashbucketlightred2.png" />
     <None Remove="Assets\Images\trashbucketwhite.png" />
     <None Remove="Assets\Images\videocam.png" />
     <None Remove="Assets\Images\vlans.png" />
@@ -205,10 +211,19 @@
     <Resource Include="Assets\Images\new_project.png">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Resource>
+    <Resource Include="Assets\Images\next.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
     <Resource Include="Assets\Images\open_flesh.png">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Resource>
     <Resource Include="Assets\Images\pc.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Assets\Images\pen.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Assets\Images\play.png">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Resource>
     <Resource Include="Assets\Images\plus.png">
@@ -265,6 +280,9 @@
     <Resource Include="Assets\Images\staticroute.png">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Resource>
+    <Resource Include="Assets\Images\stop.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
     <Resource Include="Assets\Images\switch.png">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Resource>
@@ -274,7 +292,13 @@
     <Resource Include="Assets\Images\topology.png">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Resource>
+    <Resource Include="Assets\Images\trashbuckerlightred.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
     <Resource Include="Assets\Images\trashbucket.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Assets\Images\trashbucketlightred2.png">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Resource>
     <Resource Include="Assets\Images\trashbucketwhite.png">

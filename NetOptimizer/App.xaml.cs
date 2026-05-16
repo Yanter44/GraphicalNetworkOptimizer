@@ -55,6 +55,7 @@ namespace NetOptimizer
                  services.AddTransient<DeleteEntryInRoutingTableWindow>();
 
                  services.AddSingleton<DeviceViewModelFactory>();
+                 services.AddSingleton<SimmulationViewModel>();
                  services.AddSingleton<CanvasViewModel>();
 
                  services.AddTransient<DeleteEntryInRoutingTableViewModel>();
@@ -64,7 +65,6 @@ namespace NetOptimizer
                  services.AddTransient<AddNewGroupWindowViewModel>();
                  services.AddTransient<ConnectToGroupWindowViewModel>();
                  services.AddTransient<EditorViewModel>();
-                 services.AddSingleton<SimmulationViewModel>();
                  services.AddTransient<SandboxViewModel>();
                  services.AddTransient<MainWindowViewModel>();
                  services.AddTransient<ErrorWindowViewModel>();

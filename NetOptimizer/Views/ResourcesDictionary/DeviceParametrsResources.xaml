@@ -54,6 +54,7 @@
             </Setter.Value>
         </Setter>
     </Style>
+    
     <Style x:Key="DeleteRouteButtonStyle" TargetType="Button">
         <Setter Property="Background" Value="#E53935"/>
         <Setter Property="Foreground" Value="White"/>

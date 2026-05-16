@@ -6,20 +6,25 @@ using NetOptimizer.Models.Enums;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 using System.Text;
 
 namespace NetOptimizer.Services
 {
     public class SimulationEngine : ISimulationEngine
     {
-        private Scenario _currentScenario;
-
+        public Scenario _currentScenario;
+        private CancellationTokenSource _cts;
+        private readonly ManualResetEventSlim _pauseEvent = new(true);
+        public int SimmulationSpeed { get; private set; }
+        public event NotifyCollectionChangedEventHandler SimulationEventsChanged;
         private readonly Queue<SimmulationEvent> _queue = new();
-        public ObservableCollection<SimmulationEvent> EventChain { get; } = new();
 
         private readonly IDeviceRegistry _deviceRegistry;
 
         private readonly HashSet<string> _visited = new();
+
+
         public SimulationEngine(IDeviceRegistry deviceRegistry)
         {
             _deviceRegistry = deviceRegistry;
@@ -33,9 +38,27 @@ namespace NetOptimizer.Services
         {
             _currentScenario.Actions.Add(action);
         }
-        public void StartSimmulation()
+        public void StopSimmulation()
         {
-            EventChain.Clear();
+            _cts?.Cancel();
+            _queue.Clear();
+            _pauseEvent.Set();
+        }
+        public void PauseSimmulation()
+        {
+            _pauseEvent.Reset();
+        }
+        public void ResumeSimulation()
+        {
+            _pauseEvent.Set();
+        }
+        public void StartSimmulation(int simmulationspeed)
+        {
+            SimmulationSpeed = simmulationspeed;
+            _cts = new CancellationTokenSource();
+            _pauseEvent.Set();
+
+            _currentScenario.Events.Clear();
             _queue.Clear();
             _visited.Clear();
 
@@ -51,9 +74,8 @@ namespace NetOptimizer.Services
                     .OfType<ILayer3Interface>()
                     .FirstOrDefault();
 
-                var targetL3 = targetDevice.GetInterfaces()
-                    .OfType<ILayer3Interface>()
-                    .FirstOrDefault();
+                var targetL3 = targetDevice.GetInterfaces().OfType<ILayer3Interface>()
+                                                           .FirstOrDefault();
 
                 if (sourceL3 == null || targetL3 == null)
                     continue;
@@ -78,61 +100,95 @@ namespace NetOptimizer.Services
                 foreach (var ev in entryEvents)
                     _queue.Enqueue(ev);
             }
-            Task.Run(ProcessQueue);
+            Task.Run(async () =>
+            {
+                await ProcessQueue(_cts.Token);
+            });
         }
 
-        private async Task ProcessQueue()
+
+        private async Task ProcessQueue(CancellationToken token)
         {
-            while (_queue.Count > 0)
+            try
             {
-                var currentBatch = new List<SimmulationEvent>();
-
-                while (_queue.Count > 0)
+                while (!token.IsCancellationRequested)
                 {
-                    currentBatch.Add(_queue.Dequeue());
-                }
+                    token.ThrowIfCancellationRequested();
+                    _pauseEvent.Wait(token);
 
-                var animationTasks = new List<Task>();
+                    if (_queue.Count == 0)
+                        break;
 
-                foreach (var ev in currentBatch)
-                {
-                    if (ev.Packet == null)
-                        continue;
+                    var currentBatch = new List<SimmulationEvent>();
 
-                    var key = $"{ev.Packet.Id}-{ev.ToDeviceId}-{ev.ToPortId}";
-
-                    if (!_visited.Add(key))
-                        continue;
-
-                    await App.Current.Dispatcher.InvokeAsync(() =>
+                    while (_queue.Count > 0)
                     {
-                        EventChain.Add(ev);
-                    });
+                        token.ThrowIfCancellationRequested();
+                        _pauseEvent.Wait(token);
 
-                    animationTasks.Add(ev.AnimationCompleted.Task);
-                }
+                        currentBatch.Add(_queue.Dequeue());
+                    }
 
-                await Task.WhenAll(animationTasks);
+                    var animationTasks = new List<Task>();
 
-                foreach (var ev in currentBatch)
-                {
-                    var nextDevice = _deviceRegistry.GetById(ev.ToDeviceId);
-
-                    if (nextDevice == null)
-                        continue;
-
-                    var newEvents = nextDevice.LogicDevice.ProcessPacket(
-                        ev.Packet,
-                        ev.ToPortId
-                    );
-
-                    foreach (var newEv in newEvents)
+                    foreach (var ev in currentBatch)
                     {
-                        newEv.InPortId = newEv.FromPortId;
-                        _queue.Enqueue(newEv);
+                        token.ThrowIfCancellationRequested();
+                        _pauseEvent.Wait(token);
+
+                        if (ev.Packet == null)
+                            continue;
+
+                        var key = $"{ev.Packet.Id}-{ev.ToDeviceId}-{ev.ToPortId}";
+
+                        if (!_visited.Add(key))
+                            continue;
+
+                        await App.Current.Dispatcher.InvokeAsync(() =>
+                        {
+                            _currentScenario.Events.Add(ev);
+
+                            SimulationEventsChanged?.Invoke(
+                                this,
+                                new NotifyCollectionChangedEventArgs(
+                                    NotifyCollectionChangedAction.Add,
+                                    ev));
+                        });
+
+                        animationTasks.Add(ev.AnimationCompleted.Task);
+                    }
+
+                    await Task.WhenAll(animationTasks);
+
+                    token.ThrowIfCancellationRequested();
+                    _pauseEvent.Wait(token);
+
+                    foreach (var ev in currentBatch)
+                    {
+                        token.ThrowIfCancellationRequested();
+
+                        var nextDevice = _deviceRegistry.GetById(ev.ToDeviceId);
+
+                        if (nextDevice == null)
+                            continue;
+
+                        var newEvents = nextDevice.LogicDevice.ProcessPacket(
+                            ev.Packet,
+                            ev.ToPortId);
+
+                        foreach (var newEv in newEvents)
+                        {
+                            newEv.InPortId = newEv.FromPortId;
+                            _queue.Enqueue(newEv);
+                        }
                     }
                 }
             }
+            catch (OperationCanceledException)
+            {
+                
+            }
         }
+
     }
 }

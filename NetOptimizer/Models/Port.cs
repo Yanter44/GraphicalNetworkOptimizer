@@ -10,6 +10,7 @@ namespace NetOptimizer.Models
         public string Id { get; set; } = Guid.NewGuid().ToString();
         public string PortName { get; set; }
         public string PortNumber { get; set; }
+        public string Speed { get; set; }
         public PortType Type { get; set; }
         public Device Owner { get; set; }
 

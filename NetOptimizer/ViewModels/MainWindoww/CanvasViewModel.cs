@@ -8,6 +8,7 @@ using NetOptimizer.MediatR.Notifications;
 using NetOptimizer.Models;
 using NetOptimizer.Models.DeviceModels;
 using NetOptimizer.Models.DeviceModels.DeviceSettings;
+using NetOptimizer.Models.DeviceModels.SubProperties;
 using NetOptimizer.Models.Dtos;
 using NetOptimizer.Models.Enums;
 using NetOptimizer.Models.UIElements;
@@ -40,7 +41,6 @@ namespace NetOptimizer.ViewModels.MainWindoww
 
         private Point _canvasOffset;
         private double _canvasScale = 1;
-
         private Rect _selectionRect;
         private bool _isSelecting;
         private bool _isDrawSelection;
@@ -104,27 +104,19 @@ namespace NetOptimizer.ViewModels.MainWindoww
             _mediator = mediator;
             _engine = engine;
             _deviceRegistry = deviceRegistry;
-            _engine.EventChain.CollectionChanged += OnSimulationEvent;
+            engine.SimulationEventsChanged += OnSimulationEvent;
         }
         private void OnSimulationEvent(object sender, NotifyCollectionChangedEventArgs e)
         {
             if (e.NewItems == null)
                 return;
-            foreach(var con in Connections)
-            {
-                Debug.Write($"Соединие между {con.SourcePort.Id} и {con.TargetPort.Id} существует");
-            }
             foreach (SimmulationEvent ev in e.NewItems)
             {
-                
                 var connection = FindConnection(ev.FromPortId, ev.ToPortId);
                 if (connection == null)
                 {
-                    Debug.Write($"Соединеие между {ev.FromPortId} и {ev.ToPortId} не найдены");
                     continue;
                 }
-                    
-
                 bool reversed = ev.FromPortId == connection.TargetPort.Id &&
                                 ev.ToPortId == connection.SourcePort.Id;
 
@@ -148,24 +140,30 @@ namespace NetOptimizer.ViewModels.MainWindoww
         }
         private async Task AnimatePacket(PacketViewModel packet, SimmulationEvent ev)
         {
-            int steps = 20;
-
+            int steps = 101 - _engine.SimmulationSpeed;
+            int NeededDotPacketTrailsCount = steps / 2;
             for (int i = 0; i <= steps; i++)
             {
                 packet.Progress = i / (double)steps;
-
-                UIPacketTrails.Add(new PacketTrailDotViewModel
+                if (i % 2 == 0)
                 {
-                    PacketId = packet.PacketId,
-                    PacketType = ev.Packet switch
+                    UIPacketTrails.Add(new PacketTrailDotViewModel
                     {
-                        IcmpPacket => PacketType.ICMP,
-                        ArpPacket => PacketType.ARP,
-                        _ => throw new NotSupportedException()
-                    },
-                    X = packet.X,
-                    Y = packet.Y,
-                });
+                        PacketId = packet.PacketId,
+                        PacketType = ev.Packet switch
+                        {
+                            IcmpPacket => PacketType.ICMP,
+                            ArpPacket => PacketType.ARP,
+                            _ => throw new NotSupportedException()
+                        },
+                        X = packet.X,
+                        Y = packet.Y,
+                    });
+                }
+                if(UIPacketTrails.Count > 15)
+                {
+                    UIPacketTrails.RemoveAt(0);
+                }
                 await Task.Delay(50);
             }
             UIPackets.Remove(packet);
@@ -332,33 +330,134 @@ namespace NetOptimizer.ViewModels.MainWindoww
         {
             _clipboard = new CanvasClipBoard();
 
-            var selectedDevices = Devices.Where(d => d.IsSelected).ToList();
-            var selectedUI = UIObjects.Where(u => u.IsSelected).ToList();
+            var selectedDevices = Devices
+                .Where(d => d.IsSelected)
+                .ToList();
 
             foreach (var device in selectedDevices)
             {
-                var modelCopiedDevice = new DeviceOnCanvas(device.LogicDevice, device.X, device.Y)
+                string newName = GenerateCopyName(device.LogicDevice.Name);
+
+                Device clonedLogicDevice = device.LogicDevice switch
                 {
-                    LogicDevice = device.LogicDevice,
+                    PcDevice pc => new PcDevice(
+                        newName,
+                        new PcSettings
+                        {
+                            Vendor = pc.Vendor,
+                            Model = pc.DeviceModel,
+                            AveragePrice = pc.AveragePrice,
+
+                            HardwareSpecs = new PcHardwareSpecs
+                            {
+                                CpuModel = pc.HardwareSpecs.CpuModel,
+                                RamType = pc.HardwareSpecs.RamType,
+                                StorageAmountGb = pc.HardwareSpecs.StorageAmountGb,
+                                StorageType = pc.HardwareSpecs.StorageType,
+                                RamAmountGb = pc.HardwareSpecs.RamAmountGb,
+                            },
+
+                            WifiOptions = new PcWifiOptions
+                            {
+                                HasWiFi = pc.WifiOptions.HasWiFi,
+                            },
+                           
+                            Ports = pc.Ports
+                                .Select(p => new PortDto
+                                {
+                                    Type = p.Type,
+                                    Count = 1,
+                                    Speed = p.Speed,
+                                })
+                               .ToList()
+                               
+                        }),
+
+                    SwitchDevice sw => new SwitchDevice(
+                        newName,
+                        new SwitchSettings
+                        {
+                            
+                        }),
+
+                    RouterDevice router => new RouterDevice(
+                        newName,
+                        new RouterSettings
+                        {
+                        }),
+
+                    _ => throw new NotSupportedException()
+                };
+
+                var clonedDevice = new DeviceOnCanvas(
+                    clonedLogicDevice,
+                    device.X,
+                    device.Y)
+                {
                     IsSelected = false
                 };
-                _clipboard.Devices.Add(modelCopiedDevice);
-            }
 
-            foreach (var ui in selectedUI)
-            {
-           //     var uielement = new UiEle
-            //    _clipboard.UIElements.Add(ui);
+                _clipboard.Devices.Add(clonedDevice);
             }
+        }
+        public void PasteSelected()
+        {
+            if (_clipboard == null || _clipboard.Devices.Count == 0)
+                return;
 
-            foreach (var conn in Connections)
+            const double offset = 30;
+
+            foreach (var copiedDevice in _clipboard.Devices)
             {
-                if (selectedDevices.Contains(conn.Source) &&
-                    selectedDevices.Contains(conn.Target))
+                var pastedDevice = new DeviceOnCanvas(
+                    copiedDevice.LogicDevice,
+                    copiedDevice.X + offset,
+                    copiedDevice.Y + offset)
                 {
-                    _clipboard.Connections.Add(conn);
+                    IsSelected = false
+                };
+
+                Devices.Add(pastedDevice);
+            }
+        }
+        private string GenerateCopyName(string originalName)
+        {
+            var existingNames = Devices
+                .Select(d => d.LogicDevice.Name)
+                .ToHashSet();
+
+            string baseName = StripCopySuffix(originalName);
+
+            if (!existingNames.Contains(baseName))
+                return baseName;
+
+            int i = 1;
+
+            while (true)
+            {
+                string newName = $"{baseName}({i})";
+
+                if (!existingNames.Contains(newName))
+                    return newName;
+
+                i++;
+            }
+        }
+        private string StripCopySuffix(string name)
+        {
+            int index = name.LastIndexOf('(');
+
+            if (index > 0 && name.EndsWith(")"))
+            {
+                string inside = name.Substring(index + 1, name.Length - index - 2);
+
+                if (int.TryParse(inside, out _))
+                {
+                    return name.Substring(0, index).TrimEnd();
                 }
             }
+
+            return name;
         }
         private void StartDrawConnectionLine(DeviceOnCanvas sourceDevice, Port sourceport)
         {

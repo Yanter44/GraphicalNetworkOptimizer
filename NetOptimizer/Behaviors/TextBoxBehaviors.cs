@@ -52,7 +52,6 @@ namespace NetOptimizer.Behaviors
                 }
 
                 string currentText = AssociatedObject.Text;
-
                 int caretIndex = AssociatedObject.CaretIndex;
 
                 string newText = currentText.Insert(caretIndex, e.Text);
@@ -62,15 +61,36 @@ namespace NetOptimizer.Behaviors
                     e.Handled = true;
                     return;
                 }
+
                 if (newText.Count(c => c == '.') > 3)
                 {
                     e.Handled = true;
                     return;
                 }
+
                 if (newText.StartsWith("."))
                 {
                     e.Handled = true;
                     return;
+                }
+
+                var parts = newText.Split('.');
+
+                foreach (var part in parts)
+                {
+                    if (part.Length > 3)
+                    {
+                        e.Handled = true;
+                        return;
+                    }
+
+                    if (part.Length > 0 &&
+                        int.TryParse(part, out int value) &&
+                        value > 255)
+                    {
+                        e.Handled = true;
+                        return;
+                    }
                 }
             }
         }

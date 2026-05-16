@@ -11,71 +11,84 @@
     <converters:DeviceTypeToAbstractNameConverter x:Key="DeviceTypeToAbstractNameConverter"/>
     <!-- ===================== Стили ==================== -->
     <Style x:Key="ScenarioItemRedactButton" TargetType="Button">
-        <Setter Property="Background" Value="#66E0E0"/>
-        <Setter Property="Foreground" Value="White"/>
-        <Setter Property="FontWeight" Value="SemiBold"/>
-        <Setter Property="Padding" Value="5,5"/>
+        <Setter Property="Background" Value="White"/>
+        <Setter Property="BorderBrush" Value="#E5E7EB"/>
         <Setter Property="BorderThickness" Value="1"/>
-        <Setter Property="BorderBrush" Value="Gray"/>
+        <Setter Property="FontWeight" Value="SemiBold"/>
+        <Setter Property="Padding" Value="5"/>
         <Setter Property="Cursor" Value="Hand"/>
+
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="Button">
                     <Border Background="{TemplateBinding Background}"
-                        CornerRadius="5"
+                        BorderBrush="{TemplateBinding BorderBrush}"
+                        BorderThickness="{TemplateBinding BorderThickness}"
+                        CornerRadius="10"
                         Padding="{TemplateBinding Padding}">
+
                         <ContentPresenter HorizontalAlignment="Center"
                                       VerticalAlignment="Center"/>
                     </Border>
 
                     <ControlTemplate.Triggers>
+
                         <Trigger Property="IsMouseOver" Value="True">
-                            <Setter Property="Background" Value="#4FD3D3"/>
+                            <Setter Property="Background" Value="#F5F7FA"/>
+                            <Setter Property="BorderBrush" Value="#D1D5DB"/>
                         </Trigger>
 
                         <Trigger Property="IsPressed" Value="True">
-                            <Setter Property="Background" Value="#3FBABA"/>
+                            <Setter Property="Background" Value="#ECEFF3"/>
                         </Trigger>
 
                         <Trigger Property="IsEnabled" Value="False">
                             <Setter Property="Opacity" Value="0.5"/>
                         </Trigger>
+
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
             </Setter.Value>
         </Setter>
     </Style>
-    
+
+
     <Style x:Key="ScenarioItemDeleteButton" TargetType="Button">
-        <Setter Property="Background" Value="#FF3B30"/>
-        <Setter Property="Foreground" Value="White"/>
-        <Setter Property="FontWeight" Value="SemiBold"/>
-        <Setter Property="Padding" Value="5,5"/>
+        <Setter Property="Background" Value="White"/>
+        <Setter Property="BorderBrush" Value="#E5E7EB"/>
         <Setter Property="BorderThickness" Value="1"/>
-        <Setter Property="BorderBrush" Value="Gray"/>
+        <Setter Property="FontWeight" Value="SemiBold"/>
+        <Setter Property="Padding" Value="5"/>
         <Setter Property="Cursor" Value="Hand"/>
+
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="Button">
                     <Border Background="{TemplateBinding Background}"
-                        CornerRadius="5"
+                        BorderBrush="{TemplateBinding BorderBrush}"
+                        BorderThickness="{TemplateBinding BorderThickness}"
+                        CornerRadius="10"
                         Padding="{TemplateBinding Padding}">
+
                         <ContentPresenter HorizontalAlignment="Center"
                                       VerticalAlignment="Center"/>
                     </Border>
 
                     <ControlTemplate.Triggers>
+
                         <Trigger Property="IsMouseOver" Value="True">
-                            <Setter Property="Background" Value="#E6362B"/>
+                            <Setter Property="Background" Value="#FFF1F1"/>
+                            <Setter Property="BorderBrush" Value="#FFB3B3"/>
                         </Trigger>
 
                         <Trigger Property="IsPressed" Value="True">
-                            <Setter Property="Background" Value="#CC2F25"/>
+                            <Setter Property="Background" Value="#FFE4E4"/>
                         </Trigger>
 
                         <Trigger Property="IsEnabled" Value="False">
                             <Setter Property="Opacity" Value="0.5"/>
                         </Trigger>
+
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
             </Setter.Value>
@@ -317,7 +330,7 @@
                 <ControlTemplate TargetType="Slider">
                     <Grid Background="{TemplateBinding Background}">
                         <Border x:Name="TrackBackground" 
-                            Height="4" 
+                            Height="8" 
                             Margin="5,0"
                             Background="#D3D3D3" 
                             CornerRadius="2" 
@@ -331,7 +344,7 @@
                                             <Setter Property="Template">
                                                 <Setter.Value>
                                                     <ControlTemplate TargetType="RepeatButton">
-                                                        <Border Background="#4A89F3" Height="4" CornerRadius="2" />
+                                                        <Border Background="#1E1ADD" Height="8" CornerRadius="2" />
                                                     </ControlTemplate>
                                                 </Setter.Value>
                                             </Setter>
@@ -341,10 +354,10 @@
                             </Track.DecreaseRepeatButton>
 
                             <Track.Thumb>
-                                <Thumb x:Name="Thumb" Width="10" Height="10" Focusable="False">
+                                <Thumb x:Name="Thumb" Width="14" Height="14" Focusable="False">
                                     <Thumb.Template>
                                         <ControlTemplate TargetType="Thumb">
-                                            <Ellipse Fill="#4A89F3" StrokeThickness="0">
+                                            <Ellipse Fill="#625BE7" StrokeThickness="0">
                                                 <Ellipse.Effect>
                                                     <DropShadowEffect BlurRadius="4" Opacity="0.2" ShadowDepth="1"/>
                                                 </Ellipse.Effect>

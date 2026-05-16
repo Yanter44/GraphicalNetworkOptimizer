@@ -61,6 +61,7 @@ namespace NetOptimizer.Models.DeviceModels
                         PortName = $"{dto.Type}",
                         PortNumber = $"{slot}/{port}",
                         Type = dto.Type,
+                        Speed = dto.Speed,
                         Owner = this
                     };
 
@@ -242,7 +243,6 @@ namespace NetOptimizer.Models.DeviceModels
                         ToPortId = iface.PhysicalPort.ConnectedTo.Id
                     };
                 }
-
                 yield break;
             }
 

@@ -8,6 +8,7 @@ namespace NetOptimizer.Models
 {
     public class ScenarioActionViewModel
     {
+        public string Id { get; set; }
         public DeviceOnCanvas SourceDevice { get; set; }
         public DeviceOnCanvas TargetDevice { get; set; }
         public PacketType PacketType { get; set; }

@@ -9,6 +9,5 @@ namespace NetOptimizer.Models
     {
         public List<DeviceOnCanvas> Devices { get; set; } = new();
         public List<UIElementBase> UIElements { get; set; } = new();
-        public List<DeviceConnection> Connections { get; set; } = new();
     }
 }
